@@ -1,0 +1,53 @@
+{
+  "packageManager": "npm@11.9.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "npm run build:emails && vite build",
+    "typecheck": "tsc --noEmit",
+    "build:emails": "node --import tsx scripts/build-emails.tsx",
+    "test:emails": "node --import tsx scripts/email-renderer.test.ts",
+    "emails:preview": "email dev --dir resources/js/emails",
+    "check": "npm run typecheck && npm run test:emails",
+    "format": "prettier --write resources/js scripts resources/css/app.css"
+  },
+  "dependencies": {
+    "@inertiajs/react": "3.9.1",
+    "@mdx-js/mdx": "3.1.1",
+    "@radix-ui/react-slot": "1.5.0",
+    "@react-email/components": "1.0.12",
+    "@react-email/render": "2.2.0",
+    "class-variance-authority": "0.7.1",
+    "clsx": "2.1.1",
+    "cn": "0.5.2",
+    "lucide-react": "1.68.0",
+    "quickjs-emscripten": "0.32.0",
+    "radix-ui": "1.8.1",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "remark-gfm": "4.0.1",
+    "sanitize-html": "2.18.1",
+    "tailwind-merge": "3.7.0",
+    "tsx": "4.23.15"
+  },
+  "devDependencies": {
+    "@inertiajs/vite": "3.9.1",
+    "@playwright/test": "1.64.1",
+    "@tailwindcss/vite": "4.3.3",
+    "@types/node": "26.6.6",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@types/sanitize-html": "2.16.2",
+    "@vitejs/plugin-react": "6.1.2",
+    "prettier": "3.9.10",
+    "react-email": "6.11.6",
+    "tailwindcss": "4.3.3",
+    "typescript": "7.0.2",
+    "vite": "8.3.4"
+  },
+  "name": "vukem-email",
+  "engines": {
+    "node": ">=24"
+  }
+}

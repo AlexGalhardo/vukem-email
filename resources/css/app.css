@@ -1,0 +1,162 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+:root {
+	color-scheme: dark;
+	--background: #0a0a0a;
+	--foreground: #ededed;
+	--card: #101010;
+	--card-foreground: #ededed;
+	--popover: #161616;
+	--popover-foreground: #ededed;
+	--primary: #ededed;
+	--primary-foreground: #141414;
+	--secondary: #242424;
+	--secondary-foreground: #ededed;
+	--muted: #1b1b1b;
+	--muted-foreground: #929292;
+	--accent: #222222;
+	--accent-foreground: #fafafa;
+	--destructive: #e5484d;
+	--border: #262626;
+	--input: #303030;
+	--ring: #737373;
+	--radius: 0.5rem;
+	--sidebar: #0d0d0d;
+	--sidebar-foreground: #b4b4b4;
+	--sidebar-primary: #fafafa;
+	--sidebar-primary-foreground: #111;
+	--sidebar-accent: #202020;
+	--sidebar-accent-foreground: #fafafa;
+	--sidebar-border: #262626;
+	--sidebar-ring: #555;
+}
+@theme inline {
+	--color-background: var(--background);
+	--color-foreground: var(--foreground);
+	--color-card: var(--card);
+	--color-card-foreground: var(--card-foreground);
+	--color-popover: var(--popover);
+	--color-popover-foreground: var(--popover-foreground);
+	--color-primary: var(--primary);
+	--color-primary-foreground: var(--primary-foreground);
+	--color-secondary: var(--secondary);
+	--color-secondary-foreground: var(--secondary-foreground);
+	--color-muted: var(--muted);
+	--color-muted-foreground: var(--muted-foreground);
+	--color-accent: var(--accent);
+	--color-accent-foreground: var(--accent-foreground);
+	--color-destructive: var(--destructive);
+	--color-border: var(--border);
+	--color-input: var(--input);
+	--color-ring: var(--ring);
+	--color-sidebar: var(--sidebar);
+	--color-sidebar-foreground: var(--sidebar-foreground);
+	--color-sidebar-primary: var(--sidebar-primary);
+	--color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+	--color-sidebar-accent: var(--sidebar-accent);
+	--color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+	--color-sidebar-border: var(--sidebar-border);
+	--color-sidebar-ring: var(--sidebar-ring);
+	--radius-sm: calc(var(--radius) - 4px);
+	--radius-md: calc(var(--radius) - 2px);
+	--radius-lg: var(--radius);
+	--radius-xl: calc(var(--radius) + 4px);
+	--font-sans:
+		"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+	--font-mono: "SFMono-Regular", Consolas, monospace;
+}
+@layer base {
+	* {
+		@apply border-border outline-ring/50;
+	}
+	body {
+		@apply bg-background text-foreground antialiased;
+		margin: 0;
+	}
+	button:not(:disabled),
+	a,
+	select {
+		cursor: pointer;
+	}
+	::selection {
+		background: #c6efb9;
+		color: #12220e;
+	}
+}
+@layer components {
+	.brand-mark {
+		@apply size-7 rounded-md bg-foreground text-background grid place-items-center;
+	}
+	.eyebrow {
+		@apply text-[10px] tracking-[.16em] text-muted-foreground font-medium;
+	}
+	.page-title {
+		@apply text-2xl md:text-[29px] font-semibold tracking-[-.04em] leading-tight;
+	}
+	.page-description {
+		@apply text-xs md:text-[13px] text-muted-foreground mt-3 leading-6;
+	}
+	.section-title {
+		@apply text-[13px] font-medium tracking-tight;
+	}
+	.panel {
+		@apply rounded-lg border border-border bg-card;
+	}
+	.panel-heading {
+		@apply flex justify-between items-center gap-4 px-6 py-5 border-b border-border;
+	}
+	.auth-page {
+		@apply min-h-dvh flex justify-center items-center relative px-6 py-32 bg-background;
+		background-image: radial-gradient(
+			ellipse at 50% 42%,
+			#19201735,
+			transparent 60%
+		);
+	}
+	.status {
+		@apply text-[10px] font-normal rounded-full px-2 py-0.5 gap-1.5 whitespace-nowrap;
+	}
+	.status-confirmed,
+	.status-completed {
+		@apply text-emerald-300 bg-emerald-400/5 border-emerald-400/20;
+	}
+	.status-pending {
+		@apply text-amber-200 bg-amber-300/5 border-amber-300/20;
+	}
+	.status-unsubscribed,
+	.status-draft {
+		@apply text-neutral-400 bg-neutral-400/5 border-neutral-400/20;
+	}
+	.status-queued {
+		@apply text-blue-300 bg-blue-400/5 border-blue-400/20;
+	}
+	.notice {
+		@apply flex items-center gap-2 rounded-lg border border-emerald-300/20 bg-emerald-300/5 text-emerald-200 text-xs p-4;
+	}
+	.notice.error {
+		@apply border-red-300/20 bg-red-300/5 text-red-300;
+	}
+	.audience-empty {
+		background: repeating-linear-gradient(
+			135deg,
+			#1c1c1c,
+			#1c1c1c 4px,
+			#151515 4px,
+			#151515 8px
+		);
+	}
+}
+th {
+	font-size: 10px !important;
+	font-weight: 400 !important;
+	color: #929292 !important;
+	height: 42px !important;
+}
+td {
+	font-size: 12px;
+}
+button:focus-visible,
+a:focus-visible {
+	outline: 2px solid #a3a3a3;
+	outline-offset: 3px;
+}

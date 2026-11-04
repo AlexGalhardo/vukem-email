@@ -1,0 +1,16 @@
+{{/* layout: none */}}<!doctype html>
+<html lang="pt-BR" class="dark" data-hydrating>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Vukem Email</title>
+	<meta property="csp-nonce" nonce="{{cspNonce}}">
+	{{analytics}}
+	{{viteReactRefresh}}
+	{{vite "resources/css/app.css" "resources/js/app.tsx"}}
+	{{.Head}}
+</head>
+<body>
+	{{.Inertia}}
+</body>
+</html>

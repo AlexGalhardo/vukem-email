@@ -1,0 +1,41 @@
+name: CI
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: newsletter
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: newsletter_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U newsletter"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: npm run build
+      - run: git diff --exit-code -- resources/emails
+      - run: test -z "$(gofmt -l app bootstrap cmd database resources routes tests)"
+      - run: go vet ./...
+      - run: go test -race ./...
+        env:
+          TEST_DATABASE_URL: postgres://newsletter:test@localhost:5432/newsletter_test?sslmode=disable
+      - run: npx playwright install --with-deps chromium
+      - run: RUN_BROWSER_TESTS=1 BROWSER_EXECUTABLE="$(node --input-type=module -e 'import {chromium} from "@playwright/test"; console.log(chromium.executablePath())')" go test ./tests -run TestBrowserSmoke -v
+      - run: docker build -t vukem-email:ci .
