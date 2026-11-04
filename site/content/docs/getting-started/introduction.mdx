@@ -1,0 +1,21 @@
+---
+title: Introdução
+description: Documentação técnica do Vukem Email.
+---
+
+# Vukem Email
+
+Vukem Email é um gerenciador open source de newsletters para múltiplos projetos. O backend usa [Vukem](https://vukem.dev/docs/introduction) e Go; o painel usa Inertia v3, React e shadcn/ui.
+
+O painel administrativo usa exclusivamente Google OIDC para o endereço verificado `aleexgvieira@gmail.com`. Cada projeto tem domínio, remetente, assinantes e campanhas próprios.
+
+## O que já existe
+
+- Inscrição pública com confirmação dupla e descadastro assinado.
+- Editor de campanhas em Markdown GFM, MDX e React Email, com prévia.
+- Fila persistente por destinatário, tentativas e idempotência no provedor.
+- Painel com métricas por projeto, filtros e exportação CSV.
+
+## Próximos passos
+
+Leia [Instalação](/docs/installation), [Configuração](/docs/configuration) e [Deploy](/docs/deployment). As capacidades futuras ficam no [ROADMAP](https://github.com/AlexGalhardo/vukem-email/blob/main/ROADMAP.md).

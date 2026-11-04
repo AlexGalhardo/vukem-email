@@ -1,0 +1,18 @@
+---
+title: Deploy
+description: Execute web, worker e PostgreSQL no Railway.
+---
+
+# Deploy no Railway
+
+Use o `Dockerfile` da raiz: campanhas dinâmicas precisam do runtime Node e das dependências de produção junto ao executável Go.
+
+1. Provisione PostgreSQL e defina `DATABASE_URL` no serviço web e no worker.
+2. Configure as variáveis de [Configuração](/docs/configuration) em ambos.
+3. No web, use `/app/app migrate` antes do deploy, `/up` para healthcheck e `QUEUE_IN_SERVE=false`.
+4. No worker, use `/app/app queue:work`, sem domínio público.
+5. Configure domínio do serviço web no Railway e crie o registro DNS exigido pelo Railway.
+
+`email.vukem.dev` serve a documentação Next.js. O painel usa `app.email.vukem.dev` como `APP_URL` e callback OAuth. As páginas públicas podem usar domínios próprios por projeto, como `email.hexascore.app`. A documentação é publicada como serviço Next.js separado a partir de `site/`.
+
+Não use SQLite em produção sem volume persistente. Migrações devem terminar antes de web e worker receberem tráfego.

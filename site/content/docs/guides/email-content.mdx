@@ -1,0 +1,12 @@
+---
+title: Conteúdo do email
+description: Markdown, MDX, React Email e isolamento do código autoral.
+---
+
+# Conteúdo do email
+
+Markdown aceita GFM. MDX combina Markdown, JSX e componentes React Email permitidos. O JavaScript do autor executa somente em QuickJS WebAssembly, com limites de memória, CPU, tamanho e profundidade.
+
+O interpretador não acessa Node, arquivos, rede ou variáveis de ambiente. Só uma árvore serializada sai dele; a aplicação a valida, renderiza e sanitiza o HTML. A prévia usa uma rota autenticada e iframe com sandbox.
+
+Edite os wrappers em `resources/js/emails`, execute `npm run build:emails` e versione também `resources/emails`. O documento externo, marca e rodapé de descadastro são controlados pela aplicação.

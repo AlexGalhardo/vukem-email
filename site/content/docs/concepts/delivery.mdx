@@ -1,0 +1,12 @@
+---
+title: Entrega
+description: Fila, tentativas, IDs estáveis e idempotência.
+---
+
+# Entrega
+
+O worker processa tarefas persistentes por destinatário. Antes de chamar o provedor, verifica novamente a inscrição. Cada entrega tem ID estável e chave de idempotência por campanha e assinante.
+
+Estados: `queued`, `accepted`, `skipped` e `failed`. Falhas podem ser examinadas com `/app/app queue:failed` e reprocessadas com `/app/app queue:retry`.
+
+As tentativas cessam 23 horas após a criação da tarefa, antes do limite de 24 horas de idempotência do Resend. Ajuste `QUEUE_CONCURRENCY` conforme os limites da conta de envio.

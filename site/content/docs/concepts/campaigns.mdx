@@ -1,0 +1,12 @@
+---
+title: Campanhas
+description: Rascunhos, prévia, revisão e envio.
+---
+
+# Campanhas
+
+Campanhas começam como rascunhos editáveis. O editor suporta Markdown GFM, MDX e modelos React Email. A prévia oferece modos desktop e mobile; a campanha passa por revisão antes do envio.
+
+Cada destinatário recebe uma tarefa própria na fila. O fan-out é transacional e os endereços não são expostos entre destinatários. O conteúdo e o envelope do email são gerados a partir de `resources/js/emails` e `resources/emails`.
+
+Métricas atuais refletem estados locais da fila e aceitação pelo provedor. `accepted` não significa entrega na caixa de entrada. Eventos de abertura, clique, bounce e reclamação ainda não estão implementados.

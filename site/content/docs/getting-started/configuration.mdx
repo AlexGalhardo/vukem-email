@@ -1,0 +1,19 @@
+---
+title: Configuração
+description: Variáveis essenciais para aplicação, banco, autenticação e email.
+---
+
+# Configuração
+
+Use `.env.example` como ponto de partida. Nunca versione `.env`, credenciais ou bancos SQLite.
+
+| Variável | Finalidade |
+| --- | --- |
+| `APP_KEY` | Criptografia e assinaturas; compartilhe a mesma chave entre web e worker. |
+| `APP_URL` | URL canônica do painel e callback OAuth. |
+| `DATABASE_URL` | PostgreSQL em produção. |
+| `SOCIAL_GOOGLE_CLIENT_ID` / `SOCIAL_GOOGLE_CLIENT_SECRET` | Cliente OAuth Web. |
+| `MAIL_MAILER` / `RESEND_API_KEY` | Envio pelo Resend quando `MAIL_MAILER=resend`. |
+| `QUEUE_CONNECTION` | Use `database` para fila persistente. |
+
+Rotacionar `APP_KEY` exige manter chaves anteriores em `APP_PREVIOUS_KEYS` enquanto sessões e links assinados ainda forem válidos. Configure `APP_DEBUG=false` em produção.

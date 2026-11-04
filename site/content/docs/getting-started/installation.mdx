@@ -1,0 +1,21 @@
+---
+title: Instalação
+description: Prepare Go, Node, dependências e banco local.
+---
+
+# Instalação
+
+Requisitos: Go 1.27.3+, Node 24+, npm e uma aplicação Google OAuth do tipo Web.
+
+```bash
+cp .env.example .env
+npm ci
+go run ./cmd/app key:generate
+npm run build
+go run ./cmd/app migrate
+go run ./cmd/app
+```
+
+Copie a chave gerada para `APP_KEY` em `.env`. O app abre em `http://localhost:3000`. O login Google continua obrigatório no ambiente local. Para recarga automática, instale `github.com/AlexGalhardo/vukem/cmd/vukem@v0.37.0` e execute `vukem serve`.
+
+SQLite é usado localmente; PostgreSQL é recomendado em produção. `MAIL_MAILER=array` guarda mensagens em memória durante os testes.

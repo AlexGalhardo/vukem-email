@@ -1,0 +1,12 @@
+---
+title: Google OIDC
+description: Configure o único acesso administrativo permitido.
+---
+
+# Google OIDC
+
+Crie um OAuth Client ID do tipo Web application no Google Cloud Console. Cadastre `https://app.email.vukem.dev/auth/google/callback` como callback. Em modo de teste, adicione `aleexgvieira@gmail.com` como usuário de teste.
+
+Defina `SOCIAL_GOOGLE_CLIENT_ID` e `SOCIAL_GOOGLE_CLIENT_SECRET`. O Vukem valida state de uso único, PKCE, nonce, assinatura do ID token, issuer, audience e expiração. A sessão administrativa só é criada para o endereço autorizado e verificado.
+
+Tokens OAuth não são enviados ao frontend nem persistidos pela aplicação. Não há endpoint alternativo de login em produção.

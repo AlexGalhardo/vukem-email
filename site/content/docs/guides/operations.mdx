@@ -1,0 +1,17 @@
+---
+title: Operação
+description: Migrações, healthcheck, verificações e diagnóstico.
+---
+
+# Operação
+
+O serviço web expõe `/up` para healthcheck. Execute migrações com `/app/app migrate` antes de liberar novas versões. Use um worker separado para a fila, com as mesmas variáveis de aplicação e banco.
+
+```bash
+npm run check
+npm run build
+go vet ./...
+go test -race ./...
+```
+
+O README da raiz documenta testes opcionais com Chromium e PostgreSQL. Não execute migrações em paralelo com uma versão incompatível do worker. Acompanhe eventos de entrega, bounce e reclamações diretamente no Resend até existir ingestão por webhook.

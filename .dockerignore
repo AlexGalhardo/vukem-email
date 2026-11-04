@@ -14,3 +14,10 @@ storage/
 # Vite: dev server marker; the image builds its own assets
 /resources/public/hot
 /resources/public/build/
+/site/
+/.agents/
+/.githooks/
+/.github/
+/prompt.md
+/ROADMAP.md
+/vukem-feedback.md

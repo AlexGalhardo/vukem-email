@@ -1,0 +1,12 @@
+---
+title: Assinantes
+description: Inscrição, confirmação, filtros e descadastro.
+---
+
+# Assinantes
+
+A inscrição começa pendente. O sistema envia um email de confirmação; somente a ação explícita do destinatário confirma a inscrição. Tokens são aleatórios, armazenados como hash, expiram em 24 horas e funcionam uma única vez.
+
+Links de descadastro são assinados e não exigem login. Abrir o link com GET mostra a página, mas não cancela a inscrição. A confirmação e o cancelamento exigem uma ação posterior, para evitar alterações por scanners de email.
+
+O painel oferece busca, filtros, paginação, descadastro administrativo e exportação CSV por projeto. A fila revalida o status do assinante imediatamente antes do envio.

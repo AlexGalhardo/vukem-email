@@ -1,0 +1,61 @@
+# GoReleaser builds the application binaries for a version tag, creates the
+# GitHub release, and attaches archives, checksums, SBOMs and signatures.
+# Run npm ci after extracting an archive: dynamic campaign rendering requires
+# Node.js and the production dependencies listed in package-lock.json.
+version: 2
+
+project_name: vukem-email
+
+builds:
+  - id: vukem-email
+    main: ./cmd/app
+    binary: vukem-email
+    env:
+      - CGO_ENABLED=0
+    goos: [linux, darwin, windows]
+    goarch: [amd64, arm64]
+    flags: [-trimpath]
+    ldflags: ["-s -w"]
+    mod_timestamp: "{{ .CommitTimestamp }}"
+
+archives:
+  - name_template: "vukem-email_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    files:
+      - LICENSE.md
+      - README.md
+      - CHANGELOG.md
+      - package.json
+      - package-lock.json
+      - scripts/email-renderer.tsx
+      - scripts/render-email.tsx
+      - scripts/isolated-mdx.ts
+
+checksum:
+  name_template: checksums.txt
+
+# One SPDX SBOM per archive (<archive>.sbom.json); needs syft on PATH.
+sboms:
+  - artifacts: archive
+
+# Keyless: cosign gets its identity from the GitHub Actions OIDC token, so this
+# only works in release.yml. Signing
+# checksums.txt covers every archive and SBOM it lists.
+signs:
+  - cmd: cosign
+    artifacts: checksum
+    signature: "${artifact}.sigstore.json"
+    args: ["sign-blob", "--yes", "--bundle=${signature}", "${artifact}"]
+    output: true
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  disable: true
+
+release:
+  prerelease: auto

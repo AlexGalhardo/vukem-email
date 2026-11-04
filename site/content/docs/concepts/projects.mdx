@@ -1,0 +1,12 @@
+---
+title: Projetos
+description: Isolamento de domínios, remetentes e dados.
+---
+
+# Projetos
+
+Cada projeto possui nome, identificador, domínio público, descrição e remetente. O painel permite criar e administrar vários projetos. Assinantes, campanhas, métricas e exportações são limitados ao projeto selecionado.
+
+Depois de criar um projeto, configure seu domínio e verifique o domínio remetente no Resend. A página pública usa `/subscribe` no hostname do projeto ou `/subscribe/{slug}`. O domínio do remetente pode ser diferente do domínio da página pública.
+
+O painel usa o hostname canônico de `APP_URL` para autenticação. Sessões não são compartilhadas com os outros hostnames.

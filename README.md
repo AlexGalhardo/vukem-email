@@ -1,6 +1,35 @@
-# Vukem Email
+<div align="center">
+
+<h1><strong><a href="https://email.vukem.dev">Vukem Email</a></strong></h1>
+
+[![CI](https://github.com/AlexGalhardo/vukem-email/actions/workflows/ci.yml/badge.svg)](https://github.com/AlexGalhardo/vukem-email/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.md)
+[![Go 1.27.3](https://img.shields.io/badge/go-1.27.3-00ADD8?logo=go&logoColor=white)](go.mod)
+[![Version](https://img.shields.io/github/v/release/AlexGalhardo/vukem-email?include_prereleases&label=version)](https://github.com/AlexGalhardo/vukem-email/releases)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/AlexGalhardo/vukem-email/badge)](https://scorecard.dev/viewer/?uri=github.com/AlexGalhardo/vukem-email)
+
+<h3>Newsletters open source com Vukem, Go e React</h3>
+
+</div>
+
+## Introdução
 
 Gerenciador de newsletters para os seus projetos, feito com **Vukem + Go, Inertia + React, shadcn/ui, Resend e React Email**. Preparado para PostgreSQL e deploy no Railway.
+
+A documentação técnica fica em [email.vukem.dev](https://email.vukem.dev) e no diretório [site/](site/). O código da aplicação web e do worker é executado pelo Dockerfile da raiz.
+
+## Sumário
+
+- [O que está implementado](#o-que-está-implementado)
+- [Desenvolvimento](#desenvolvimento)
+- [Google OAuth](#google-oauth)
+- [Railway](#railway)
+- [Verificação](#verificação)
+- [Estabilidade e releases](#estabilidade-e-releases)
+- [Contribuição](#contribuição)
+- [Código de conduta](#código-de-conduta)
+- [Segurança](#segurança)
+- [Licença](#licença)
 
 ## O que está implementado
 
@@ -53,7 +82,7 @@ No Google Cloud Console:
 
 ```text
 http://localhost:3000/auth/google/callback
-https://news.hexascore.app/auth/google/callback
+https://app.email.vukem.dev/auth/google/callback
 ```
 
 4. Preencha `SOCIAL_GOOGLE_CLIENT_ID`, `SOCIAL_GOOGLE_CLIENT_SECRET` e `APP_URL`.
@@ -70,12 +99,12 @@ Após o login, abra **Projetos → Novo projeto**. Exemplo:
 | --- | --- |
 | Nome | Hexascore |
 | Identificador | hexascore |
-| Domínio | news.hexascore.app |
+| Domínio | email.hexascore.app |
 | Remetente | newsletter@hexascore.app |
 
 Verifique o domínio do remetente no Resend, com os registros DNS que ele fornecer. O domínio da página pública e o domínio remetente podem ser diferentes.
 
-A página pública estará em `https://news.hexascore.app/subscribe`. Adicione um link para ela na landing page do projeto. A tela **Configurações** fornece o HTML do link. Essa implementação usa uma página hospedada; não expõe uma API de inscrição com CORS aberto para formulários de outros sites.
+A página pública estará em `https://email.hexascore.app/subscribe`. Adicione um link para ela na landing page do projeto. A tela **Configurações** fornece o HTML do link. Essa implementação usa uma página hospedada; não expõe uma API de inscrição com CORS aberto para formulários de outros sites.
 
 ## Markdown, MDX e React Email
 
@@ -117,7 +146,7 @@ O repositório inclui um `Dockerfile` de produção e a configuração declarati
 | `APP_ENV` | `production` |
 | `APP_DEBUG` | `false` |
 | `APP_KEY` | Chave gerada; igual no web e no worker |
-| `APP_URL` | `https://news.hexascore.app` |
+| `APP_URL` | `https://app.email.vukem.dev` |
 | `DATABASE_URL` | Referência ao PostgreSQL do Railway |
 | `SOCIAL_GOOGLE_CLIENT_ID` | ID do cliente Google |
 | `SOCIAL_GOOGLE_CLIENT_SECRET` | Segredo do cliente Google |
@@ -135,7 +164,7 @@ O repositório inclui um `Dockerfile` de produção e a configuração declarati
 
 O Railway injeta `PORT`. A imagem já define `HOST=0.0.0.0`. Não inclua segredos no Git ou em build arguments. Para apenas um serviço, use `QUEUE_IN_SERVE=true`: o servidor também processa a fila. **Não use SQLite em produção sem volume persistente**; a configuração recomendada usa PostgreSQL.
 
-Adicione `news.hexascore.app` em **Networking → Custom Domain** do serviço web, e crie o CNAME/registro de verificação exatamente como o Railway informar. Para outro projeto, adicione outro subdomínio ao mesmo serviço e crie o projeto correspondente no dashboard. As migrações devem terminar antes do novo web e worker receberem tráfego.
+Adicione `email.hexascore.app` em **Networking → Custom Domain** do serviço web, e crie o CNAME/registro de verificação exatamente como o Railway informar. Para outro projeto, adicione outro subdomínio ao mesmo serviço e crie o projeto correspondente no dashboard. As migrações devem terminar antes do novo web e worker receberem tráfego.
 
 Fila e falhas podem ser inspecionadas pelo CLI da aplicação:
 
@@ -171,3 +200,23 @@ TEST_DATABASE_URL=postgres://newsletter:test@localhost:5432/newsletter_test?sslm
 Os testes cobrem autorização, dados públicos, double opt-in, tokens expirados/consumidos, descadastro, isolamento entre projetos, envio único, fila persistente, renderização, isolamento do MDX e fluxos no navegador. Os testes locais não fazem login no Google nem enviam e-mails reais pelo Resend.
 
 Framework: [Vukem](https://vukem.dev/docs/introduction). Interface: [shadcn/ui](https://ui.shadcn.com/). Deploy: [Railway](https://railway.com/).
+
+## Estabilidade e releases
+
+O projeto usa [Semantic Versioning](https://semver.org/spec/v2.0.0.html), tags `vX.Y.Z` e [Keep a Changelog](CHANGELOG.md). Os commits seguem [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/). O [ROADMAP](ROADMAP.md) é local e ignorado pelo Git, conforme solicitado para planejamento interno.
+
+## Contribuição
+
+Leia [CONTRIBUTING.md](CONTRIBUTING.md) para instalação, verificações, commits e pull requests. A documentação do projeto está em [site/](site/).
+
+## Código de conduta
+
+Contribuidores seguem o [Código de Conduta](CODE_OF_CONDUCT.md).
+
+## Segurança
+
+Vulnerabilidades devem ser relatadas conforme [SECURITY.md](SECURITY.md), sem issue pública. O projeto usa [OpenSSF Scorecard](https://scorecard.dev/viewer/?uri=github.com/AlexGalhardo/vukem-email) para avaliar práticas da cadeia de suprimentos.
+
+## Licença
+
+Distribuído sob a [licença MIT](LICENSE.md).

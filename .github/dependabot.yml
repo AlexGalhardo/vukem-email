@@ -1,0 +1,56 @@
+version: 2
+updates:
+  - package-ecosystem: gomod
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      go-deps:
+        patterns: ["*"]
+    commit-message:
+      prefix: build
+      include: scope
+
+  # Workflows pin actions by commit SHA with a "# vX.Y.Z" comment; Dependabot
+  # bumps both together.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]
+    commit-message:
+      prefix: ci
+
+  - package-ecosystem: docker
+    directories:
+      - /
+      - /site
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: build
+      include: scope
+
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      app-deps:
+        patterns: ["*"]
+    commit-message:
+      prefix: build
+      include: scope
+
+  - package-ecosystem: npm
+    directory: /site
+    schedule:
+      interval: weekly
+    groups:
+      site-deps:
+        patterns: ["*"]
+    commit-message:
+      prefix: build
+      include: scope

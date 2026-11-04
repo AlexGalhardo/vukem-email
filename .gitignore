@@ -17,3 +17,11 @@ node_modules/
 /resources/public/hot
 /resources/public/build/
 /bootstrap/ssr/
+
+prompt.md
+vukem-feedback.md
+ROADMAP.md
+/.reference-vukem/
+/.reference-full/
+/site/.next/
+/site/node_modules/
