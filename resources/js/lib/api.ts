@@ -10,13 +10,13 @@ export async function api<T = { message: string }>(
   });
   const result = await response
     .json()
-    .catch(() => ({ detail: "Não foi possível concluir a solicitação." }));
+    .catch(() => ({ detail: "The request could not be completed." }));
   if (!response.ok)
     throw new Error(
       result.detail ||
         result.message ||
         result.title ||
-        "Não foi possível concluir a solicitação.",
+        "The request could not be completed.",
     );
   return result;
 }

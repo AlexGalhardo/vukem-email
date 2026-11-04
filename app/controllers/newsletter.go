@@ -94,7 +94,7 @@ func (n *NewsletterController) Subscribe(c *web.Ctx) error {
 	}
 	email := strings.ToLower(in["email"])
 	if !validEmail(email) {
-		return errs.New(422, "Informe um e-mail válido.")
+		return errs.New(422, "Enter a valid email address.")
 	}
 	if in["website"] == "" {
 		err = n.DB.Tx(c.Context(), func(tx *database.Tx) error {
@@ -130,7 +130,7 @@ func (n *NewsletterController) Subscribe(c *web.Ctx) error {
 			return err
 		}
 	}
-	return c.JSON(http.StatusAccepted, web.Map{"message": "Se este e-mail puder ser inscrito, você receberá um link de confirmação. Confira também o spam."})
+	return c.JSON(http.StatusAccepted, web.Map{"message": "If this address can be subscribed, you will receive a confirmation link. Check your spam folder too."})
 }
 func (n *NewsletterController) ConfirmPage(c *web.Ctx) error {
 	c.Writer().Header().Set("Referrer-Policy", "no-referrer")
@@ -142,16 +142,16 @@ func (n *NewsletterController) Confirm(c *web.Ctx) error {
 		return err
 	}
 	if len(in["token"]) < 20 || len(in["token"]) > 128 {
-		return errs.New(422, "Link inválido ou expirado. Solicite uma nova inscrição.")
+		return errs.New(422, "Invalid or expired link. Please subscribe again.")
 	}
 	count, err := orm.QueryOf[models.Subscriber](n.DB).Where("token_hash", "=", newsletter.Hash(in["token"])).Where("status", "=", "pending").Where("expires_at", ">", time.Now().Unix()).Update(c.Context(), orm.Set{"status": "confirmed", "token_hash": "", "expires_at": int64(0)})
 	if err != nil {
 		return err
 	}
 	if count == 0 {
-		return errs.New(422, "Link inválido, utilizado ou expirado. Solicite uma nova inscrição.")
+		return errs.New(422, "Invalid, used, or expired link. Please subscribe again.")
 	}
-	return c.JSON(200, web.Map{"message": "Inscrição confirmada. Que bom ter você por aqui!"})
+	return c.JSON(200, web.Map{"message": "Subscription confirmed. Welcome aboard!"})
 }
 func (n *NewsletterController) UnsubscribePage(c *web.Ctx) error {
 	c.Writer().Header().Set("Referrer-Policy", "no-referrer")
@@ -186,7 +186,7 @@ func (n *NewsletterController) Unsubscribe(c *web.Ctx) error {
 	if err != nil {
 		return err
 	}
-	return c.JSON(200, web.Map{"message": "Inscrição cancelada. Você não receberá novas campanhas."})
+	return c.JSON(200, web.Map{"message": "Subscription canceled. You will not receive new campaigns."})
 }
 func (n *NewsletterController) CreateProject(c *web.Ctx) error {
 	in, err := input(c)
@@ -194,14 +194,14 @@ func (n *NewsletterController) CreateProject(c *web.Ctx) error {
 		return err
 	}
 	if len(in["name"]) < 2 || len(in["name"]) > 100 || !regexp.MustCompile(`^[a-z0-9]+(?:-[a-z0-9]+)*$`).MatchString(in["slug"]) || len(in["slug"]) > 63 {
-		return errs.New(422, "Informe um nome e um identificador válido (letras minúsculas, números e hífens).")
+		return errs.New(422, "Enter a name and valid slug (lowercase letters, numbers, and hyphens).")
 	}
 	domain := strings.ToLower(in["domain"])
 	if len(domain) > 253 || !regexp.MustCompile(`^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$`).MatchString(domain) || !validEmail(in["from_email"]) {
-		return errs.New(422, "Informe um domínio sem https:// e um e-mail remetente válido.")
+		return errs.New(422, "Enter a domain without https:// and a valid sender email.")
 	}
 	if len(in["description"]) > 500 {
-		return errs.New(422, "Use até 500 caracteres na descrição.")
+		return errs.New(422, "Keep the description within 500 characters.")
 	}
 	exists, err := orm.QueryOf[models.Project](n.DB).Where("slug", "=", in["slug"]).Where("id", "!=", number(in["id"])).Count(c.Context())
 	if err != nil {
@@ -212,7 +212,7 @@ func (n *NewsletterController) CreateProject(c *web.Ctx) error {
 		return err
 	}
 	if exists+other > 0 {
-		return errs.New(409, "Já existe um projeto com este identificador ou domínio.")
+		return errs.New(409, "A project with this slug or domain already exists.")
 	}
 	p := models.Project{Name: in["name"], Slug: in["slug"], Domain: domain, FromEmail: in["from_email"], Description: in["description"]}
 	if id := number(in["id"]); id > 0 {
@@ -313,10 +313,10 @@ func (n *NewsletterController) campaignInput(c *web.Ctx) (models.Project, map[st
 		return p, nil, "", err
 	}
 	if in["subject"] == "" || len(in["subject"]) > 200 || strings.ContainsAny(in["subject"], "\r\n") {
-		return p, nil, "", errs.New(422, "Informe um assunto com até 200 caracteres.")
+			return p, nil, "", errs.New(422, "Enter a subject of up to 200 characters.")
 	}
 	if in["source"] == "" || (in["mode"] != "markdown" && in["mode"] != "mdx" && in["mode"] != "components") {
-		return p, nil, "", errs.New(422, "Escolha um formato e escreva o conteúdo.")
+			return p, nil, "", errs.New(422, "Choose a format and write some content.")
 	}
 	html, err := newsletter.Render(c.Context(), in["mode"], in["source"])
 	if err != nil {
@@ -336,7 +336,7 @@ func (n *NewsletterController) SaveCampaign(c *web.Ctx) error {
 			return err
 		}
 		if count == 0 {
-			return errs.New(409, "A campanha já foi enviada ou não foi encontrada.")
+			return errs.New(409, "The campaign was already sent or was not found.")
 		}
 		campaign.ID = id
 	} else if err := orm.Create(c.Context(), n.DB, &campaign); err != nil {
@@ -378,14 +378,14 @@ func (n *NewsletterController) SendCampaign(c *web.Ctx) error {
 			return err
 		}
 		if campaign.Status != "draft" {
-			return errs.New(409, "Esta campanha já entrou na fila de envio.")
+			return errs.New(409, "This campaign is already queued for delivery.")
 		}
 		count, err := orm.QueryOf[models.Campaign](tx).Where("id", "=", campaign.ID).Where("status", "=", "draft").Update(c.Context(), orm.Set{"status": "queued"})
 		if err != nil {
 			return err
 		}
 		if count == 0 {
-			return errs.New(409, "Esta campanha já entrou na fila.")
+			return errs.New(409, "This campaign is already queued.")
 		}
 		var recipients, lastID int64
 		for {
@@ -409,7 +409,7 @@ func (n *NewsletterController) SendCampaign(c *web.Ctx) error {
 			}
 		}
 		if recipients == 0 {
-			return errs.New(422, "Este projeto ainda não tem inscritos confirmados.")
+			return errs.New(422, "This project has no confirmed subscribers yet.")
 		}
 		_, err = orm.QueryOf[models.Campaign](tx).Where("id", "=", campaign.ID).Update(c.Context(), orm.Set{"recipients": recipients})
 		return err
@@ -417,7 +417,7 @@ func (n *NewsletterController) SendCampaign(c *web.Ctx) error {
 	if err != nil {
 		return err
 	}
-	return c.JSON(202, web.Map{"message": "Campanha adicionada à fila. Os envios respeitam a confirmação e o descadastro."})
+	return c.JSON(202, web.Map{"message": "Campaign queued. Delivery respects confirmation and unsubscribe status."})
 }
 func (n *NewsletterController) Export(c *web.Ctx) error {
 	id := number(c.Query("project"))
@@ -462,7 +462,7 @@ func (n *NewsletterController) AdminUnsubscribe(c *web.Ctx) error {
 	if count == 0 {
 		return errs.ErrNotFound
 	}
-	return c.JSON(200, web.Map{"message": "Inscrição cancelada."})
+	return c.JSON(200, web.Map{"message": "Subscription canceled."})
 }
 
 // PreviewDocument is the only document allowed email-specific styles and remote

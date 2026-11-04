@@ -27,7 +27,7 @@ func setup(t *testing.T) (*vukemtest.App, models.Project) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	p := models.Project{Name: "Hexascore", Slug: "hexascore", Domain: "news.hexascore.app", FromEmail: "newsletter@hexascore.app", Description: "Novidades do projeto"}
+	p := models.Project{Name: "Hexascore", Slug: "hexascore", Domain: "news.hexascore.app", FromEmail: "newsletter@hexascore.app", Description: "Project updates"}
 	if err := orm.Create(t.Context(), db, &p); err != nil {
 		t.Fatal(err)
 	}

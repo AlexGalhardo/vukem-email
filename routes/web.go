@@ -48,7 +48,7 @@ func Web(r *router.Router, app *vukem.App) error {
 	}).Name("login")
 	r.Get("/auth/google/redirect", func(c *web.Ctx) error {
 		if app.Source.Get("SOCIAL_GOOGLE_CLIENT_ID") == "" {
-			return errs.New(503, "Configure as credenciais Google OAuth para entrar.")
+			return errs.New(503, "Configure Google OAuth credentials to sign in.")
 		}
 		return s.Redirect(c, "google")
 	}).Use(limit).Name("google.redirect")
@@ -58,7 +58,7 @@ func Web(r *router.Router, app *vukem.App) error {
 			return err
 		}
 		if !controllers.AllowedGoogle(u.Email, u.EmailVerified) {
-			return errs.New(403, "Esta conta não tem acesso ao dashboard.")
+			return errs.New(403, "This account cannot access the dashboard.")
 		}
 		c.Session().Regenerate()
 		c.Session().Put("admin", controllers.AdminEmail)

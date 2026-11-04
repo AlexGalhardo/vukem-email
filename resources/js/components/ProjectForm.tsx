@@ -50,22 +50,22 @@ export default function ProjectForm({
           size={small ? "sm" : "default"}
         >
           {project ? <Globe2 size={14} /> : <Plus size={15} />}{" "}
-          {project ? "Editar projeto" : "Novo projeto"}
+          {project ? "Edit project" : "New project"}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>
             {project
-              ? "Configurar projeto"
-              : "Um novo projeto. Uma nova audiência."}
+              ? "Configure project"
+              : "A new project. A new audience."}
           </DialogTitle>
           <DialogDescription>
-            Conecte um subdomínio e um remetente para sua newsletter.
+            Connect a subdomain and sender for your newsletter.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={submit} className="space-y-4 mt-2">
-          <Field label="Nome do projeto">
+          <Field label="Project name">
             <Input
               name="name"
               required
@@ -74,7 +74,7 @@ export default function ProjectForm({
               defaultValue={project?.name}
             />
           </Field>
-          <Field label="Identificador">
+          <Field label="Slug">
             <Input
               name="slug"
               required
@@ -84,7 +84,7 @@ export default function ProjectForm({
               defaultValue={project?.slug}
             />
           </Field>
-          <Field label="Subdomínio">
+          <Field label="Subdomain">
             <Input
               name="domain"
               required
@@ -92,7 +92,7 @@ export default function ProjectForm({
               defaultValue={project?.domain}
             />
           </Field>
-          <Field label="E-mail remetente">
+          <Field label="Sender email">
             <Input
               name="from_email"
               required
@@ -101,14 +101,14 @@ export default function ProjectForm({
               defaultValue={project?.from_email}
             />
             <p className="text-[11px] text-muted-foreground mt-1.5">
-              O domínio do remetente precisa estar verificado no Resend.
+              The sender domain must be verified in Resend.
             </p>
           </Field>
-          <Field label="Descrição da newsletter">
+          <Field label="Newsletter description">
             <Textarea
               name="description"
               maxLength={500}
-              placeholder="Novidades, bastidores e tudo que estamos construindo."
+              placeholder="Updates, behind-the-scenes stories, and what we are building."
               defaultValue={project?.description}
             />
           </Field>
@@ -119,10 +119,10 @@ export default function ProjectForm({
           )}
           <Button type="submit" disabled={busy} className="w-full">
             {busy
-              ? "Salvando…"
+              ? "Saving…"
               : project
-                ? "Salvar alterações"
-                : "Criar projeto"}
+                ? "Save changes"
+                : "Create project"}
             <ArrowRight size={15} />
           </Button>
         </form>

@@ -1,12 +1,12 @@
 ---
-title: Segurança
-description: Limites de autenticação, inscrição e renderização.
+title: Security
+description: Authentication, subscription, and rendering boundaries.
 ---
 
-# Segurança
+# Security
 
-Acesso administrativo exige Google OIDC e email verificado. Dados públicos nunca incluem endereços de assinantes, hashes de confirmação, tokens OAuth ou credenciais. Todas as consultas administrativas respeitam o projeto ativo.
+Administrative access requires Google OIDC and a verified email address. Public data never includes subscriber addresses, confirmation hashes, OAuth tokens, or credentials. Administrative queries are scoped to the active project.
 
-Confirmação dupla usa tokens com hash, expiração e consumo único. Descadastro usa assinaturas. Requisições GET não confirmam nem cancelam inscrições. A fila consulta o status antes de cada entrega.
+Double opt-in uses hashed, expiring, single-use tokens. Unsubscribe links are signed. GET requests cannot confirm or cancel subscriptions. The queue checks status before every delivery.
 
-MDX executa em QuickJS WebAssembly; somente imports permitidos de `@react-email/components` e `react` são aceitos. A árvore serializada é validada e o HTML renderizado é sanitizado. Relate vulnerabilidades conforme [SECURITY.md](https://github.com/AlexGalhardo/vukem-email/blob/main/SECURITY.md).
+MDX runs in QuickJS WebAssembly; only permitted imports from `@react-email/components` and `react` are accepted. The serialized tree is validated and rendered HTML is sanitized. Report vulnerabilities through [SECURITY.md](https://github.com/AlexGalhardo/vukem-email/blob/main/SECURITY.md).

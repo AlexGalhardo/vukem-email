@@ -1,12 +1,12 @@
 ---
-title: Campanhas
-description: Rascunhos, prévia, revisão e envio.
+title: Campaigns
+description: Drafts, previews, review, and delivery.
 ---
 
-# Campanhas
+# Campaigns
 
-Campanhas começam como rascunhos editáveis. O editor suporta Markdown GFM, MDX e modelos React Email. A prévia oferece modos desktop e mobile; a campanha passa por revisão antes do envio.
+Campaigns start as editable drafts. The editor supports GFM Markdown, MDX, and React Email templates. Preview the message on desktop or mobile before reviewing and sending it.
 
-Cada destinatário recebe uma tarefa própria na fila. O fan-out é transacional e os endereços não são expostos entre destinatários. O conteúdo e o envelope do email são gerados a partir de `resources/js/emails` e `resources/emails`.
+Each recipient gets a separate queue job. Fan-out is transactional, and recipients never see each other's addresses. Email content and wrappers are generated from `resources/js/emails` and `resources/emails`.
 
-Métricas atuais refletem estados locais da fila e aceitação pelo provedor. `accepted` não significa entrega na caixa de entrada. Eventos de abertura, clique, bounce e reclamação ainda não estão implementados.
+Current metrics reflect local queue states and provider acceptance. `accepted` does not mean delivery to an inbox. Open, click, bounce, and complaint events are not implemented yet.

@@ -31,7 +31,7 @@ export default function SubscriptionAction({
   }
   return (
     <>
-      <Head title={confirm ? "Confirmar inscrição" : "Cancelar inscrição"} />
+      <Head title={confirm ? "Confirm subscription" : "Unsubscribe"} />
       <main className="auth-page">
         <section className="w-full max-w-md rounded-xl border border-border bg-card p-9 text-center">
           <div className="size-14 rounded-xl border border-border mx-auto mb-6 grid place-items-center">
@@ -43,16 +43,16 @@ export default function SubscriptionAction({
           </div>
           <h1 className="text-2xl font-semibold tracking-tight">
             {message
-              ? "Tudo certo."
+              ? "All set."
               : confirm
-                ? "Confirme sua inscrição."
-                : "Vamos sentir sua falta."}
+                ? "Confirm your subscription."
+                : "We will miss you."}
           </h1>
           <p className="text-sm text-muted-foreground mt-4 leading-6">
             {message ||
               (confirm
-                ? "Clique abaixo para confirmar seu e-mail e começar a receber as novidades."
-                : "Confirme abaixo para parar de receber esta newsletter.")}
+                ? "Click below to confirm your email and start receiving updates."
+                : "Confirm below to stop receiving this newsletter.")}
           </p>
           {!message && (
             <Button
@@ -61,10 +61,10 @@ export default function SubscriptionAction({
               onClick={submit}
             >
               {busy
-                ? "Aguarde…"
+                ? "Please wait…"
                 : confirm
-                  ? "Confirmar meu e-mail"
-                  : "Cancelar minha inscrição"}
+                  ? "Confirm my email"
+                  : "Unsubscribe"}
             </Button>
           )}
           {error && (

@@ -1,181 +1,47 @@
-<div align="center">
+# [Vukem Email](https://email.vukem.dev)
 
-<h1><strong><a href="https://email.vukem.dev">Vukem Email</a></strong></h1>
+### Open source newsletter management for multiple projects
 
-[![CI](https://github.com/AlexGalhardo/vukem-email/actions/workflows/ci.yml/badge.svg)](https://github.com/AlexGalhardo/vukem-email/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.md)
-[![Go 1.27.3](https://img.shields.io/badge/go-1.27.3-00ADD8?logo=go&logoColor=white)](go.mod)
-[![Version](https://img.shields.io/github/v/release/AlexGalhardo/vukem-email?include_prereleases&label=version)](https://github.com/AlexGalhardo/vukem-email/releases)
-[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/AlexGalhardo/vukem-email/badge)](https://scorecard.dev/viewer/?uri=github.com/AlexGalhardo/vukem-email)
+## Introduction
 
-<h3>Newsletters open source com Vukem, Go e React</h3>
+Vukem Email is a personal newsletter dashboard built with [Vukem](https://vukem.dev), Go, Inertia, React, PostgreSQL, Resend, and React Email. It manages subscribers, campaigns, and delivery for separate projects. The dashboard runs at [email.hexascore.app](https://email.hexascore.app); the technical documentation runs at [email.vukem.dev](https://email.vukem.dev).
 
-</div>
+## Summary
 
-## Introdução
+- [Features](#features)
+- [Quick start](#quick-start)
+- [Documentation](#documentation)
+- [Stability](#stability)
+- [Contributing](#contributing)
+- [Code of conduct](#code-of-conduct)
+- [Security vulnerabilities](#security-vulnerabilities)
+- [License](#license)
 
-Gerenciador de newsletters para os seus projetos, feito com **Vukem + Go, Inertia + React, shadcn/ui, Resend e React Email**. Preparado para PostgreSQL e deploy no Railway.
+## Features
 
-A documentação técnica fica em [email.vukem.dev](https://email.vukem.dev) e no diretório [site/](site/). O código da aplicação web e do worker é executado pelo Dockerfile da raiz.
+- Private dashboard with Google sign-in restricted to one verified owner account.
+- Isolated projects with their own public subscription domain and sender address.
+- Double opt-in with expiring, single-use confirmation links and signed unsubscribe links.
+- Markdown, MDX, and React Email campaigns with a sandboxed preview. Authored JavaScript runs only in QuickJS WebAssembly.
+- Persistent delivery queue with per-recipient status checks, stable message IDs, retries, and provider idempotency.
 
-## Sumário
+## Quick start
 
-- [O que está implementado](#o-que-está-implementado)
-- [Desenvolvimento](#desenvolvimento)
-- [Google OAuth](#google-oauth)
-- [Railway](#railway)
-- [Verificação](#verificação)
-- [Estabilidade e releases](#estabilidade-e-releases)
-- [Contribuição](#contribuição)
-- [Código de conduta](#código-de-conduta)
-- [Segurança](#segurança)
-- [Licença](#licença)
-
-## O que está implementado
-
-- Dashboard em `/`, com sidebar, métricas reais por projeto e layout responsivo.
-- Login exclusivo com Google: somente **`aleexgvieira@gmail.com`**, com endereço verificado pelo provedor. Sem cadastro público, senha ou acesso administrativo alternativo.
-- Vários projetos, cada um com nome, subdomínio, descrição e remetente próprios.
-- Landing pública em `/subscribe`, identificada pelo hostname, ou `/subscribe/{slug}`.
-- Double opt-in: inscrição pendente → e-mail → confirmação explícita → inscrição confirmada. Tokens aleatórios, armazenados como hash, expiram em 24 horas e funcionam uma única vez.
-- Busca, filtros, paginação, descadastro administrativo e exportação CSV por projeto.
-- Campanhas em Markdown GFM, MDX e componentes React Email, com modelos de boas-vindas, lançamento e resumo.
-- Rascunhos editáveis, prévia desktop/mobile e revisão antes do envio.
-- Fila persistente e transacional. Cada destinatário tem uma tarefa própria; o worker verifica novamente o status antes de enviar. Os destinatários nunca são expostos uns aos outros.
-- Tentativas automáticas, IDs estáveis de mensagem e estados `queued`, `accepted`, `skipped` e `failed` por destinatário.
-- Descadastro assinado, sem necessidade de login. Visitar um link via GET não confirma nem cancela a inscrição: é necessário clicar no botão, para evitar ações de scanners de e-mail.
-
-`accepted` significa **aceito pelo provedor**, e não entrega confirmada na caixa de entrada. Não há métricas inventadas de abertura, cliques ou entrega. Webhooks de entrega, bounce e reclamações do Resend ainda não estão implementados; acompanhe esses eventos no painel do Resend.
-
-## Desenvolvimento
-
-Requisitos: Go **1.27.3+**, Node **24+**, npm e uma aplicação Google OAuth do tipo Web.
+Requires Go 1.27.3+, Node 24+, npm, and a Google OAuth Web application.
 
 ```bash
+git clone https://github.com/AlexGalhardo/vukem-email.git
+cd vukem-email
 cp .env.example .env
 npm ci
 go run ./cmd/app key:generate
-# Coloque a chave gerada em APP_KEY no .env.
+# Add the generated key and Google OAuth credentials to .env.
 npm run build
 go run ./cmd/app migrate
 go run ./cmd/app
 ```
 
-Abra `http://localhost:3000`. O login exige credenciais Google válidas, inclusive localmente. Para desenvolvimento com recarga automática:
-
-```bash
-go install github.com/AlexGalhardo/vukem/cmd/vukem@v0.37.0
-vukem serve
-```
-
-SQLite é usado localmente. `MAIL_MAILER=array` não envia mensagens externas; os testes verificam o conteúdo das mensagens em memória. Para enviar de verdade, use `MAIL_MAILER=resend`, uma chave Resend e um remetente verificado. Os links de confirmação e descadastro usam o domínio configurado no projeto e HTTPS; configure esse domínio antes de fazer testes reais com e-mail.
-
-O processo Go inicia um subprocesso Node apenas ao compilar ou pré-visualizar conteúdo de campanha. **O binário Go isolado não substitui o runtime Docker**: Node, as dependências de produção e os scripts de renderização precisam estar disponíveis. O envio dos e-mails já compilados é feito pelo Go.
-
-## Google OAuth
-
-No Google Cloud Console:
-
-1. Configure a tela de consentimento e, se o app estiver em modo de teste, adicione `aleexgvieira@gmail.com` como test user.
-2. Crie um OAuth Client ID do tipo **Web application**.
-3. Cadastre as URIs de redirecionamento exatas:
-
-```text
-http://localhost:3000/auth/google/callback
-https://app.email.vukem.dev/auth/google/callback
-```
-
-4. Preencha `SOCIAL_GOOGLE_CLIENT_ID`, `SOCIAL_GOOGLE_CLIENT_SECRET` e `APP_URL`.
-
-O Vukem valida state de uso único, PKCE, nonce, assinatura do ID token, issuer, audience e expiração. O callback só cria uma sessão administrativa se o e-mail verificado for o autorizado. Tokens Google não são enviados para o frontend nem persistidos pela aplicação.
-
-Para administrar vários domínios, use o domínio canônico de `APP_URL` para o dashboard e login. Os outros domínios podem servir suas páginas públicas; as sessões são restritas ao hostname.
-
-## Criando um projeto
-
-Após o login, abra **Projetos → Novo projeto**. Exemplo:
-
-| Campo | Valor |
-| --- | --- |
-| Nome | Hexascore |
-| Identificador | hexascore |
-| Domínio | email.hexascore.app |
-| Remetente | newsletter@hexascore.app |
-
-Verifique o domínio do remetente no Resend, com os registros DNS que ele fornecer. O domínio da página pública e o domínio remetente podem ser diferentes.
-
-A página pública estará em `https://email.hexascore.app/subscribe`. Adicione um link para ela na landing page do projeto. A tela **Configurações** fornece o HTML do link. Essa implementação usa uma página hospedada; não expõe uma API de inscrição com CORS aberto para formulários de outros sites.
-
-## Markdown, MDX e React Email
-
-Markdown usa GFM: títulos, listas, links, tabelas, código e texto riscado. O modo **React Email** oferece modelos e botões para inserir componentes. O modo **MDX** combina Markdown, JSX, variáveis, expressões, funções e componentes definidos no próprio conteúdo:
-
-```mdx
-import { Button, Section, Text } from '@react-email/components'
-
-export const features = ['Mais simples', 'Mais rápido']
-export const Highlight = ({ children }) => <Text>{children}</Text>
-
-# Temos novidades!
-
-<Section>
-  {features.map(feature => <Highlight key={feature}>{feature}</Highlight>)}
-  <Button href="https://hexascore.app">Conhecer as novidades</Button>
-</Section>
-```
-
-São permitidos imports de `@react-email/components` para os componentes disponíveis e de `react` para renderização estática (`createElement` e `Fragment`). Não há acesso a módulos arbitrários do servidor, hooks ou APIs de navegador. Componentes disponíveis: `Button`, `Column`, `Container`, `Heading`, `Hr`, `Img`, `Link`, `Row`, `Section`, `Text`, `CodeInline`, `CodeBlock`, `Markdown` e `Tailwind`. O documento externo, cabeçalho, marca e rodapé com descadastro são controlados pela aplicação.
-
-O JavaScript do MDX executa em **QuickJS dentro de WebAssembly**, sem expor Node, arquivos, rede, variáveis de ambiente ou callbacks do host. Há limites de memória, CPU, tamanho e profundidade. Apenas uma árvore de elementos serializada sai do interpretador; ela é validada, renderizada com React Email e sanitizada. A prévia usa uma rota autenticada temporária e um iframe com sandbox; scripts e formulários ficam desativados. A CSP global continua restrita.
-
-Os templates de confirmação e envelope da campanha vivem em `resources/js/emails/`. `npm run build:emails` gera os templates Go em `resources/emails/`, que são incorporados ao binário. Alterou um template? Gere e versione novamente os arquivos HTML.
-
-## Railway
-
-O repositório inclui um `Dockerfile` de produção e a configuração declarativa `.railway/railway.ts`. Você também pode criar os serviços pelo painel do Railway:
-
-1. Crie um projeto e adicione **PostgreSQL**.
-2. Adicione um serviço web apontando para este repositório, usando o Dockerfile.
-3. Configure **Pre-deploy command**: `/app/app migrate`; **Healthcheck path**: `/up`.
-4. Configure as variáveis abaixo no serviço web.
-5. Crie um segundo serviço usando o mesmo repositório, com **Start command** `/app/app queue:work`, as mesmas variáveis e sem domínio público.
-6. Configure `QUEUE_IN_SERVE=false` no web e mantenha um worker com `QUEUE_CONCURRENCY=1` inicialmente. Ajuste capacidade conforme os limites de envio da sua conta Resend.
-
-| Variável | Valor |
-| --- | --- |
-| `APP_ENV` | `production` |
-| `APP_DEBUG` | `false` |
-| `APP_KEY` | Chave gerada; igual no web e no worker |
-| `APP_URL` | `https://app.email.vukem.dev` |
-| `DATABASE_URL` | Referência ao PostgreSQL do Railway |
-| `SOCIAL_GOOGLE_CLIENT_ID` | ID do cliente Google |
-| `SOCIAL_GOOGLE_CLIENT_SECRET` | Segredo do cliente Google |
-| `RESEND_API_KEY` | Chave Resend com permissão de envio |
-| `MAIL_MAILER` | `resend` |
-| `MAIL_FROM` | Remetente padrão verificado |
-| `CACHE_STORE` | `database` |
-| `SESSION_DRIVER` | `cookie` |
-| `QUEUE_CONNECTION` | `database` |
-| `QUEUE_IN_SERVE` | `false`, com worker separado |
-| `QUEUE_CONCURRENCY` | `1` inicialmente |
-| `TRUSTED_PROXIES` | `100.64.0.0/24`, confirme os peers nos logs do Railway |
-| `CLIENT_IP_HEADER` | `X-Real-IP` |
-| `TRUST_FORWARDED_PROTO` | `true` |
-
-O Railway injeta `PORT`. A imagem já define `HOST=0.0.0.0`. Não inclua segredos no Git ou em build arguments. Para apenas um serviço, use `QUEUE_IN_SERVE=true`: o servidor também processa a fila. **Não use SQLite em produção sem volume persistente**; a configuração recomendada usa PostgreSQL.
-
-Adicione `email.hexascore.app` em **Networking → Custom Domain** do serviço web, e crie o CNAME/registro de verificação exatamente como o Railway informar. Para outro projeto, adicione outro subdomínio ao mesmo serviço e crie o projeto correspondente no dashboard. As migrações devem terminar antes do novo web e worker receberem tráfego.
-
-Fila e falhas podem ser inspecionadas pelo CLI da aplicação:
-
-```bash
-/app/app queue:failed
-/app/app queue:retry
-```
-
-Envios usam uma chave de idempotência estável por campanha/inscrito. As tarefas de entrega recusam novas tentativas após 23 horas da criação, para não ultrapassar a janela de 24 horas do Resend. Rotacionar `APP_KEY` sem manter a chave anterior interrompe sessões e tarefas criptografadas; mantenha `APP_PREVIOUS_KEYS` durante a rotação. Links de descadastro anteriores continuam válidos enquanto a chave anterior estiver em `APP_PREVIOUS_KEYS`.
-
-## Verificação
+Open [http://localhost:3000](http://localhost:3000). Google sign-in is required locally too. For development with live reload, install Vukem v0.37.0 and run `vukem serve`.
 
 ```bash
 npm run check
@@ -184,39 +50,31 @@ go vet ./...
 go test -race ./...
 ```
 
-O teste de navegador usa fixtures e cookies apenas dentro de `go test`; o servidor de produção não possui bypass de autenticação:
+## Documentation
 
-```bash
-# Chromium local ou outro executável indicado por BROWSER_EXECUTABLE
-RUN_BROWSER_TESTS=1 BROWSER_EXECUTABLE=/usr/bin/chromium go test ./tests -run TestBrowserSmoke -v
-```
+- [Online documentation](https://email.vukem.dev/docs/introduction) and its [source](site/).
+- [Installation](https://email.vukem.dev/docs/installation), [configuration](https://email.vukem.dev/docs/configuration), and [Railway deployment](https://email.vukem.dev/docs/deployment).
+- [Google OIDC](https://email.vukem.dev/docs/guides/google-oidc) and [security](https://email.vukem.dev/docs/guides/security).
+- [AGENTS.md](AGENTS.md) for repository instructions.
 
-Para executar a integração com um PostgreSQL descartável:
+Production runs the root Dockerfile for the web service and worker, plus `site/Dockerfile` for the documentation service. Set `APP_URL=https://email.hexascore.app` on both application services and register `https://email.hexascore.app/auth/google/callback` with Google. Use PostgreSQL, a verified Resend sender, and a separate queue worker. Deploy the documentation at `email.vukem.dev`.
 
-```bash
-TEST_DATABASE_URL=postgres://newsletter:test@localhost:5432/newsletter_test?sslmode=disable go test ./tests -run TestPostgresWorkflow -v
-```
+## Stability
 
-Os testes cobrem autorização, dados públicos, double opt-in, tokens expirados/consumidos, descadastro, isolamento entre projetos, envio único, fila persistente, renderização, isolamento do MDX e fluxos no navegador. Os testes locais não fazem login no Google nem enviam e-mails reais pelo Resend.
+Releases follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html), use `vX.Y.Z` tags, and are recorded in [CHANGELOG.md](CHANGELOG.md).
 
-Framework: [Vukem](https://vukem.dev/docs/introduction). Interface: [shadcn/ui](https://ui.shadcn.com/). Deploy: [Railway](https://railway.com/).
+## Contributing
 
-## Estabilidade e releases
+Read [CONTRIBUTING.md](CONTRIBUTING.md) for setup, checks, and pull request conventions. Keep code, documentation, and user-facing copy in English.
 
-O projeto usa [Semantic Versioning](https://semver.org/spec/v2.0.0.html), tags `vX.Y.Z` e [Keep a Changelog](CHANGELOG.md). Os commits seguem [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/). O [ROADMAP](ROADMAP.md) é local e ignorado pelo Git, conforme solicitado para planejamento interno.
+## Code of conduct
 
-## Contribuição
+Please follow the [Code of Conduct](CODE_OF_CONDUCT.md).
 
-Leia [CONTRIBUTING.md](CONTRIBUTING.md) para instalação, verificações, commits e pull requests. A documentação do projeto está em [site/](site/).
+## Security vulnerabilities
 
-## Código de conduta
+Report vulnerabilities through the [security policy](SECURITY.md), not a public issue.
 
-Contribuidores seguem o [Código de Conduta](CODE_OF_CONDUCT.md).
+## License
 
-## Segurança
-
-Vulnerabilidades devem ser relatadas conforme [SECURITY.md](SECURITY.md), sem issue pública. O projeto usa [OpenSSF Scorecard](https://scorecard.dev/viewer/?uri=github.com/AlexGalhardo/vukem-email) para avaliar práticas da cadeia de suprimentos.
-
-## Licença
-
-Distribuído sob a [licença MIT](LICENSE.md).
+Vukem Email is open source software released under the [MIT license](LICENSE.md).

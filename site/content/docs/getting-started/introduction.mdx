@@ -1,21 +1,21 @@
 ---
-title: Introdução
-description: Documentação técnica do Vukem Email.
+title: Introduction
+description: Technical documentation for Vukem Email.
 ---
 
 # Vukem Email
 
-Vukem Email é um gerenciador open source de newsletters para múltiplos projetos. O backend usa [Vukem](https://vukem.dev/docs/introduction) e Go; o painel usa Inertia v3, React e shadcn/ui.
+Vukem Email is an open source newsletter manager for multiple projects. The backend uses [Vukem](https://vukem.dev/docs/introduction) and Go; the dashboard uses Inertia v3, React, and shadcn/ui.
 
-O painel administrativo usa exclusivamente Google OIDC para o endereço verificado `aleexgvieira@gmail.com`. Cada projeto tem domínio, remetente, assinantes e campanhas próprios.
+Administrative access requires Google OIDC with the verified address `aleexgvieira@gmail.com`. Each project has its own domain, sender, subscribers, and campaigns.
 
-## O que já existe
+## Features
 
-- Inscrição pública com confirmação dupla e descadastro assinado.
-- Editor de campanhas em Markdown GFM, MDX e React Email, com prévia.
-- Fila persistente por destinatário, tentativas e idempotência no provedor.
-- Painel com métricas por projeto, filtros e exportação CSV.
+- Public sign-up with double opt-in and signed unsubscribe links.
+- Campaign editor for GFM Markdown, MDX, and React Email, with previews.
+- Persistent per-recipient queue with retries and provider idempotency.
+- Project metrics, filters, and CSV export.
 
-## Próximos passos
+## Next steps
 
-Leia [Instalação](/docs/installation), [Configuração](/docs/configuration) e [Deploy](/docs/deployment). As capacidades futuras ficam no [ROADMAP](https://github.com/AlexGalhardo/vukem-email/blob/main/ROADMAP.md).
+Read [Installation](/docs/installation), [Configuration](/docs/configuration), and [Deployment](/docs/deployment). Future work is tracked in the local roadmap.

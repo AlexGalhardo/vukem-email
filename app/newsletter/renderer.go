@@ -13,7 +13,7 @@ import (
 // without host APIs, then validates and sanitizes the resulting element data.
 func Render(ctx context.Context, mode, source string) (string, error) {
 	if len(source) > 100000 {
-		return "", errors.New("O conteúdo excede 100 KB.")
+		return "", errors.New("Content exceeds 100 KB.")
 	}
 	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
@@ -24,10 +24,10 @@ func Render(ctx context.Context, mode, source string) (string, error) {
 	cmd.Stdout = &out
 	cmd.Stderr = &stderr
 	if err := cmd.Run(); err != nil {
-		return "", errors.New("Conteúdo inválido. Revise a sintaxe e use os componentes React Email disponíveis e imports de React ou @react-email/components.")
+		return "", errors.New("Invalid content. Review the syntax and use supported React Email components and imports from React or @react-email/components.")
 	}
 	if out.Len() > 1000000 {
-		return "", errors.New("O HTML gerado excede o limite de 1 MB.")
+		return "", errors.New("Generated HTML exceeds the 1 MB limit.")
 	}
 	return out.String(), nil
 }

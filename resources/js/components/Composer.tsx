@@ -26,34 +26,34 @@ import {
 import { api } from "@/lib/api";
 import type { Campaign, Mode, Project } from "@/types";
 const markdown =
-  "# Temos novidades.\n\nOlá! 👋\n\nUma nova edição da nossa newsletter acaba de chegar.\n\n## O que estamos construindo\n\n- **Algo novo** para tornar seu dia mais simples\n- Melhorias que você pediu\n- Bastidores e próximos passos\n\n[Conheça as novidades →](https://hexascore.app)\n\n---\n\nObrigado por fazer parte dessa jornada.\n\nAté a próxima,\n\n**Alex**";
+  "# We have news.\n\nHello! 👋\n\nA new edition of our newsletter is here.\n\n## What we are building\n\n- **Something new** to make your day easier\n- Improvements you asked for\n- Behind-the-scenes stories and next steps\n\n[Explore the news →](https://hexascore.app)\n\n---\n\nThanks for being part of this journey.\n\nUntil next time,\n\n**Alex**";
 const mdx =
-  '# Uma ideia que virou realidade.\n\nOlá! Esta edição mistura **Markdown** com componentes React Email.\n\n<Section style={{ backgroundColor: "#f5f5f5", padding: "24px", borderRadius: "8px" }}>\n  <Heading as="h2">O próximo capítulo começa agora.</Heading>\n  <Text>Novidades que merecem um lugar na sua caixa de entrada.</Text>\n  <Button href="https://hexascore.app" style={{ backgroundColor: "#171717", color: "#ffffff", padding: "12px 20px", borderRadius: "6px" }}>Conhecer o projeto →</Button>\n</Section>\n\nObrigado por acompanhar!';
+  '# An idea brought to life.\n\nHello! This edition combines **Markdown** with React Email components.\n\n<Section style={{ backgroundColor: "#f5f5f5", padding: "24px", borderRadius: "8px" }}>\n  <Heading as="h2">The next chapter starts now.</Heading>\n  <Text>Updates worth a place in your inbox.</Text>\n  <Button href="https://hexascore.app" style={{ backgroundColor: "#171717", color: "#ffffff", padding: "12px 20px", borderRadius: "6px" }}>Explore the project →</Button>\n</Section>\n\nThanks for following along!';
 const templates = {
   welcome:
-    '<Section>\n  <Heading>Que bom ter você por aqui.</Heading>\n  <Text>Você agora faz parte da nossa comunidade. Aqui, cada novidade é uma oportunidade de construir algo melhor.</Text>\n  <Button href="https://hexascore.app" style={{ backgroundColor: "#171717", color: "#ffffff", padding: "12px 20px", borderRadius: "6px" }}>Conheça o projeto →</Button>\n  <Hr />\n  <Text>Até a próxima, Alex.</Text>\n</Section>',
+    '<Section>\n  <Heading>Welcome aboard.</Heading>\n  <Text>You are now part of our community. Every update is a chance to build something better.</Text>\n  <Button href="https://hexascore.app" style={{ backgroundColor: "#171717", color: "#ffffff", padding: "12px 20px", borderRadius: "6px" }}>Explore the project →</Button>\n  <Hr />\n  <Text>Until next time, Alex.</Text>\n</Section>',
   update:
-    '<Section>\n  <Text>NOVIDADES DO PROJETO</Text>\n  <Heading>Uma nova versão. Novas possibilidades.</Heading>\n  <Text>Estamos animados para compartilhar o que acabamos de lançar.</Text>\n  <Row>\n    <Column><Heading as="h3">Mais simples</Heading><Text>Uma experiência pensada nos detalhes.</Text></Column>\n    <Column><Heading as="h3">Mais rápido</Heading><Text>Menos espera. Mais tempo para o que importa.</Text></Column>\n  </Row>\n  <Button href="https://hexascore.app">Ver o que mudou →</Button>\n</Section>',
+    '<Section>\n  <Text>PROJECT UPDATES</Text>\n  <Heading>A new release. New possibilities.</Heading>\n  <Text>We are excited to share what we have just launched.</Text>\n  <Row>\n    <Column><Heading as="h3">Simpler</Heading><Text>An experience designed down to the details.</Text></Column>\n    <Column><Heading as="h3">Faster</Heading><Text>Less waiting. More time for what matters.</Text></Column>\n  </Row>\n  <Button href="https://hexascore.app">See what changed →</Button>\n</Section>',
   digest:
-    '<Section>\n  <Text>SUA DOSE DE NOVIDADES</Text>\n  <Heading>O que vale a sua atenção.</Heading>\n  <Heading as="h2">01. Uma descoberta</Heading>\n  <Text>Uma ideia interessante para começar a semana.</Text>\n  <Hr />\n  <Heading as="h2">02. Nos bastidores</Heading>\n  <Text>Um pouco do que estamos construindo.</Text>\n  <Hr />\n  <Link href="https://hexascore.app">Continue a conversa →</Link>\n</Section>',
+    '<Section>\n  <Text>YOUR ROUNDUP</Text>\n  <Heading>What deserves your attention.</Heading>\n  <Heading as="h2">01. A discovery</Heading>\n  <Text>An interesting idea to start the week.</Text>\n  <Hr />\n  <Heading as="h2">02. Behind the scenes</Heading>\n  <Text>A glimpse of what we are building.</Text>\n  <Hr />\n  <Link href="https://hexascore.app">Continue the conversation →</Link>\n</Section>',
 };
 const snippets: Record<string, string> = {
-  Heading: "<Heading>Seu título aqui</Heading>",
-  Text: "<Text>Escreva sua mensagem aqui.</Text>",
+  Heading: "<Heading>Your heading here</Heading>",
+  Text: "<Text>Write your message here.</Text>",
   Button:
-    '<Button href="https://example.com" style={{ backgroundColor: "#171717", color: "#ffffff", padding: "12px 20px", borderRadius: "6px" }}>Saiba mais →</Button>',
+    '<Button href="https://example.com" style={{ backgroundColor: "#171717", color: "#ffffff", padding: "12px 20px", borderRadius: "6px" }}>Learn more →</Button>',
   Section:
-    '<Section style={{ padding: "24px" }}>\n  <Text>Seu conteúdo aqui.</Text>\n</Section>',
-  Row: "<Row>\n  <Column><Text>Coluna 1</Text></Column>\n  <Column><Text>Coluna 2</Text></Column>\n</Row>",
-  Img: '<Img src="https://example.com/image.png" alt="Descrição da imagem" width="480" />',
+    '<Section style={{ padding: "24px" }}>\n  <Text>Your content here.</Text>\n</Section>',
+  Row: "<Row>\n  <Column><Text>Column 1</Text></Column>\n  <Column><Text>Column 2</Text></Column>\n</Row>",
+  Img: '<Img src="https://example.com/image.png" alt="Image description" width="480" />',
   Hr: "<Hr />",
-  Link: '<Link href="https://example.com">Abrir link →</Link>',
-  Container: "<Container>\n  <Text>Seu conteúdo aqui.</Text>\n</Container>",
+  Link: '<Link href="https://example.com">Open link →</Link>',
+  Container: "<Container>\n  <Text>Your content here.</Text>\n</Container>",
   CodeInline: '<CodeInline>const hello = "world"</CodeInline>',
   CodeBlock: '<CodeBlock code={"const hello = 42;"} language="javascript" />',
   Tailwind:
-    '<Tailwind><Section className="bg-gray-100 p-6 rounded-lg"><Text className="text-gray-900">Sua mensagem aqui.</Text></Section></Tailwind>',
-  Markdown: '<Markdown>{"**Markdown** em um componente."}</Markdown>',
+    '<Tailwind><Section className="bg-gray-100 p-6 rounded-lg"><Text className="text-gray-900">Your message here.</Text></Section></Tailwind>',
+  Markdown: '<Markdown>{"**Markdown** in a component."}</Markdown>',
 };
 export default function Composer({
   project,
@@ -92,7 +92,7 @@ export default function Composer({
   async function save() {
     const r = await api<Campaign>("/api/campaigns", data());
     setSavedId(r.id);
-    setNotice("Rascunho salvo.");
+    setNotice("Draft saved.");
     return r.id;
   }
   async function act(action: "save" | "preview" | "prepare" | "send") {
@@ -141,13 +141,13 @@ export default function Composer({
             onClick={() => router.visit(`/campaigns?project=${project.id}`)}
           >
             <ArrowLeft size={13} />
-            Todas as campanhas
+            All campaigns
           </button>
           <h1 className="page-title">
-            {campaign ? "Editar campanha" : "Uma nova conversa."}
+            {campaign ? "Edit campaign" : "A new conversation."}
           </h1>
           <p className="page-description">
-            Escreva algo que as pessoas queiram abrir.
+            Write something people want to open.
           </p>
         </div>
         <div className="flex gap-2 mt-6">
@@ -157,14 +157,14 @@ export default function Composer({
             onClick={() => act("save")}
           >
             <Save size={14} />
-            Salvar rascunho
+            Save draft
           </Button>
           <Button
             disabled={!!busy || confirmed === 0}
             onClick={() => act("prepare")}
           >
             <Send size={14} />
-            Revisar envio
+            Review send
           </Button>
         </div>
       </div>
@@ -186,18 +186,18 @@ export default function Composer({
               className="text-xs text-muted-foreground block mb-2"
               htmlFor="subject"
             >
-              Assunto do e-mail
+              Email subject
             </label>
             <Input
               id="subject"
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
               maxLength={200}
-              placeholder="Uma boa história começa com um bom assunto."
+              placeholder="A good story starts with a good subject."
               className="bg-transparent border-0 px-0 shadow-none text-base focus-visible:ring-0"
             />
             <div className="text-[11px] text-muted-foreground mt-3">
-              De: <span className="text-foreground">{project.from_email}</span>
+              From: <span className="text-foreground">{project.from_email}</span>
             </div>
           </div>
           <div className="p-3 flex gap-1 border-b border-border">
@@ -227,12 +227,12 @@ export default function Composer({
             <div className="p-3 border-b border-border space-y-3">
               <div className="flex gap-2 items-center">
                 <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
-                  Modelos
+                  Templates
                 </span>
                 {Object.entries({
-                  welcome: "Boas-vindas",
-                  update: "Lançamento",
-                  digest: "Resumo",
+                  welcome: "Welcome",
+                  update: "Launch",
+                  digest: "Digest",
                 }).map(([key, label]) => (
                   <Button
                     key={key}
@@ -262,7 +262,7 @@ export default function Composer({
           )}
           <Textarea
             ref={editor}
-            aria-label="Conteúdo da campanha"
+            aria-label="Campaign content"
             value={source}
             onChange={(e) => setSource(e.target.value)}
             spellCheck={false}
@@ -271,23 +271,23 @@ export default function Composer({
           <div className="px-5 py-3 border-t border-border text-[10px] text-muted-foreground flex justify-between">
             <span>
               {mode === "markdown"
-                ? "Markdown com tabelas, listas e blocos de código"
-                : "Componentes React Email · MDX isolado"}
+                ? "Markdown with tables, lists, and code blocks"
+                : "React Email components · isolated MDX"}
             </span>
-            <span>{source.length.toLocaleString("pt-BR")} caracteres</span>
+            <span>{source.length.toLocaleString("en-US")} characters</span>
           </div>
         </section>
         <section className="panel overflow-hidden flex flex-col">
           <div className="px-5 py-4 border-b border-border flex items-center justify-between">
             <div className="flex items-center gap-2 text-xs font-medium">
               <Eye size={14} />
-              Prévia do e-mail
+              Email preview
             </div>
             <div className="flex gap-2">
               <Button
                 variant="ghost"
                 size="icon"
-                aria-label="Alternar prévia mobile"
+                aria-label="Toggle mobile preview"
                 onClick={() => setMobile(!mobile)}
                 className={mobile ? "bg-muted" : ""}
               >
@@ -304,14 +304,14 @@ export default function Composer({
                 ) : (
                   <Eye size={13} />
                 )}
-                Atualizar prévia
+                Refresh preview
               </Button>
             </div>
           </div>
           <div className="flex-1 bg-[#ededed] min-h-[560px] p-4 flex justify-center">
             {html ? (
               <iframe
-                title="Prévia da campanha"
+                title="Campaign preview"
                 sandbox=""
                 src={html}
                 className={`bg-white border-0 w-full min-h-[560px] ${mobile ? "max-w-[375px]" : "max-w-full"}`}
@@ -322,11 +322,11 @@ export default function Composer({
                   <MailPreview />
                 </div>
                 <h3 className="font-medium text-sm text-neutral-800">
-                  Sua mensagem, do outro lado.
+                  Your message, on the other side.
                 </h3>
                 <p className="text-xs leading-6 mt-2">
-                  Escreva seu conteúdo e atualize a prévia para ver como o
-                  e-mail vai chegar.
+                  Write your content and refresh the preview to see how the
+                  email will arrive.
                 </p>
               </div>
             )}
@@ -334,35 +334,35 @@ export default function Composer({
         </section>
       </div>
       <div className="mt-5 text-[11px] text-muted-foreground flex gap-2 items-center">
-        <span className="size-1.5 rounded-full bg-emerald-400" />O rodapé de
-        descadastro é incluído automaticamente em todos os e-mails.
+        <span className="size-1.5 rounded-full bg-emerald-400" />
+        An unsubscribe footer is included automatically in every email.
       </div>
       <Dialog open={confirm} onOpenChange={setConfirm}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Pronto para chegar à caixa de entrada?</DialogTitle>
+            <DialogTitle>Ready for the inbox?</DialogTitle>
             <DialogDescription>
-              O envio começa assim que você confirmar. Revise o assunto, o
-              conteúdo e o projeto antes de continuar.
+              Sending starts when you confirm. Review the subject, content, and
+              project before continuing.
             </DialogDescription>
           </DialogHeader>
           <div className="rounded-lg bg-muted/40 border border-border p-4 space-y-2 text-sm">
             <p>{subject}</p>
             <p className="text-muted-foreground text-xs">
-              Projeto: {project.name}
+              Project: {project.name}
             </p>
             <p className="text-muted-foreground text-xs">
-              Até {confirmed} inscritos confirmados · {project.from_email}
+              Up to {confirmed} confirmed subscribers · {project.from_email}
             </p>
           </div>
           <p className="text-xs text-muted-foreground">
-            Somente inscrições confirmadas serão consideradas. Descadastros são
-            verificados novamente no momento do envio.
+            Only confirmed subscriptions are eligible. Unsubscribe status is
+            checked again before delivery.
           </p>
           <Button disabled={!!busy} onClick={() => act("send")}>
             {busy === "send"
-              ? "Colocando na fila…"
-              : "Confirmar e enviar campanha"}
+              ? "Queuing…"
+              : "Confirm and send campaign"}
             <Send size={14} />
           </Button>
         </DialogContent>

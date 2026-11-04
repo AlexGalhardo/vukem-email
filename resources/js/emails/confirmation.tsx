@@ -12,9 +12,9 @@ import {
 } from "@react-email/components";
 export default function Confirmation() {
   return (
-    <Html lang="pt-BR">
+    <Html lang="en">
       <Head />
-      <Preview>Confirme seu e-mail para receber novidades.</Preview>
+      <Preview>Confirm your email to receive updates.</Preview>
       <Body
         style={{
           backgroundColor: "#f6f6f6",
@@ -33,11 +33,11 @@ export default function Confirmation() {
           <Text style={{ fontSize: "14px", fontWeight: 700 }}>
             {"{{.Project.Name}}"} / newsletter
           </Text>
-          <Heading style={{ fontSize: "28px" }}>Só falta confirmar.</Heading>
+          <Heading style={{ fontSize: "28px" }}>One more step.</Heading>
           <Text style={{ color: "#525252", lineHeight: "26px" }}>
-            Você está a um clique de receber as novidades de{" "}
-            {"{{.Project.Name}}"}. Confirme que este e-mail é seu para entrar na
-            lista.
+            You are one click away from updates from{" "}
+            {"{{.Project.Name}}"}. Confirm that this email belongs to you to
+            join the list.
           </Text>
           <Button
             href="{{.URL}}"
@@ -48,12 +48,12 @@ export default function Confirmation() {
               borderRadius: "6px",
             }}
           >
-            Confirmar minha inscrição →
+            Confirm my subscription →
           </Button>
           <Hr style={{ borderColor: "#eee", margin: "32px 0" }} />
           <Text style={{ fontSize: "12px", color: "#737373" }}>
-            O link expira em 24 horas. Se você não solicitou esta inscrição,
-            ignore este e-mail.
+            This link expires in 24 hours. If you did not request this
+            subscription, ignore this email.
           </Text>
         </Container>
       </Body>

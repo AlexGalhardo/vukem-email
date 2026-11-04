@@ -39,24 +39,24 @@ export default function Subscribe({ project }: { project: Project }) {
             {project.name}
           </div>
           <span className="text-xs text-muted-foreground">
-            Uma carta. Muitas possibilidades.
+            One letter. Many possibilities.
           </span>
         </header>
         <section className="max-w-xl w-full text-center relative">
           <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-xs text-muted-foreground mb-7">
             <span className="size-1.5 bg-emerald-400 rounded-full" />A
-            newsletter de {project.name}
+            {project.name} newsletter
           </span>
           <h1 className="text-5xl md:text-6xl font-semibold tracking-[-.05em] leading-[1.1]">
-            O próximo capítulo,
+            The next chapter,
             <br />
             <span className="text-muted-foreground">
-              na sua caixa de entrada.
+              in your inbox.
             </span>
           </h1>
           <p className="text-muted-foreground mt-6 max-w-md mx-auto text-sm md:text-base leading-7">
             {project.description ||
-              `Novidades, bastidores e ideias de ${project.name}. Assine para acompanhar o que estamos construindo.`}
+              `Updates, behind-the-scenes stories, and ideas from ${project.name}. Subscribe to follow what we are building.`}
           </p>
           {message ? (
             <div
@@ -69,7 +69,7 @@ export default function Subscribe({ project }: { project: Project }) {
           ) : (
             <form onSubmit={submit} className="mt-9 max-w-md mx-auto">
               <label htmlFor="email" className="sr-only">
-                Seu e-mail
+                Your email
               </label>
               <div className="flex gap-2">
                 <Input
@@ -79,11 +79,11 @@ export default function Subscribe({ project }: { project: Project }) {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Seu melhor e-mail"
+                  placeholder="Your email address"
                   className="h-12 bg-card"
                 />
                 <Button disabled={busy} type="submit" className="h-12 px-5">
-                  {busy ? "Inscrevendo…" : "Quero receber"}
+                  {busy ? "Subscribing…" : "Subscribe"}
                   <ArrowRight size={15} />
                 </Button>
               </div>
@@ -102,17 +102,17 @@ export default function Subscribe({ project }: { project: Project }) {
               <div className="flex justify-center gap-5 text-[11px] text-muted-foreground mt-5">
                 <span className="flex items-center gap-1">
                   <Check size={12} />
-                  Sem spam. Só o que importa.
+                  No spam. Just the essentials.
                 </span>
                 <span className="flex items-center gap-1">
                   <Check size={12} />
-                  Cancele quando quiser.
+                  Unsubscribe anytime.
                 </span>
               </div>
               <p className="text-[11px] text-muted-foreground/70 mt-5">
-                Ao assinar, você concorda em receber a newsletter de{" "}
+                By subscribing, you agree to receive the newsletter from{" "}
                 {project.name}.<br />
-                Enviaremos um e-mail para confirmar sua inscrição.
+                We will email you to confirm your subscription.
               </p>
             </form>
           )}

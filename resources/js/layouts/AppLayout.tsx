@@ -39,10 +39,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 const nav = [
-  { href: "/", label: "Visão geral", icon: LayoutDashboard },
-  { href: "/subscribers", label: "Inscritos", icon: Users },
-  { href: "/campaigns", label: "Campanhas", icon: Mail },
-  { href: "/projects", label: "Projetos", icon: Globe2 },
+  { href: "/", label: "Overview", icon: LayoutDashboard },
+  { href: "/subscribers", label: "Subscribers", icon: Users },
+  { href: "/campaigns", label: "Campaigns", icon: Mail },
+  { href: "/projects", label: "Projects", icon: Globe2 },
 ];
 export default function AppLayout({
   children,
@@ -82,7 +82,7 @@ export default function AppLayout({
                 <span className="flex size-6 items-center justify-center rounded bg-white/10 text-xs font-semibold">
                   {project.name?.slice(0, 1) || "+"}
                 </span>
-                <SelectValue placeholder="Selecione um projeto" />
+                <SelectValue placeholder="Select a project" />
               </div>
             </SelectTrigger>
             <SelectContent>
@@ -97,7 +97,7 @@ export default function AppLayout({
         <SidebarContent>
           <SidebarGroup className="px-3">
             <SidebarGroupLabel className="text-[10px] tracking-[.14em] px-3 mb-2">
-              GERENCIAR
+              MANAGE
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
@@ -140,19 +140,19 @@ export default function AppLayout({
                 >
                   <Link href={link("/settings")}>
                     <Settings2 size={16} />
-                    Configurações
+                    Settings
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild className="h-10 px-3">
                   <a
-                    href="https://vukem.dev/docs/introduction"
+                    href="https://email.vukem.dev/docs/introduction"
                     target="_blank"
                     rel="noreferrer"
                   >
                     <FileText size={16} />
-                    Documentação
+                    Documentation
                     <ArrowUpRight className="ml-auto" size={13} />
                   </a>
                 </SidebarMenuButton>
@@ -164,12 +164,12 @@ export default function AppLayout({
           <div className="rounded-lg border border-border p-3 mb-3">
             <div className="flex gap-2 items-center text-xs font-medium">
               <span className="size-1.5 bg-emerald-400 rounded-full" />
-              Feito para seus projetos
+              Made for your projects
             </div>
             <p className="text-xs leading-5 text-muted-foreground mt-2">
-              Uma audiência própria.
+              Your own audience.
               <br />
-              Uma conexão de cada vez.
+              One connection at a time.
             </p>
           </div>
           <div className="flex items-center gap-2.5 px-1">
@@ -179,11 +179,11 @@ export default function AppLayout({
             <div className="min-w-0 flex-1">
               <div className="text-xs font-medium">Alex Galhardo</div>
               <div className="text-[10px] text-muted-foreground truncate">
-                Workspace pessoal
+                Personal workspace
               </div>
             </div>
             <button
-              aria-label="Sair da conta"
+              aria-label="Sign out"
               className="text-muted-foreground hover:text-foreground"
               onClick={() => router.post("/logout")}
             >
@@ -196,19 +196,19 @@ export default function AppLayout({
         <header className="h-16 flex items-center border-b border-border px-5 md:px-9 gap-3">
           <SidebarTrigger className="md:hidden" />
           <span className="text-muted-foreground text-sm">
-            Workspace pessoal
+            Personal workspace
           </span>
           <span className="text-muted-foreground/50">/</span>
-          <span className="text-sm">{project.name || "Seus projetos"}</span>
+          <span className="text-sm">{project.name || "Your projects"}</span>
           <span className="ml-1 text-[10px] rounded border border-border px-1.5 py-0.5 text-muted-foreground">
-            Pessoal
+            Personal
           </span>
           <div className="ml-auto flex gap-4 items-center">
             <a
-              href="https://vukem.dev/docs/digging-deeper/mail"
+              href="https://email.vukem.dev/docs/introduction"
               target="_blank"
               rel="noreferrer"
-              aria-label="Ajuda"
+              aria-label="Help"
               className="text-muted-foreground"
             >
               <CircleHelp size={17} />
@@ -225,7 +225,7 @@ export default function AppLayout({
           <span>© {new Date().getFullYear()} Vukem Email</span>
           <span className="flex gap-1.5 items-center">
             <span className="size-1.5 rounded-full bg-emerald-400" />
-            Sua próxima conexão começa aqui
+            Your next connection starts here
           </span>
         </footer>
       </SidebarInset>

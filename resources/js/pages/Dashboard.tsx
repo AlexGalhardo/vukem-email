@@ -44,12 +44,12 @@ import {
 import { api } from "@/lib/api";
 import type { Campaign, DashboardProps, Project, Subscriber } from "@/types";
 const labels: Record<string, string> = {
-  pending: "Pendente",
-  confirmed: "Confirmado",
-  unsubscribed: "Descadastrado",
-  draft: "Rascunho",
-  queued: "Na fila",
-  completed: "Processada",
+  pending: "Pending",
+  confirmed: "Confirmed",
+  unsubscribed: "Unsubscribed",
+  draft: "Draft",
+  queued: "Queued",
+  completed: "Processed",
 };
 function Status({ value }: { value: string }) {
   return (
@@ -60,7 +60,7 @@ function Status({ value }: { value: string }) {
   );
 }
 function date(value: string) {
-  return new Intl.DateTimeFormat("pt-BR", {
+  return new Intl.DateTimeFormat("en-US", {
     day: "2-digit",
     month: "short",
   }).format(new Date(value));
@@ -113,30 +113,30 @@ export default function Dashboard(props: DashboardProps) {
       setTimeout(() => setCopied(false), 2000);
     } catch {
       setError(
-        "Não foi possível copiar. Selecione e copie o endereço manualmente.",
+        "Could not copy. Select and copy the address manually.",
       );
     }
   }
   const title =
     path === "/subscribers"
-      ? "Sua audiência."
+      ? "Your audience."
       : path === "/campaigns"
-        ? "Conversas que conectam."
+        ? "Conversations that connect."
         : path === "/projects"
-          ? "Um lugar para cada projeto."
+          ? "A place for every project."
           : path === "/settings"
-            ? "Do seu jeito."
-            : "Cada conexão importa.";
+            ? "Make it yours."
+            : "Every connection matters.";
   const description =
     path === "/subscribers"
-      ? "Pessoas que escolheram acompanhar o que você está construindo."
+      ? "People who chose to follow what you are building."
       : path === "/campaigns"
-        ? "Uma boa ideia, uma mensagem e sua próxima conexão."
+        ? "One good idea, one message, and your next connection."
         : path === "/projects"
-          ? "Gerencie suas newsletters, domínios e remetentes em um só lugar."
+          ? "Manage your newsletters, domains, and senders in one place."
           : path === "/settings"
-            ? "As conexões que fazem sua newsletter acontecer."
-            : "Uma visão de perto da sua newsletter e das pessoas do outro lado.";
+            ? "The connections behind your newsletter."
+            : "A closer look at your newsletter and the people on the other side.";
   useEffect(() => {
     if (path === "/campaigns" && campaigns.some((c) => c.status === "queued")) {
       const id = setInterval(
@@ -151,16 +151,16 @@ export default function Dashboard(props: DashboardProps) {
       <Head
         title={
           path === "/subscribers"
-            ? "Inscritos"
+            ? "Subscribers"
             : path === "/campaigns/new"
-              ? "Nova campanha"
+              ? "New campaign"
               : path === "/campaigns"
-                ? "Campanhas"
+                ? "Campaigns"
                 : path === "/projects"
-                  ? "Projetos"
+                  ? "Projects"
                   : path === "/settings"
-                    ? "Configurações"
-                    : "Visão geral"
+                    ? "Settings"
+                    : "Overview"
         }
       />
       {path === "/campaigns/new" && hasProject ? (
@@ -178,7 +178,7 @@ export default function Dashboard(props: DashboardProps) {
           <div className="flex gap-5 flex-wrap justify-between items-start mb-8">
             <div>
               <p className="eyebrow mb-2.5">
-                {path === "/" ? "VISÃO GERAL" : path.slice(1).toUpperCase()}
+                {path === "/" ? "OVERVIEW" : path.slice(1).toUpperCase()}
               </p>
               <h1 className="page-title">{title}</h1>
               <p className="page-description">{description}</p>
@@ -196,14 +196,14 @@ export default function Dashboard(props: DashboardProps) {
                       className="hidden sm:inline-flex"
                     >
                       <a href={publicUrl} target="_blank" rel="noreferrer">
-                        Página pública
+                        Public page
                         <ArrowUpRight size={14} />
                       </a>
                     </Button>
                     <Button asChild>
                       <Link href={link("/campaigns/new")}>
                         <Plus size={15} />
-                        Nova campanha
+                        New campaign
                       </Link>
                     </Button>
                   </>
@@ -222,29 +222,29 @@ export default function Dashboard(props: DashboardProps) {
                 <Globe2 size={27} />
               </div>
               <Badge variant="outline" className="mb-5">
-                VAMOS COMEÇAR
+                LET'S GET STARTED
               </Badge>
               <h2 className="text-2xl font-semibold tracking-tight">
-                Sua primeira newsletter começa aqui.
+                Your first newsletter starts here.
               </h2>
               <p className="text-sm text-muted-foreground max-w-md mx-auto mt-3 mb-7 leading-7">
-                Crie um projeto, conecte seu subdomínio e abra espaço para as
-                pessoas que querem acompanhar sua jornada.
+                Create a project, connect your subdomain, and welcome people
+                who want to follow your journey.
               </p>
               <ProjectForm />
               <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-2xl mx-auto text-left">
                 {[
                   [
                     "01",
-                    "Conecte seu projeto",
-                    "Um domínio e um remetente próprios.",
+                    "Connect your project",
+                    "Your own domain and sender.",
                   ],
                   [
                     "02",
-                    "Convide sua audiência",
-                    "Uma página pronta para receber inscrições.",
+                    "Invite your audience",
+                    "A page ready to accept subscriptions.",
                   ],
-                  ["03", "Comece uma conversa", "Crie campanhas do seu jeito."],
+                  ["03", "Start a conversation", "Create campaigns your way."],
                 ].map(([num, title, desc]) => (
                   <div key={num}>
                     <p className="font-mono text-[10px] text-muted-foreground mb-3">
@@ -264,29 +264,29 @@ export default function Dashboard(props: DashboardProps) {
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
                 {[
                   {
-                    label: "Inscritos confirmados",
+                    label: "Confirmed subscribers",
                     value: stats.confirmed,
                     icon: Users,
-                    caption: "Prontos para receber suas novidades",
+                    caption: "Ready to receive your updates",
                     green: true,
                   },
                   {
-                    label: "Aguardando confirmação",
+                    label: "Awaiting confirmation",
                     value: stats.pending,
                     icon: Mail,
-                    caption: "Uma confirmação para começar",
+                    caption: "One confirmation to get started",
                   },
                   {
-                    label: "Campanhas criadas",
+                    label: "Campaigns created",
                     value: stats.campaigns,
                     icon: Send,
-                    caption: "Suas histórias ganhando o mundo",
+                    caption: "Your stories reaching the world",
                   },
                   {
-                    label: "Taxa de confirmação",
+                    label: "Confirmation rate",
                     value: `${stats.confirmed + stats.pending ? Math.round((stats.confirmed / (stats.confirmed + stats.pending)) * 100) : 0}%`,
                     icon: ShieldCheck,
-                    caption: "Entre inscrições ativas e pendentes",
+                    caption: "Among active and pending subscriptions",
                   },
                 ].map((metric) => (
                   <div className="panel p-5" key={metric.label}>
@@ -296,7 +296,7 @@ export default function Dashboard(props: DashboardProps) {
                     </div>
                     <div className="text-3xl font-semibold tracking-tight mt-5 tabular-nums">
                       {typeof metric.value === "number"
-                        ? metric.value.toLocaleString("pt-BR")
+                        ? metric.value.toLocaleString("en-US")
                         : metric.value}
                     </div>
                     <p className="text-[10px] text-muted-foreground mt-3 flex items-center gap-1.5">
@@ -313,22 +313,22 @@ export default function Dashboard(props: DashboardProps) {
                   <div className="flex justify-between items-start">
                     <div>
                       <h2 className="section-title">
-                        Sua audiência, de perto.
+                        Your audience, up close.
                       </h2>
                       <p className="text-xs text-muted-foreground mt-2">
-                        Cada inscrição é o começo de uma conexão.
+                        Every subscription begins a connection.
                       </p>
                     </div>
                     <Badge variant="outline" className="text-[10px]">
-                      Todos os inscritos
+                      All subscribers
                     </Badge>
                   </div>
                   <Audience stats={stats} />
                   <div className="grid grid-cols-3 border-t border-border pt-5 text-xs">
                     {[
-                      ["confirmed", "Confirmados", "bg-emerald-400"],
-                      ["pending", "Pendentes", "bg-amber-300"],
-                      ["unsubscribed", "Descadastros", "bg-neutral-500"],
+                      ["confirmed", "Confirmed", "bg-emerald-400"],
+                      ["pending", "Pending", "bg-amber-300"],
+                      ["unsubscribed", "Unsubscribed", "bg-neutral-500"],
                     ].map(([key, label, color]) => (
                       <div key={key}>
                         <span className="flex gap-1.5 text-[10px] text-muted-foreground items-center">
@@ -336,7 +336,7 @@ export default function Dashboard(props: DashboardProps) {
                           {label}
                         </span>
                         <p className="text-lg font-medium mt-2">
-                          {(stats[key] || 0).toLocaleString("pt-BR")}
+                          {(stats[key] || 0).toLocaleString("en-US")}
                         </p>
                       </div>
                     ))}
@@ -348,15 +348,15 @@ export default function Dashboard(props: DashboardProps) {
                   <div className="size-9 rounded-lg border border-border grid place-items-center mb-6">
                     <Send size={17} />
                   </div>
-                  <p className="eyebrow mb-3">SUA PRÓXIMA EDIÇÃO</p>
+                  <p className="eyebrow mb-3">YOUR NEXT EDITION</p>
                   <h2 className="text-xl tracking-tight font-medium max-w-64 leading-7">
-                    Tem algo novo
+                    Something new
                     <br />
-                    para compartilhar?
+                    to share?
                   </h2>
                   <p className="text-xs leading-6 text-muted-foreground mt-3 mb-7 max-w-64">
-                    Uma atualização, uma ideia ou os bastidores do seu projeto.
-                    Sua audiência quer saber.
+                    An update, an idea, or a look behind the scenes.
+                    Your audience wants to hear it.
                   </p>
                   <Button
                     asChild
@@ -364,7 +364,7 @@ export default function Dashboard(props: DashboardProps) {
                     variant="outline"
                   >
                     <Link href={link("/campaigns/new")}>
-                      Criar uma campanha
+                      Create a campaign
                       <ArrowRight size={14} />
                     </Link>
                   </Button>
@@ -373,16 +373,16 @@ export default function Dashboard(props: DashboardProps) {
               <div className="panel mb-6">
                 <div className="panel-heading">
                   <div>
-                    <h2 className="section-title">Últimas inscrições</h2>
+                    <h2 className="section-title">Recent subscriptions</h2>
                     <p className="text-[11px] text-muted-foreground mt-1.5">
-                      As pessoas que acabaram de chegar.
+                      The people who just joined.
                     </p>
                   </div>
                   <Link
                     href={link("/subscribers")}
                     className="text-xs text-muted-foreground flex gap-1.5 items-center hover:text-foreground"
                   >
-                    Ver todos
+                    View all
                     <ArrowRight size={13} />
                   </Link>
                 </div>
@@ -394,7 +394,7 @@ export default function Dashboard(props: DashboardProps) {
                 </div>
                 <div className="flex-1">
                   <p className="text-xs font-medium">
-                    Seu próximo inscrito pode estar a um link de distância.
+                    Your next subscriber may be one link away.
                   </p>
                   <a
                     href={publicUrl}
@@ -411,7 +411,7 @@ export default function Dashboard(props: DashboardProps) {
                   onClick={() => copy(publicUrl)}
                 >
                   {copied ? <Check size={13} /> : <Clipboard size={13} />}{" "}
-                  {copied ? "Copiado" : "Copiar link"}
+                  {copied ? "Copied" : "Copy link"}
                 </Button>
               </div>
             </>
@@ -422,11 +422,11 @@ export default function Dashboard(props: DashboardProps) {
               <div className="panel-heading">
                 <div className="flex items-center gap-2">
                   <Mail size={15} />
-                  <h2 className="section-title">Todas as campanhas</h2>
+                  <h2 className="section-title">All campaigns</h2>
                   <Badge variant="secondary">{campaigns.length}</Badge>
                 </div>
                 <span className="text-[11px] text-muted-foreground">
-                  Últimas 100 campanhas
+                  Latest 100 campaigns
                 </span>
               </div>
               {campaigns.length ? (
@@ -434,12 +434,12 @@ export default function Dashboard(props: DashboardProps) {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="pl-6">Campanha</TableHead>
+                        <TableHead className="pl-6">Campaign</TableHead>
                         <TableHead>Status</TableHead>
-                        <TableHead>Destinatários</TableHead>
-                        <TableHead>Aceitos pelo provedor</TableHead>
-                        <TableHead>Falhas / ignorados</TableHead>
-                        <TableHead>Data</TableHead>
+                        <TableHead>Recipients</TableHead>
+                        <TableHead>Accepted by provider</TableHead>
+                        <TableHead>Failed / skipped</TableHead>
+                        <TableHead>Date</TableHead>
                         <TableHead />
                       </TableRow>
                     </TableHeader>
@@ -476,13 +476,13 @@ export default function Dashboard(props: DashboardProps) {
                                 <Link
                                   href={`${link("/campaigns/new")}&campaign=${c.id}`}
                                 >
-                                  Editar
+                                  Edit
                                   <ArrowRight size={13} />
                                 </Link>
                               </Button>
                             ) : (
                               <span className="text-[10px] text-muted-foreground">
-                                {deliveryStats[c.id]?.queued || 0} na fila
+                                {deliveryStats[c.id]?.queued || 0} queued
                               </span>
                             )}
                           </TableCell>
@@ -493,14 +493,14 @@ export default function Dashboard(props: DashboardProps) {
                 </div>
               ) : (
                 <Empty
-                  title="Sua primeira campanha está por vir."
-                  description="Compartilhe uma novidade. Conte uma história. Comece uma conversa com seus inscritos."
+                  title="Your first campaign is ahead."
+                  description="Share an update. Tell a story. Start a conversation with your subscribers."
                   icon={Send}
                 />
               )}
               <div className="px-6 py-4 border-t border-border text-[10px] text-muted-foreground">
-                Aceito pelo provedor indica que o Resend aceitou a mensagem; a
-                entrega final depende do servidor do destinatário.
+                Accepted by provider means Resend accepted the message; final
+                delivery depends on the recipient's mail server.
               </div>
             </div>
           )}
@@ -522,12 +522,12 @@ export default function Dashboard(props: DashboardProps) {
                   </p>
                   <p className="text-xs text-muted-foreground mt-4 min-h-12 leading-6">
                     {p.description ||
-                      "Um espaço para conectar seu projeto às pessoas."}
+                      "A space to connect your project with people."}
                   </p>
                   <div className="border-t border-border mt-5 pt-4 flex gap-2">
                     <Button asChild size="sm" variant="outline">
                       <Link href={`/?project=${p.id}`}>
-                        Abrir projeto
+                        Open project
                         <ArrowUpRight size={12} />
                       </Link>
                     </Button>
@@ -541,7 +541,7 @@ export default function Dashboard(props: DashboardProps) {
                     <Plus size={18} />
                   </span>
                   <p className="text-xs text-muted-foreground mt-4">
-                    Mais um projeto. Novas conexões.
+                    Another project. New connections.
                   </p>
                   <div
                     id="add-project-trigger"
@@ -557,13 +557,13 @@ export default function Dashboard(props: DashboardProps) {
           {hasProject && path === "/settings" && (
             <div className="grid lg:grid-cols-2 gap-5">
               <section className="panel p-6">
-                <h2 className="section-title">Seu projeto</h2>
+                <h2 className="section-title">Your project</h2>
                 <dl className="mt-6 space-y-5 text-xs">
                   {[
-                    ["Nome", project.name],
-                    ["Domínio", project.domain],
-                    ["Remetente", project.from_email],
-                    ["Página pública", publicUrl],
+                    ["Name", project.name],
+                    ["Domain", project.domain],
+                    ["Sender", project.from_email],
+                    ["Public page", publicUrl],
                   ].map(([k, v]) => (
                     <div key={k} className="flex justify-between gap-3">
                       <dt className="text-muted-foreground">{k}</dt>
@@ -576,23 +576,23 @@ export default function Dashboard(props: DashboardProps) {
                 </div>
               </section>
               <section className="panel p-6">
-                <h2 className="section-title">Acesso e envio</h2>
+                <h2 className="section-title">Access and delivery</h2>
                 <div className="mt-6 space-y-6">
                   {[
                     {
                       icon: ShieldCheck,
                       title: "Google OAuth",
-                      text: "Acesso exclusivo a aleexgvieira@gmail.com, com e-mail verificado.",
+                      text: "Access restricted to the verified address aleexgvieira@gmail.com.",
                     },
                     {
                       icon: Send,
                       title: "Resend + React Email",
-                      text: "Confirmações e campanhas com fila persistente, tentativas automáticas e descadastro.",
+                      text: "Confirmations and campaigns use a persistent queue, automatic retries, and unsubscribe links.",
                     },
                     {
                       icon: Code2,
-                      title: "Markdown, MDX e componentes",
-                      text: "GFM com tabelas, listas, código e componentes React Email. MDX com variáveis, expressões e componentes em um interpretador isolado.",
+                      title: "Markdown, MDX, and components",
+                      text: "GFM with tables, lists, code, and React Email components. MDX with variables, expressions, and components in an isolated interpreter.",
                     },
                   ].map((item) => (
                     <div key={item.title} className="flex gap-3">
@@ -614,21 +614,21 @@ export default function Dashboard(props: DashboardProps) {
                 <div className="flex gap-3 items-center">
                   <Code2 size={17} />
                   <h2 className="section-title">
-                    Convide pessoas para sua newsletter
+                    Invite people to your newsletter
                   </h2>
                 </div>
                 <p className="text-xs text-muted-foreground mt-3">
-                  Adicione este link à landing page do seu projeto. O formulário
-                  e a confirmação já estão prontos na página pública.
+                  Add this link to your project's landing page. The form and
+                  confirmation flow are ready on the public page.
                 </p>
                 <div className="mt-5 flex gap-3">
-                  <code className="flex-1 text-xs bg-muted/40 border border-border rounded-lg p-4 break-all">{`<a href="${publicUrl}">Assinar newsletter</a>`}</code>
+                  <code className="flex-1 text-xs bg-muted/40 border border-border rounded-lg p-4 break-all">{`<a href="${publicUrl}">Subscribe to newsletter</a>`}</code>
                   <Button
                     variant="outline"
                     onClick={() =>
-                      copy(`<a href="${publicUrl}">Assinar newsletter</a>`)
+                      copy(`<a href="${publicUrl}">Subscribe to newsletter</a>`)
                     }
-                    aria-label="Copiar HTML"
+                    aria-label="Copy HTML"
                   >
                     {copied ? <Check size={15} /> : <Clipboard size={15} />}
                   </Button>
@@ -648,15 +648,15 @@ function Audience({ stats }: { stats: Record<string, number> }) {
     <div className="py-10">
       <div className="flex items-baseline gap-2">
         <span className="text-4xl font-semibold tracking-tight">
-          {total.toLocaleString("pt-BR")}
+          {total.toLocaleString("en-US")}
         </span>
         <span className="text-xs text-muted-foreground">
-          inscrições no total
+          total subscriptions
         </span>
       </div>
       <div
         className="flex gap-1 h-8 rounded overflow-hidden mt-6 bg-muted/50"
-        aria-label="Distribuição dos inscritos"
+        aria-label="Subscriber distribution"
       >
         {total ? (
           ["confirmed", "pending", "unsubscribed"].map((key, i) => (
@@ -675,8 +675,8 @@ function Audience({ stats }: { stats: Record<string, number> }) {
       </div>
       <div className="text-[10px] text-muted-foreground mt-3">
         {total
-          ? "Distribuição por status de inscrição"
-          : "As primeiras conexões vão aparecer aqui."}
+          ? "Distribution by subscription status"
+          : "Your first connections will appear here."}
       </div>
     </div>
   );
@@ -695,9 +695,9 @@ function SubscriberTable({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="pl-6">E-mail</TableHead>
+            <TableHead className="pl-6">Email</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead>Inscrito em</TableHead>
+            <TableHead>Subscribed on</TableHead>
             {actions && <TableHead />}
           </TableRow>
         </TableHeader>
@@ -727,7 +727,7 @@ function SubscriberTable({
                       className="text-xs text-muted-foreground"
                       onClick={() => onAction?.(s)}
                     >
-                      Descadastrar
+                      Unsubscribe
                     </Button>
                   )}
                 </TableCell>
@@ -739,8 +739,8 @@ function SubscriberTable({
     </div>
   ) : (
     <Empty
-      title="As primeiras conexões vêm aí."
-      description="Compartilhe sua página de inscrição para começar a receber novos inscritos."
+      title="Your first connections are on their way."
+      description="Share your subscription page to welcome new subscribers."
       icon={Users}
     />
   );
@@ -784,9 +784,9 @@ function Subscribers(props: DashboardProps) {
             size={14}
           />
           <Input
-            aria-label="Buscar e-mail"
+            aria-label="Search email"
             className="pl-9 h-9 w-60"
-            placeholder="Buscar por e-mail…"
+            placeholder="Search by email…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -797,16 +797,16 @@ function Subscribers(props: DashboardProps) {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Todos os status</SelectItem>
-              <SelectItem value="confirmed">Confirmados</SelectItem>
-              <SelectItem value="pending">Pendentes</SelectItem>
-              <SelectItem value="unsubscribed">Descadastrados</SelectItem>
+              <SelectItem value="all">All statuses</SelectItem>
+              <SelectItem value="confirmed">Confirmed</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="unsubscribed">Unsubscribed</SelectItem>
             </SelectContent>
           </Select>
           <Button asChild variant="outline" size="sm">
             <a href={`/api/subscribers/export?project=${project.id}`}>
               <ArrowDownToLine size={13} />
-              Exportar CSV
+              Export CSV
             </a>
           </Button>
         </div>
@@ -824,8 +824,8 @@ function Subscribers(props: DashboardProps) {
       <div className="px-6 py-4 border-t border-border flex items-center justify-between">
         <span className="text-[11px] text-muted-foreground">
           {total
-            ? `${(page - 1) * 20 + 1}–${Math.min(page * 20, total)} de ${total}`
-            : "0 inscritos"}
+            ? `${(page - 1) * 20 + 1}–${Math.min(page * 20, total)} of ${total}`
+            : "0 subscribers"}
         </span>
         <div className="flex gap-2">
           <Button
@@ -841,7 +841,7 @@ function Subscribers(props: DashboardProps) {
             }
           >
             <ChevronLeft size={13} />
-            Anterior
+            Previous
           </Button>
           <Button
             size="sm"
@@ -855,7 +855,7 @@ function Subscribers(props: DashboardProps) {
               })
             }
           >
-            Próxima
+            Next
             <ChevronRight size={13} />
           </Button>
         </div>

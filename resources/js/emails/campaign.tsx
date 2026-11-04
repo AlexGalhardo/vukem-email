@@ -11,7 +11,7 @@ import {
 } from "@react-email/components";
 export default function Campaign() {
   return (
-    <Html lang="pt-BR">
+    <Html lang="en">
       <Head />
       <Preview>{"{{.Subject}}"}</Preview>
       <Body
@@ -36,14 +36,15 @@ export default function Campaign() {
           <div>{"{{.Body}}"}</div>
           <Hr style={{ borderColor: "#eee", margin: "32px 0" }} />
           <Text style={{ fontSize: "12px", color: "#737373" }}>
-            Você recebe este e-mail porque confirmou sua inscrição em{" "}
+            You are receiving this email because you confirmed your
+            subscription to{" "}
             {"{{.Project.Name}}"}.
           </Text>
           <Link
             href="{{.UnsubscribeURL}}"
             style={{ fontSize: "12px", color: "#737373" }}
           >
-            Cancelar inscrição
+            Unsubscribe
           </Link>
         </Container>
       </Body>

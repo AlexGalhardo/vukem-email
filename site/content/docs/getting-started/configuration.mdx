@@ -1,19 +1,19 @@
 ---
-title: Configuração
-description: Variáveis essenciais para aplicação, banco, autenticação e email.
+title: Configuration
+description: Essential settings for the app, database, authentication, and email.
 ---
 
-# Configuração
+# Configuration
 
-Use `.env.example` como ponto de partida. Nunca versione `.env`, credenciais ou bancos SQLite.
+Start with `.env.example`. Never commit `.env`, credentials, or SQLite databases.
 
-| Variável | Finalidade |
+| Variable | Purpose |
 | --- | --- |
-| `APP_KEY` | Criptografia e assinaturas; compartilhe a mesma chave entre web e worker. |
-| `APP_URL` | URL canônica do painel e callback OAuth. |
-| `DATABASE_URL` | PostgreSQL em produção. |
-| `SOCIAL_GOOGLE_CLIENT_ID` / `SOCIAL_GOOGLE_CLIENT_SECRET` | Cliente OAuth Web. |
-| `MAIL_MAILER` / `RESEND_API_KEY` | Envio pelo Resend quando `MAIL_MAILER=resend`. |
-| `QUEUE_CONNECTION` | Use `database` para fila persistente. |
+| `APP_KEY` | Encryption and signatures; use the same key in web and worker. |
+| `APP_URL` | Canonical dashboard URL and OAuth callback origin. |
+| `DATABASE_URL` | PostgreSQL connection in production. |
+| `SOCIAL_GOOGLE_CLIENT_ID` / `SOCIAL_GOOGLE_CLIENT_SECRET` | Google OAuth Web client. |
+| `MAIL_MAILER` / `RESEND_API_KEY` | Resend delivery when `MAIL_MAILER=resend`. |
+| `QUEUE_CONNECTION` | Use `database` for a persistent queue. |
 
-Rotacionar `APP_KEY` exige manter chaves anteriores em `APP_PREVIOUS_KEYS` enquanto sessões e links assinados ainda forem válidos. Configure `APP_DEBUG=false` em produção.
+When rotating `APP_KEY`, keep older keys in `APP_PREVIOUS_KEYS` while existing sessions and signed links remain valid. Set `APP_DEBUG=false` in production.

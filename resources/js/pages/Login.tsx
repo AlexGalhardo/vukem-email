@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 export default function Login({ configured }: { configured: boolean }) {
   return (
     <>
-      <Head title="Entrar" />
+      <Head title="Sign in" />
       <main className="auth-page">
         <a
           href="/login"
@@ -19,15 +19,15 @@ export default function Login({ configured }: { configured: boolean }) {
           <div className="mx-auto mb-7 rounded-2xl border border-border bg-card size-16 grid place-items-center">
             <MailIcon />
           </div>
-          <p className="eyebrow mb-4">SEU WORKSPACE DE NEWSLETTERS</p>
+          <p className="eyebrow mb-4">YOUR NEWSLETTER WORKSPACE</p>
           <h1 className="text-3xl font-semibold tracking-tight">
-            Boas ideias merecem
+            Good ideas deserve
             <br />
-            chegar mais longe.
+            to go further.
           </h1>
           <p className="mt-4 text-sm text-muted-foreground leading-6">
-            Entre para criar campanhas, acompanhar sua audiência e se conectar
-            com seus inscritos.
+            Sign in to create campaigns, follow your audience, and connect
+            with your subscribers.
           </p>
           <Button
             asChild
@@ -57,26 +57,25 @@ export default function Login({ configured }: { configured: boolean }) {
                   d="M12 5.5c1.6 0 3 .5 4.1 1.6l3.1-3.2A10.5 10.5 0 0 0 12 1a11 11 0 0 0-9.8 6l3.7 2.9C6.8 7.4 9.2 5.5 12 5.5"
                 />
               </svg>
-              Continuar com Google
+              Continue with Google
             </a>
           </Button>
           <div className="text-xs text-muted-foreground flex gap-1.5 items-center justify-center mt-5">
             <LockKeyhole size={12} />
-            Acesso restrito ao administrador
+            Administrator access only
           </div>
           {!configured && (
             <p
               role="status"
               className="mt-6 text-xs text-amber-300 border border-amber-300/20 rounded-lg p-3"
             >
-              O login estará disponível após configurar as credenciais Google
-              OAuth no ambiente.
+              Sign-in will be available after Google OAuth credentials are
+              configured.
             </p>
           )}
         </section>
         <div className="absolute bottom-8 text-xs text-muted-foreground">
-          Construído com Vukem <span className="mx-2">·</span> Feito para
-          conectar.
+          Built with Vukem <span className="mx-2">·</span> Made to connect.
         </div>
       </main>
     </>

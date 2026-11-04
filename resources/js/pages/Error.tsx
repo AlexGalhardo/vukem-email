@@ -10,21 +10,21 @@ export default function ErrorPage({
 }) {
   return (
     <>
-      <Head title={`Erro ${status}`} />
+      <Head title={`Error ${status}`} />
       <main className="auth-page">
         <section className="text-center max-w-md">
           <span className="brand-mark mx-auto mb-8">
             <Send size={17} />
           </span>
-          <p className="eyebrow mb-3">ERRO {status}</p>
+          <p className="eyebrow mb-3">ERROR {status}</p>
           <h1 className="text-2xl font-semibold tracking-tight">
             {status === 403
-              ? "Este acesso não está disponível."
+              ? "This access is unavailable."
               : status === 404
-                ? "Não encontramos esta página."
+                ? "We could not find this page."
                 : status >= 500
-                  ? "Algo não saiu como esperado."
-                  : "Não foi possível continuar."}
+                  ? "Something went wrong."
+                  : "We could not continue."}
           </h1>
           <p className="text-sm text-muted-foreground mt-4 leading-6">
             {message}
@@ -32,7 +32,7 @@ export default function ErrorPage({
           <Button asChild variant="outline" className="mt-7">
             <Link href="/">
               <ArrowLeft size={14} />
-              Voltar ao início
+              Back to home
             </Link>
           </Button>
         </section>
