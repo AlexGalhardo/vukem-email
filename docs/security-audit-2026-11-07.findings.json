@@ -1,0 +1,332 @@
+[
+  {
+    "verdict": "confirmed",
+    "fingerprint": "vukem-email:ci:codeql-checkout-persists-credentials",
+    "title": "CodeQL workflow checkout keeps the GitHub token in the local git config",
+    "description": "codeql.yml checks out the repository without persist-credentials: false, unlike the other workflows. The job token stays in .git/config for later steps, including the autobuild step that runs repository code.",
+    "root_cause": "actions/checkout default persist-credentials: true.",
+    "intended_behavior": "Workflows check out with persist-credentials: false, as ci.yml, release.yml and security-audit.yml do.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": ".github/workflows/codeql.yml",
+        "line": 28,
+        "scope": "jobs.analyze",
+        "description": "Push and pull_request runs execute the checkout step."
+      },
+      {
+        "kind": "sink",
+        "file": ".github/workflows/codeql.yml",
+        "line": 28,
+        "scope": "checkout step",
+        "description": "Token is written to the workspace git config and stays readable by autobuild."
+      }
+    ],
+    "evidence": [
+      {
+        "file": ".github/workflows/codeql.yml",
+        "line": 28,
+        "description": "The checkout step has no with: block."
+      }
+    ],
+    "conditions": [
+      {
+        "kind": "environmental_dependency",
+        "description": "Needs untrusted code during autobuild; the token is limited to contents read and security-events write."
+      }
+    ],
+    "execution": {
+      "attacker_perspective": "Pull request author whose code runs in autobuild.",
+      "payloads": [
+        "none"
+      ],
+      "instructions": [
+        "Inspect the workflow: the checkout step lacks persist-credentials: false."
+      ],
+      "observed_result": "Token remains available in .git/config for subsequent steps."
+    },
+    "remediation": {
+      "strategy": "Add with: persist-credentials: false to the checkout step.",
+      "code_changes": []
+    },
+    "severity": {
+      "likelihood": {
+        "score": "low",
+        "reason": "Fork PRs get a read-only token and same-repo authors already have write access."
+      },
+      "impact": {
+        "score": "informational",
+        "reason": "Token scope is read plus security-events write."
+      },
+      "overall_severity": "informational"
+    },
+    "confidence": {
+      "score": "high",
+      "reason": "Visible in the workflow file."
+    }
+  },
+  {
+    "verdict": "needs_validation",
+    "fingerprint": "vukem-email:deploy:railway-iac-omits-webhook-and-origins",
+    "title": "Railway IaC may drop RESEND_WEBHOOK_SECRET and NEWSLETTER_ALLOWED_ORIGINS",
+    "description": "The service env map in .railway/railway.ts lists neither RESEND_WEBHOOK_SECRET nor NEWSLETTER_ALLOWED_ORIGINS. If applying the IaC removes variables it does not list, the webhook route is disabled (bounces and complaints stop suppressing addresses) and the browser CORS allowlist becomes empty.",
+    "claimed_root_cause": "Variables read by routes/web.go are absent from the declarative environment.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": ".railway/railway.ts",
+        "line": 4,
+        "scope": "defineRailway env",
+        "description": "Declared variable set."
+      },
+      {
+        "kind": "sink",
+        "file": "routes/web.go",
+        "line": 132,
+        "scope": "Web",
+        "description": "Route /webhooks/resend is registered only when RESEND_WEBHOOK_SECRET is non-empty."
+      }
+    ],
+    "evidence": [
+      {
+        "file": ".railway/railway.ts",
+        "line": 8,
+        "description": "RESEND_API_KEY uses preserve() but no entry exists for the two variables."
+      },
+      {
+        "file": "routes/web.go",
+        "line": 53,
+        "description": "NEWSLETTER_ALLOWED_ORIGINS is read at startup."
+      }
+    ],
+    "blockers": [
+      "Whether a Railway IaC apply deletes variables missing from the declaration is platform behaviour not present in the repository."
+    ],
+    "validation_plan": {
+      "local": "Read the Railway IaC documentation for variable reconciliation semantics.",
+      "deployment": "Owner compares the live service variables before and after an IaC apply in a staging environment."
+    }
+  },
+  {
+    "verdict": "rejected",
+    "fingerprint": "vukem-email:deps:deepmerge-prototype-pollution",
+    "title": "deepmerge prototype poisoning via html-to-text",
+    "description": "npm audit reports GHSA-gcqx-w48m-w2h4 in the nested @react-email/render dependency.",
+    "claimed_root_cause": "npm audit reports GHSA-gcqx-w48m-w2h4 in the nested @react-email/render dependency.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "scripts/email-renderer.tsx",
+        "line": 118,
+        "scope": "renderContent",
+        "description": "Author content enters the renderer."
+      }
+    ],
+    "evidence": [
+      {
+        "file": "scripts/email-renderer.tsx",
+        "line": 125,
+        "description": "Only static options reach html-to-text."
+      }
+    ],
+    "reason": "No attacker-controlled object reaches deepmerge, so the advisory is not reachable."
+  },
+  {
+    "verdict": "confirmed",
+    "fingerprint": "vukem-email:renderer:env-inherited-by-node",
+    "title": "Campaign renderer subprocess inherits the full server environment",
+    "description": "newsletter.Render starts Node with cmd.Env unset, so the child receives APP_KEY, RESEND_API_KEY, the Google client secret, the webhook secret and DATABASE_URL. The QuickJS sandbox keeps authored code away from them today, but any future escape or bug in the host-side Node code (React Email, Tailwind, sanitizer) would expose every production secret. This is a prerequisite weakness, not a standalone exploit.",
+    "root_cause": "exec.Cmd without Env inherits the parent environment; the renderer needs none of the application secrets.",
+    "intended_behavior": "The renderer, which handles untrusted author content, runs with a minimal allowlisted environment.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "app/controllers/newsletter.go",
+        "line": 374,
+        "scope": "campaignInput",
+        "description": "Admin save or preview calls newsletter.Render with author source."
+      },
+      {
+        "kind": "sink",
+        "file": "app/newsletter/renderer.go",
+        "line": 21,
+        "scope": "Render",
+        "description": "exec.CommandContext spawns node without cmd.Env, inheriting the process environment."
+      }
+    ],
+    "evidence": [
+      {
+        "file": "app/newsletter/renderer.go",
+        "line": 21,
+        "description": "No cmd.Env assignment; a nil Env uses the current process environment."
+      }
+    ],
+    "conditions": [
+      {
+        "kind": "authentication_level",
+        "description": "Admin session to submit content, plus an independent sandbox or Node escape."
+      }
+    ],
+    "execution": {
+      "attacker_perspective": "Admin-authored content combined with a hypothetical renderer escape.",
+      "payloads": [
+        "none"
+      ],
+      "instructions": [
+        "Start the server with RESEND_API_KEY set.",
+        "Render a campaign with node replaced by a stub that prints its environment."
+      ],
+      "observed_result": "The child environment contains every variable of the parent process."
+    },
+    "remediation": {
+      "strategy": "Set cmd.Env to an allowlist (PATH, NODE_ENV and platform essentials such as SystemRoot).",
+      "code_changes": []
+    },
+    "severity": {
+      "likelihood": {
+        "score": "low",
+        "reason": "Needs a separate escape from QuickJS or a host library bug."
+      },
+      "impact": {
+        "score": "informational",
+        "reason": "No effect alone; amplifies a hypothetical code-execution bug."
+      },
+      "overall_severity": "informational"
+    },
+    "confidence": {
+      "score": "high",
+      "reason": "Behaviour is defined by the Go standard library."
+    }
+  },
+  {
+    "verdict": "rejected",
+    "fingerprint": "vukem-email:renderer:quickjs-escape",
+    "title": "MDX sandbox escape to Node",
+    "description": "Authored JS reaches host APIs.",
+    "claimed_root_cause": "Authored JS reaches host APIs.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "scripts/email-renderer.tsx",
+        "line": 118,
+        "scope": "renderContent",
+        "description": "Author content enters the renderer."
+      }
+    ],
+    "evidence": [
+      {
+        "file": "scripts/email-renderer.tsx",
+        "line": 76,
+        "description": "hydrate rejects non-allowlisted types and unsafe props; scripts/email-renderer.test.ts covers process, require, fetch and constructor escapes."
+      }
+    ],
+    "reason": "Review of isolated-mdx.ts found no path to host objects; the import allowlist, memory and time limits hold."
+  },
+  {
+    "verdict": "rejected",
+    "fingerprint": "vukem-email:renderer:tailwind-config-injection",
+    "title": "Author-controlled Tailwind config reaches host code",
+    "description": "Admin JSON config objects flow into the react-email Tailwind compile step.",
+    "claimed_root_cause": "Admin JSON config objects flow into the react-email Tailwind compile step.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "scripts/email-renderer.tsx",
+        "line": 118,
+        "scope": "renderContent",
+        "description": "Author content enters the renderer."
+      }
+    ],
+    "evidence": [
+      {
+        "file": "scripts/email-renderer.tsx",
+        "line": 145,
+        "description": "Output passes sanitizeHtml with tag, attribute, scheme and style allowlists after rendering."
+      }
+    ],
+    "reason": "Tailwind loadModule only returns the supplied config and JSON cannot carry functions; resulting CSS is clipped by the style allowlist and the author is the sole admin, so no boundary is crossed."
+  },
+  {
+    "verdict": "confirmed",
+    "fingerprint": "vukem-email:subscribe:unbounded-confirmation-mail",
+    "title": "Public subscribe lets anyone repeat confirmation emails to any address without a lasting cap",
+    "description": "POST /subscribe/{slug} is unauthenticated. Its only limits are 10 requests per minute per client IP and a 60 second cooldown per address. There is no per-address lifetime or daily cap and no per-project cap. An attacker can keep sending project-branded confirmation emails to a third-party mailbox (including one that already unsubscribed) indefinitely, and many source addresses can exhaust the Resend sending quota and harm the sender domain reputation.",
+    "root_cause": "Subscribe resends a confirmation whenever the stored row is not confirmed and LastRequestedAt is older than 60 seconds; nothing counts confirmations sent to the address or project over a longer window.",
+    "intended_behavior": "Double opt-in must not become a way to mail-bomb third parties; confirmation volume per address and per project stays bounded.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "routes/web.go",
+        "line": 126,
+        "scope": "Web",
+        "description": "Public POST /subscribe/{slug} protected only by the per-IP limiter and the 8 KiB body limit."
+      },
+      {
+        "kind": "propagation",
+        "file": "app/controllers/newsletter.go",
+        "line": 134,
+        "scope": "NewsletterController.Subscribe",
+        "description": "Only a 60 second cooldown and the confirmed status prevent a resend; pending and unsubscribed rows are reset to pending."
+      },
+      {
+        "kind": "sink",
+        "file": "app/controllers/newsletter.go",
+        "line": 152,
+        "scope": "NewsletterController.Subscribe",
+        "description": "MailLaterTx queues a confirmation email to the attacker-chosen address."
+      }
+    ],
+    "evidence": [
+      {
+        "file": "routes/web.go",
+        "line": 91,
+        "description": "Limiter is ratelimit.NewMemory(10, time.Minute) keyed by IP only."
+      },
+      {
+        "file": "app/models/newsletter.go",
+        "line": 14,
+        "description": "Subscriber stores no counter of confirmations already sent."
+      }
+    ],
+    "conditions": [
+      {
+        "kind": "authentication_level",
+        "description": "None; the endpoint is public and Origin-less requests are accepted."
+      },
+      {
+        "kind": "third_party_dependency",
+        "description": "Impact on quota and reputation depends on the Resend plan and domain policy."
+      }
+    ],
+    "execution": {
+      "attacker_perspective": "Unauthenticated internet client choosing a victim address.",
+      "payloads": [
+        "{\"email\":\"victim@example.com\"}"
+      ],
+      "instructions": [
+        "POST the payload to /subscribe/{slug} once every 61 seconds from one IP, or for many addresses from several IPs.",
+        "Each request older than the cooldown queues one more confirmation email while the response stays 202."
+      ],
+      "observed_result": "Code-path trace: no path ever stops further sends to the same address; only the 60 second cooldown applies."
+    },
+    "remediation": {
+      "strategy": "Cap confirmation emails per address (for example 3 per 24 hours) and per project per hour, returning the same 202 body when the cap applies so enumeration stays impossible. Thresholds are a product choice, left to the owner.",
+      "code_changes": []
+    },
+    "severity": {
+      "likelihood": {
+        "score": "medium",
+        "reason": "Trivial to script."
+      },
+      "impact": {
+        "score": "low",
+        "reason": "Unsolicited mail to third parties and sender quota use; no data exposure or account effect."
+      },
+      "overall_severity": "low"
+    },
+    "confidence": {
+      "score": "high",
+      "reason": "The controlling conditional is in one function."
+    }
+  }
+]
