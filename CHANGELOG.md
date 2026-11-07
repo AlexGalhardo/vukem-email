@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Resend webhooks (`POST /webhooks/resend`) with Svix signature verification, replay window and deduplication; hard bounces and complaints suppress the address per project and delivery states `delivered`, `bounced` and `complained`.
 - RFC 8058 one-click unsubscribe: `List-Unsubscribe` and `List-Unsubscribe-Post` headers on campaign emails (Resend) and `POST /unsubscribe/one-click`.
 - CORS allowlist (`NEWSLETTER_ALLOWED_ORIGINS`) for the public `POST /subscribe/{slug}` endpoint, with preflight support, no credentials, and a documented JSON contract (`docs/subscribe-api.md`).
 - **security:** Vendor the Cloudflare security-audit skill and run it on pull requests.

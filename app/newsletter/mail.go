@@ -17,7 +17,7 @@ type Confirmation struct {
 }
 
 func (m Confirmation) Envelope() mail.Envelope {
-	return mail.Envelope{From: m.Project.FromEmail, To: []string{m.Email}, Subject: "Confirm your subscription to " + m.Project.Name}
+	return mail.Envelope{From: m.Project.FromEmail, To: []string{m.Email}, Subject: "Confirm your subscription to " + m.Project.Name, Tags: map[string]string{"project": strconv.FormatInt(m.Project.ID, 10)}}
 }
 func (m Confirmation) Content() mail.Content { return mail.React("confirmation", m) }
 

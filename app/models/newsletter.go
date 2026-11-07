@@ -38,3 +38,11 @@ type Delivery struct {
 	SubscriberID int64  `json:"subscriber_id"`
 	Status       string `json:"status"`
 }
+
+// Suppression blocks an address for one project after a hard bounce or spam complaint.
+type Suppression struct {
+	orm.Model
+	ProjectID int64  `json:"project_id"`
+	Email     string `json:"email"`
+	Reason    string `json:"reason"`
+}

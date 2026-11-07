@@ -1,0 +1,33 @@
+---
+title: Resend webhooks
+description: Delivery events, signature verification, and automatic suppression of bounced addresses.
+---
+
+# Resend webhooks
+
+`POST /webhooks/resend` receives `email.delivered`, `email.bounced` and `email.complained` events. The route exists only when `RESEND_WEBHOOK_SECRET` is set.
+
+## Setup
+
+1. In Resend, add a webhook for `https://email.hexascore.app/webhooks/resend` with the three events above.
+2. Copy its signing secret (`whsec_...`) into `RESEND_WEBHOOK_SECRET`.
+
+## Verification
+
+- The Svix signature (`svix-id`, `svix-timestamp`, `svix-signature`) is verified over the raw body with HMAC-SHA256. Missing or forged signatures get 401.
+- Timestamps more than five minutes from the server clock are rejected, which bounds replays of captured requests.
+- Event ids are remembered for 72 hours. A redelivery answers `200` with `Webhook-Duplicate: true` and changes nothing.
+- The route needs no session or CSRF token; the signature is the credential.
+
+## Effects
+
+Every campaign and confirmation email is tagged with its project (campaign emails also with the campaign and delivery id). Events map back through those tags.
+
+| Event | Effect |
+| --- | --- |
+| `email.delivered` | The delivery becomes `delivered`. |
+| `email.bounced` with `Permanent` type | Delivery `bounced`; the address is added to the project's suppression list and the subscriber becomes `suppressed`. |
+| `email.bounced` with other types | Delivery `bounced`; nothing else (soft bounces may recover). |
+| `email.complained` | Delivery `complained`; the address is suppressed. |
+
+Suppression is per project. A suppressed address never receives campaigns (the queue worker checks the list right before sending) and the public subscribe endpoint keeps answering 202 without sending a confirmation email, so the response does not reveal the state. Removing an address from the list requires deleting its row in `suppressions`.
