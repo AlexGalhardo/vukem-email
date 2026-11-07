@@ -18,7 +18,7 @@ import (
 	"time"
 )
 
-var publicPOST = []string{"POST /subscribe/{slug}"}
+var publicPOST = []string{"POST /subscribe/{slug}", "POST /unsubscribe/one-click"}
 
 func allowedOrigins(raw string) ([]string, error) {
 	var out []string
@@ -124,6 +124,8 @@ func Web(r *router.Router, app *vukem.App) error {
 	r.Get("/confirm", c.ConfirmPage).Name("confirm.show")
 	r.Post("/confirm", c.Confirm).Use(limit).Name("confirm.store")
 	r.Get("/unsubscribe", c.UnsubscribePage).Name("unsubscribe.show")
+	// No per-IP limit: mailbox providers deliver many one-click requests from shared addresses. The HMAC token is the credential.
+	r.Post("/unsubscribe/one-click", c.OneClickUnsubscribe).Name("unsubscribe.one-click")
 	r.Post("/unsubscribe", c.Unsubscribe).Use(limit).Name("unsubscribe.store")
 	return nil
 }

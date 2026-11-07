@@ -183,6 +183,22 @@ func (n *NewsletterController) Unsubscribe(c *web.Ctx) error {
 	if err != nil {
 		return err
 	}
+	return n.unsubscribe(c, in)
+}
+
+// OneClickUnsubscribe implements RFC 8058: mail providers POST
+// "List-Unsubscribe=One-Click" to the signed URL from the List-Unsubscribe header.
+func (n *NewsletterController) OneClickUnsubscribe(c *web.Ctx) error {
+	in, err := input(c)
+	if err != nil {
+		return err
+	}
+	if in["List-Unsubscribe"] != "One-Click" {
+		return errs.New(400, "Missing List-Unsubscribe=One-Click body.")
+	}
+	return n.unsubscribe(c, in)
+}
+func (n *NewsletterController) unsubscribe(c *web.Ctx, in map[string]string) error {
 	id := number(in["subscriber"])
 	key, err := n.App.DeriveKey("newsletter.unsubscribe", 32)
 	if err != nil {
