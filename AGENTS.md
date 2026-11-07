@@ -9,3 +9,5 @@
 - Change email wrappers in `resources/js/emails`, then run `npm run build:emails` and commit `resources/emails` too.
 - Use `npm run check`, `npm run build`, `go vet ./...`, and `go test -race ./...` for relevant application changes. The README explains optional browser and PostgreSQL integration checks.
 - Deploy using the Dockerfile: dynamic campaign rendering needs Node and production dependencies beside the Go executable. Never commit `.env`, SQLite files or credentials.
+- Public POST routes (`/subscribe/{slug}`, `/unsubscribe/one-click`, `/webhooks/resend`) bypass CSRF and sessions in `routes/web.go`; keep their own protection (Origin allowlist via `NEWSLETTER_ALLOWED_ORIGINS`, HMAC token, Svix signature with replay window and dedupe) and the 8 KiB body limit. Never widen CORS beyond `/subscribe/`.
+- Campaign mail goes through `newsletter.SendWithHeaders` (RFC 8058 headers; direct Resend API call because vukem mail has no header support, see `vukem-feedback.md`). Messages carry `project`, `campaign` and `delivery` tags that webhooks use to suppress addresses per project.
