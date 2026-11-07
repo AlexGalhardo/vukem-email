@@ -6,3 +6,4 @@
 - Execute campaign JavaScript only in QuickJS WebAssembly and sanitize rendered HTML.
 - Never expose subscriber addresses, OAuth tokens or credentials in public props.
 - Recheck subscription state in the queue worker before sending.
+- Apply the vendored `security-audit` skill (`.agents/skills/security-audit`, Cloudflare) during development so security issues are audited as part of the work; use guidance mode unless the task is an explicit full audit. CI runs it in `.github/workflows/security-audit.yml`.
