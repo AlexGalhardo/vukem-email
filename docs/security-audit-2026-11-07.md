@@ -61,6 +61,7 @@ The application's stated invariants hold: Google OIDC is the only login and requ
 - Location: `.railway/railway.ts:8`, `routes/web.go:53`, `routes/web.go:132`
 - Blocker: whether a Railway IaC apply deletes variables missing from the declaration is platform behaviour outside the repository. If it does, the webhook route disappears (bounces and complaints stop suppressing) and the CORS allowlist empties.
 - Owner check: compare live service variables before and after an apply in a staging environment, or add both with `preserve()` once the semantics are confirmed.
+- Status: resolved defensively. Both variables are declared with `preserve()` in `.railway/railway.ts`, which keeps the live value whatever the apply semantics are.
 
 ## Rejected after validation
 
