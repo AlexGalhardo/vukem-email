@@ -72,13 +72,20 @@ func SendWithHeaders(ctx context.Context, app *vukem.App, msg *mail.Message, hea
 	}
 	defer resp.Body.Close()
 	detail, _ := io.ReadAll(io.LimitReader(resp.Body, 4<<10))
+	return resendError(resp.StatusCode, detail)
+}
+
+// resendError maps a Resend response to nil, a retryable error, or a permanent
+// one the queue gives up on.
+func resendError(status int, detail []byte) error {
 	switch {
-	case resp.StatusCode < 300:
+	case status < 300:
 		return nil
-	case resp.StatusCode == http.StatusTooManyRequests || resp.StatusCode >= 500:
-		return fmt.Errorf("resend %d: %s", resp.StatusCode, detail)
+	// 408 and 409 (concurrent_idempotent_requests) are transient: the retry reuses the Idempotency-Key.
+	case status == http.StatusTooManyRequests || status == http.StatusRequestTimeout || status == http.StatusConflict || status >= 500:
+		return fmt.Errorf("resend %d: %s", status, detail)
 	default:
-		return fmt.Errorf("resend %d: %s: %w", resp.StatusCode, detail, errors.Join(queue.ErrPermanent))
+		return fmt.Errorf("resend %d: %s: %w", status, detail, errors.Join(queue.ErrPermanent))
 	}
 }
 
