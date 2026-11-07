@@ -33,7 +33,7 @@ The application's stated invariants hold: Google OIDC is the only login and requ
 - Location: `app/controllers/newsletter.go:134`, `app/controllers/newsletter.go:152`, `routes/web.go:91`, `routes/web.go:126`
 - Impact: any unauthenticated client can keep triggering project-branded confirmation emails to a third-party address, including one that already unsubscribed. Limits are only 10 requests per minute per IP and a 60 second cooldown per address, with no per-address or per-project cap over a longer window. Abuse costs Resend quota and sender reputation; there is no data exposure.
 - Reproduction (code path): POST `{"email":"victim@example.com"}` to `/subscribe/{slug}` every 61 seconds. The row is not confirmed and `LastRequestedAt` is older than 60 seconds, so `Subscribe` rotates the token and `MailLaterTx` queues another email, answering the same 202.
-- Fix: cap confirmations per address (for example 3 per 24 hours) and per project per hour, keeping the same 202 body. The thresholds are a product decision, so this is left as an owner decision (not implemented in phase B).
+- Fix: confirmations are capped at 3 per address per rolling 24 hours and 500 per project per hour, with the same 202 body (`subscribers.confirmations` and `confirmations_since`, migration `20261107000002_add_confirmation_caps`). Regression test: `TestConfirmationsCappedPerAddress`. Status: fixed.
 
 ### SA-002 Renderer subprocess inherits the full server environment (informational)
 

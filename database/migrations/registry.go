@@ -9,5 +9,6 @@ func All() []schema.Migration {
 		newsletter(),
 		suppressions(),
 		indexes(),
+		confirmationCaps(),
 	}
 }
