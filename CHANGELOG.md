@@ -26,6 +26,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Fixed
 
 - **security:** Run the campaign renderer subprocess with an allowlisted environment so a renderer bug cannot read `APP_KEY`, provider keys or `DATABASE_URL` (audit SA-002).
+- **security:** Stop persisting the GitHub token in the CodeQL workflow checkout (audit SA-003).
 
 ## [0.3.0] - 2026-11-04
 
