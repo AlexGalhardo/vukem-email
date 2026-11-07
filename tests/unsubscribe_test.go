@@ -94,6 +94,9 @@ func TestCampaignCarriesListUnsubscribeHeaders(t *testing.T) {
 	if post != "List-Unsubscribe=One-Click" || !strings.HasPrefix(link, "<https://news.hexascore.app/unsubscribe/one-click?subscriber=") || !strings.HasSuffix(link, ">") {
 		t.Fatalf("headers: %v", h)
 	}
+	if tags, _ := got[0]["tags"].([]any); len(tags) != 3 {
+		t.Fatalf("expected project, campaign and delivery tags: %v", got[0]["tags"])
+	}
 	if keys[0] != "newsletter-"+strconv.FormatInt(c.ID, 10)+"-"+strconv.FormatInt(s.ID, 10)+"|Bearer re_test" {
 		t.Fatalf("idempotency/auth: %s", keys[0])
 	}

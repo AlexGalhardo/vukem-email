@@ -117,7 +117,11 @@ func (n *NewsletterController) Subscribe(c *web.Ctx) error {
 	if !validEmail(email) {
 		return errs.New(422, "Enter a valid email address.")
 	}
-	if in["website"] == "" {
+	suppressed, err := orm.QueryOf[models.Suppression](n.DB).Where("project_id", "=", p.ID).Where("email", "=", email).Count(c.Context())
+	if err != nil {
+		return err
+	}
+	if in["website"] == "" && suppressed == 0 {
 		err = n.DB.Tx(c.Context(), func(tx *database.Tx) error {
 			if _, err := orm.QueryOf[models.Project](tx).Where("id", "=", p.ID).LockForUpdate().First(c.Context()); err != nil {
 				return err

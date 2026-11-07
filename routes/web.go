@@ -12,13 +12,14 @@ import (
 	"github.com/AlexGalhardo/vukem/router"
 	"github.com/AlexGalhardo/vukem/social"
 	"github.com/AlexGalhardo/vukem/web"
+	"github.com/AlexGalhardo/vukem/webhook"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
 )
 
-var publicPOST = []string{"POST /subscribe/{slug}", "POST /unsubscribe/one-click"}
+var publicPOST = []string{"POST /subscribe/{slug}", "POST /unsubscribe/one-click", "POST /webhooks/resend"}
 
 func allowedOrigins(raw string) ([]string, error) {
 	var out []string
@@ -126,6 +127,13 @@ func Web(r *router.Router, app *vukem.App) error {
 	r.Get("/unsubscribe", c.UnsubscribePage).Name("unsubscribe.show")
 	// No per-IP limit: mailbox providers deliver many one-click requests from shared addresses. The HMAC token is the credential.
 	r.Post("/unsubscribe/one-click", c.OneClickUnsubscribe).Name("unsubscribe.one-click")
+	if secret := app.Source.Get("RESEND_WEBHOOK_SECRET"); secret != "" {
+		verify, err := webhook.Standard(secret, webhook.StandardOptions{MaxBody: 256 << 10})
+		if err != nil {
+			return err
+		}
+		r.Post("/webhooks/resend", c.ResendWebhook).Use(controllers.SvixHeaders, verify, webhook.Dedupe(cache.Store(), controllers.SvixID, webhook.DedupeOptions{})).Name("webhooks.resend")
+	}
 	r.Post("/unsubscribe", c.Unsubscribe).Use(limit).Name("unsubscribe.store")
 	return nil
 }

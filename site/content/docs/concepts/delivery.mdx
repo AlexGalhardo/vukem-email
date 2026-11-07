@@ -7,7 +7,7 @@ description: Queue jobs, retries, stable IDs, and idempotency.
 
 The worker processes persistent jobs for individual recipients. It rechecks subscription status before calling the provider. Each delivery has a stable message ID and an idempotency key tied to the campaign and subscriber.
 
-States are `queued`, `accepted`, `skipped`, and `failed`. Inspect failures with `/app/app queue:failed` and retry them with `/app/app queue:retry`.
+States are `queued`, `accepted`, `skipped`, `failed`, and, after Resend webhooks, `delivered`, `bounced`, and `complained`. Inspect failures with `/app/app queue:failed` and retry them with `/app/app queue:retry`.
 
 Retries stop 23 hours after job creation, before Resend's 24-hour idempotency limit. Set `QUEUE_CONCURRENCY` according to your sending account's limits.
 

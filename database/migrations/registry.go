@@ -7,5 +7,6 @@ import "github.com/AlexGalhardo/vukem/schema"
 func All() []schema.Migration {
 	return []schema.Migration{
 		newsletter(),
+		suppressions(),
 	}
 }
