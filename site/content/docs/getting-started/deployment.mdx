@@ -3,8 +3,6 @@ title: Deployment
 description: Run the web app, worker, and PostgreSQL on Railway.
 ---
 
-# Deploy to Railway
-
 Use the root `Dockerfile`: dynamic campaigns need Node and production dependencies alongside the Go executable.
 
 1. Provision PostgreSQL and set `DATABASE_URL` on the web and worker services.
@@ -13,6 +11,6 @@ Use the root `Dockerfile`: dynamic campaigns need Node and production dependenci
 4. On worker, start `/app/app queue:work` without a public domain.
 5. Add `email.hexascore.app` to the web service and create the CNAME and ownership TXT records requested by Railway.
 
-`email.vukem.dev` serves the Next.js documentation from `site/`. The dashboard uses `https://email.hexascore.app` as `APP_URL` and `https://email.hexascore.app/auth/google/callback` as its OAuth callback. The Hexascore public subscription page is `https://email.hexascore.app/subscribe`. Other projects can use their own domains.
+`email.vukem.dev` serves the static Astro documentation built from `site/`. The dashboard uses `https://email.hexascore.app` as `APP_URL` and `https://email.hexascore.app/auth/google/callback` as its OAuth callback. The Hexascore public subscription page is `https://email.hexascore.app/subscribe`. Other projects can use their own domains.
 
 Do not use SQLite in production without a persistent volume. Migrations must finish before the new web and worker versions receive traffic.
