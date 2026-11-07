@@ -6,30 +6,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-07
+
 ### Added
 
-- Resend webhooks (`POST /webhooks/resend`) with Svix signature verification, replay window and deduplication; hard bounces and complaints suppress the address per project and delivery states `delivered`, `bounced` and `complained`.
-- RFC 8058 one-click unsubscribe: `List-Unsubscribe` and `List-Unsubscribe-Post` headers on campaign emails (Resend) and `POST /unsubscribe/one-click`.
-- CORS allowlist (`NEWSLETTER_ALLOWED_ORIGINS`) for the public `POST /subscribe/{slug}` endpoint, with preflight support, no credentials, and a documented JSON contract (`docs/subscribe-api.md`).
-- **security:** Vendor the Cloudflare security-audit skill and run it on pull requests.
+- **subscribe:** Add CORS allowlist and documented JSON contract for the public subscribe endpoint ([7b7db17](https://github.com/AlexGalhardo/vukem-email/commit/7b7db171df79fd36822b675d421d5909dd178f0a))
+- **unsubscribe:** Add RFC 8058 one-click unsubscribe headers and endpoint ([f4699bc](https://github.com/AlexGalhardo/vukem-email/commit/f4699bcb479a07b524096bf2b8a04afd6597c2f3))
+- **webhooks:** Verify Resend events and suppress hard bounces and complaints per project ([a185460](https://github.com/AlexGalhardo/vukem-email/commit/a185460222efc5a9dab68d38e98983be2d23301b))
+- **emails:** Add confirmation fallback link and end-to-end subscriber flow test ([2a63706](https://github.com/AlexGalhardo/vukem-email/commit/2a6370661562a54707d956cf580ef5f6d17d9595))
 
 ### Changed
 
-- Require vukem v0.39.0.
-- **docs:** Agent guidance covers the shared framework feedback file (`VE-` ids), the public subscribe contract, the release pattern, the Astro site and `last-updated`, and the security-audit skill.
-- Migrate the documentation site from Next.js to Astro 7.4 with the vukem.dev shell (static output served by nginx); same pages and URLs, `npm run preview` replaces `npm run start`.
-- Public form endpoints reject bodies over 8 KiB; broader Go and browser tests cover every public route, admin-only routes, edge cases, and API error shapes.
-- Dashboard subscriber counts use one grouped query instead of one per status.
-- Add indexes on deliveries (`campaign_id`, `status`) and campaigns (`project_id`, `id`) for the delivery worker and dashboard.
-- Confirmation email shows a copyable fallback link so the plain-text part reads cleanly; an end-to-end test covers subscribe, confirm, campaign, unsubscribe and resubscribe.
-- **deps:** Bump vukem to v0.38.0.
+- Group dashboard status counts and add delivery and campaign indexes ([da41753](https://github.com/AlexGalhardo/vukem-email/commit/da41753c5fb15943372d824d91fcfb2fd6e34531))
+- **site:** Migrate the documentation site from Next.js to Astro with the vukem.dev shell ([8daa20b](https://github.com/AlexGalhardo/vukem-email/commit/8daa20bb4f14dee15bcb4b11ab6547b3c776c544))
 
 ### Fixed
 
-- **site:** Doc pages are dated by the author date, so a rebase merge no longer turns the `Last updated` check red; the `.githooks/pre-push` hook refreshes `site/content/last-updated.json` before a push.
-- Public subscribe caps confirmation emails at 3 per address per 24 hours and 500 per project per hour (SA-001).
-- **security:** Run the campaign renderer subprocess with an allowlisted environment so a renderer bug cannot read `APP_KEY`, provider keys or `DATABASE_URL` (audit SA-002).
-- **security:** Stop persisting the GitHub token in the CodeQL workflow checkout (audit SA-003).
+- **delivery:** Retry transient Resend 408/409 responses ([437d2c3](https://github.com/AlexGalhardo/vukem-email/commit/437d2c35d42f93fbf3c065d1ae2ae0d461a942b5))
+- **webhooks:** Keep provider delivery events from being overwritten or dropped ([0c0dbad](https://github.com/AlexGalhardo/vukem-email/commit/0c0dbad2710a90217ecd2e238276bd2cd49c7b73))
+- **security:** Run the campaign renderer with an allowlisted environment ([260dbb8](https://github.com/AlexGalhardo/vukem-email/commit/260dbb8504430489fde97853bbaf7accbcad3313))
+- **security:** Cap confirmation emails per address and per project ([63fda1d](https://github.com/AlexGalhardo/vukem-email/commit/63fda1d6f043315cab2f8a30fa2a04bd183b21e8))
+- **deploy:** Preserve the webhook secret and allowed origins in the Railway declaration ([e21bc8f](https://github.com/AlexGalhardo/vukem-email/commit/e21bc8fcee06e5b9beb944f3c95cfaa6ff2fd24f))
+- **site:** Date doc pages by author date so rebase merges keep them valid ([991f2fc](https://github.com/AlexGalhardo/vukem-email/commit/991f2fcba54bfe55c3ebf27c6f7a2f5329e5512a))
 
 ## [0.3.0] - 2026-11-04
 
@@ -55,7 +53,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - Build multi-project newsletter manager with Vukem and React ([086a101](https://github.com/AlexGalhardo/vukem-email/commit/086a10189335995a726dc024ecddf26fd5fc11f8))
 
-[Unreleased]: https://github.com/AlexGalhardo/vukem-email/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/AlexGalhardo/vukem-email/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/AlexGalhardo/vukem-email/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/AlexGalhardo/vukem-email/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/AlexGalhardo/vukem-email/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/AlexGalhardo/vukem-email/compare/v0.1.0...v0.2.0
