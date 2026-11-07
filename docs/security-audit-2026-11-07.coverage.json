@@ -1,0 +1,627 @@
+[
+  {
+    "coverage_id": ".github%2Fworkflows%2Fcodeql.yml%23checkout::.github%2Fworkflows%2Fci.yml%23permissions::profile%2Fquick%2Fall-in-scope-subsystems::ATTACK-CLASSES.md%23Obvious%20things",
+    "canonical_refs": {
+      "surface": ".github/workflows/codeql.yml#checkout",
+      "boundary": ".github/workflows/ci.yml#permissions",
+      "subsystem": "profile/quick/all-in-scope-subsystems",
+      "attack_class": "ATTACK-CLASSES.md#Obvious things"
+    },
+    "surface": ".github/workflows/codeql.yml#checkout",
+    "boundary": ".github/workflows/ci.yml#permissions",
+    "subsystem": "profile/quick/all-in-scope-subsystems",
+    "attack_class": "ATTACK-CLASSES.md#Obvious things",
+    "starting_paths": [
+      ".github/workflows/codeql.yml",
+      ".github/workflows/ci.yml",
+      ".github/workflows/release.yml",
+      ".github/workflows/security-audit.yml",
+      ".github/workflows/pr-title.yml"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Obvious things",
+    "selected_companion_blocks": [],
+    "excluded_blocks": [],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "hunter-main",
+    "reviewed_paths": [
+      ".github/workflows/codeql.yml",
+      ".github/workflows/ci.yml",
+      ".github/workflows/release.yml",
+      ".github/workflows/security-audit.yml",
+      ".github/workflows/pr-title.yml"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-main",
+        "reviewed_paths": [
+          ".github/workflows/codeql.yml",
+          ".github/workflows/ci.yml",
+          ".github/workflows/release.yml",
+          ".github/workflows/security-audit.yml",
+          ".github/workflows/pr-title.yml"
+        ],
+        "invariant": "Workflows use least privilege, SHA-pinned actions and non-persisted credentials.",
+        "method": "source",
+        "result": "Actions pinned; permissions minimal; codeql checkout keeps credentials.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "vukem-email:ci:codeql-checkout-persists-credentials"
+    ],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "Dockerfile%23runtime::.goreleaser.yaml%23archives::profile%2Fquick%2Fall-in-scope-subsystems::ATTACK-CLASSES.md%23Obvious%20things",
+    "canonical_refs": {
+      "surface": "Dockerfile#runtime",
+      "boundary": ".goreleaser.yaml#archives",
+      "subsystem": "profile/quick/all-in-scope-subsystems",
+      "attack_class": "ATTACK-CLASSES.md#Obvious things"
+    },
+    "surface": "Dockerfile#runtime",
+    "boundary": ".goreleaser.yaml#archives",
+    "subsystem": "profile/quick/all-in-scope-subsystems",
+    "attack_class": "ATTACK-CLASSES.md#Obvious things",
+    "starting_paths": [
+      "Dockerfile",
+      ".dockerignore",
+      ".goreleaser.yaml",
+      ".railway/railway.ts"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Obvious things",
+    "selected_companion_blocks": [],
+    "excluded_blocks": [],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "hunter-main",
+    "reviewed_paths": [
+      "Dockerfile",
+      ".dockerignore",
+      ".goreleaser.yaml",
+      ".railway/railway.ts"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-main",
+        "reviewed_paths": [
+          "Dockerfile",
+          ".dockerignore",
+          ".goreleaser.yaml",
+          ".railway/railway.ts"
+        ],
+        "invariant": "Image runs unprivileged without secrets; release is signed.",
+        "method": "source",
+        "result": "USER node, .env ignored, cosign and SBOM present; Railway env map gap needs validation.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "vukem-email:deploy:railway-iac-omits-webhook-and-origins"
+    ],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "app%2Fcontrollers%2Fnewsletter.go%23Dashboard%2CExport%2CPreview::app%2Fcontrollers%2Fnewsletter.go%23PreviewDocument::profile%2Fquick%2Fall-in-scope-subsystems::ATTACK-CLASSES.md%23Injection",
+    "canonical_refs": {
+      "surface": "app/controllers/newsletter.go#Dashboard,Export,Preview",
+      "boundary": "app/controllers/newsletter.go#PreviewDocument",
+      "subsystem": "profile/quick/all-in-scope-subsystems",
+      "attack_class": "ATTACK-CLASSES.md#Injection"
+    },
+    "surface": "app/controllers/newsletter.go#Dashboard,Export,Preview",
+    "boundary": "app/controllers/newsletter.go#PreviewDocument",
+    "subsystem": "profile/quick/all-in-scope-subsystems",
+    "attack_class": "ATTACK-CLASSES.md#Injection",
+    "starting_paths": [
+      "app/controllers/newsletter.go",
+      "resources/js/components/Composer.tsx",
+      "resources/js/pages/Dashboard.tsx"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Injection",
+    "selected_companion_blocks": [],
+    "excluded_blocks": [],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "hunter-main",
+    "reviewed_paths": [
+      "app/controllers/newsletter.go",
+      "resources/js/components/Composer.tsx",
+      "resources/js/pages/Dashboard.tsx"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-main",
+        "reviewed_paths": [
+          "app/controllers/newsletter.go",
+          "resources/js/components/Composer.tsx",
+          "resources/js/pages/Dashboard.tsx"
+        ],
+        "invariant": "Queries are parameterized; CSV neutralizes formulas; preview is sandboxed with CSP.",
+        "method": "source",
+        "result": "No raw interpolation of input into SQL; CSV prefix guard; iframe sandbox and CSP sandbox.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "app%2Fcontrollers%2Fnewsletter.go%23admin%20routes::app%2Fcontrollers%2Fnewsletter.go%23Protected::profile%2Fquick%2Fall-in-scope-subsystems::ATTACK-CLASSES.md%23Access%20control",
+    "canonical_refs": {
+      "surface": "app/controllers/newsletter.go#admin routes",
+      "boundary": "app/controllers/newsletter.go#Protected",
+      "subsystem": "profile/quick/all-in-scope-subsystems",
+      "attack_class": "ATTACK-CLASSES.md#Access control"
+    },
+    "surface": "app/controllers/newsletter.go#admin routes",
+    "boundary": "app/controllers/newsletter.go#Protected",
+    "subsystem": "profile/quick/all-in-scope-subsystems",
+    "attack_class": "ATTACK-CLASSES.md#Access control",
+    "starting_paths": [
+      "routes/web.go",
+      "app/controllers/newsletter.go"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Access control",
+    "selected_companion_blocks": [],
+    "excluded_blocks": [],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "hunter-main",
+    "reviewed_paths": [
+      "routes/web.go",
+      "app/controllers/newsletter.go"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-main",
+        "reviewed_paths": [
+          "routes/web.go",
+          "app/controllers/newsletter.go"
+        ],
+        "invariant": "Every dashboard and /api route sits behind Protected and Google OIDC with verified owner email.",
+        "method": "source",
+        "result": "All admin routes wrapped; callback checks EmailVerified and owner address; tests cover it.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "app%2Fjobs%2Fdelivery.go%23deliver::app%2Fnewsletter%2Fsend.go%23SendWithHeaders::profile%2Fquick%2Fall-in-scope-subsystems::ATTACK-CLASSES.md%23Business%20logic",
+    "canonical_refs": {
+      "surface": "app/jobs/delivery.go#deliver",
+      "boundary": "app/newsletter/send.go#SendWithHeaders",
+      "subsystem": "profile/quick/all-in-scope-subsystems",
+      "attack_class": "ATTACK-CLASSES.md#Business logic"
+    },
+    "surface": "app/jobs/delivery.go#deliver",
+    "boundary": "app/newsletter/send.go#SendWithHeaders",
+    "subsystem": "profile/quick/all-in-scope-subsystems",
+    "attack_class": "ATTACK-CLASSES.md#Business logic",
+    "starting_paths": [
+      "app/jobs/delivery.go",
+      "app/newsletter/send.go"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Business logic",
+    "selected_companion_blocks": [],
+    "excluded_blocks": [],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "hunter-main",
+    "reviewed_paths": [
+      "app/jobs/delivery.go",
+      "app/newsletter/send.go"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-main",
+        "reviewed_paths": [
+          "app/jobs/delivery.go",
+          "app/newsletter/send.go"
+        ],
+        "invariant": "Delivery rechecks status and suppression; idempotency key stable; provider errors classified.",
+        "method": "source",
+        "result": "Recheck before send, stable ids, 23h window honoured.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "app%2Fnewsletter%2Frenderer.go%23Render::scripts%2Fisolated-mdx.ts%23isolatedMdx::profile%2Fquick%2Fall-in-scope-subsystems::ATTACK-CLASSES.md%23Injection",
+    "canonical_refs": {
+      "surface": "app/newsletter/renderer.go#Render",
+      "boundary": "scripts/isolated-mdx.ts#isolatedMdx",
+      "subsystem": "profile/quick/all-in-scope-subsystems",
+      "attack_class": "ATTACK-CLASSES.md#Injection"
+    },
+    "surface": "app/newsletter/renderer.go#Render",
+    "boundary": "scripts/isolated-mdx.ts#isolatedMdx",
+    "subsystem": "profile/quick/all-in-scope-subsystems",
+    "attack_class": "ATTACK-CLASSES.md#Injection",
+    "starting_paths": [
+      "app/newsletter/renderer.go",
+      "scripts/isolated-mdx.ts",
+      "scripts/email-renderer.tsx",
+      "scripts/render-email.tsx"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Injection",
+    "selected_companion_blocks": [],
+    "excluded_blocks": [],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "hunter-main",
+    "reviewed_paths": [
+      "app/newsletter/renderer.go",
+      "scripts/isolated-mdx.ts",
+      "scripts/email-renderer.tsx",
+      "scripts/render-email.tsx"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-main",
+        "reviewed_paths": [
+          "app/newsletter/renderer.go",
+          "scripts/isolated-mdx.ts",
+          "scripts/email-renderer.tsx",
+          "scripts/render-email.tsx"
+        ],
+        "invariant": "Author JS runs only in QuickJS; tree validated and HTML sanitized.",
+        "method": "source",
+        "result": "No sandbox escape or sanitizer bypass found; subprocess environment inheritance noted.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "vukem-email:renderer:env-inherited-by-node"
+    ],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "database%2Fmigrations%2Fnewsletter.go%23schema::database%2Fmigrations%2Fregistry.go%23All::profile%2Fquick%2Fall-in-scope-subsystems::ATTACK-CLASSES.md%23Resource%20and%20file%20handling",
+    "canonical_refs": {
+      "surface": "database/migrations/newsletter.go#schema",
+      "boundary": "database/migrations/registry.go#All",
+      "subsystem": "profile/quick/all-in-scope-subsystems",
+      "attack_class": "ATTACK-CLASSES.md#Resource and file handling"
+    },
+    "surface": "database/migrations/newsletter.go#schema",
+    "boundary": "database/migrations/registry.go#All",
+    "subsystem": "profile/quick/all-in-scope-subsystems",
+    "attack_class": "ATTACK-CLASSES.md#Resource and file handling",
+    "starting_paths": [
+      "database/migrations/newsletter.go",
+      "database/migrations/suppressions.go",
+      "database/migrations/indexes.go"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Resource and file handling",
+    "selected_companion_blocks": [],
+    "excluded_blocks": [],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "hunter-main",
+    "reviewed_paths": [
+      "database/migrations/newsletter.go",
+      "database/migrations/suppressions.go",
+      "database/migrations/indexes.go"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-main",
+        "reviewed_paths": [
+          "database/migrations/newsletter.go",
+          "database/migrations/suppressions.go",
+          "database/migrations/indexes.go"
+        ],
+        "invariant": "Uniqueness and foreign keys enforce project isolation.",
+        "method": "source",
+        "result": "Unique project/email indexes and constrained foreign keys present.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "routes%2Fweb.go%23POST%20%2Fconfirm::app%2Fnewsletter%2Fmail.go%23Hash::profile%2Fquick%2Fall-in-scope-subsystems::ATTACK-CLASSES.md%23Cryptography%20and%20secrets",
+    "canonical_refs": {
+      "surface": "routes/web.go#POST /confirm",
+      "boundary": "app/newsletter/mail.go#Hash",
+      "subsystem": "profile/quick/all-in-scope-subsystems",
+      "attack_class": "ATTACK-CLASSES.md#Cryptography and secrets"
+    },
+    "surface": "routes/web.go#POST /confirm",
+    "boundary": "app/newsletter/mail.go#Hash",
+    "subsystem": "profile/quick/all-in-scope-subsystems",
+    "attack_class": "ATTACK-CLASSES.md#Cryptography and secrets",
+    "starting_paths": [
+      "routes/web.go",
+      "app/controllers/newsletter.go",
+      "app/newsletter/mail.go"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Cryptography and secrets",
+    "selected_companion_blocks": [],
+    "excluded_blocks": [],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "hunter-main",
+    "reviewed_paths": [
+      "routes/web.go",
+      "app/controllers/newsletter.go",
+      "app/newsletter/mail.go"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-main",
+        "reviewed_paths": [
+          "routes/web.go",
+          "app/controllers/newsletter.go",
+          "app/newsletter/mail.go"
+        ],
+        "invariant": "Confirmation tokens are high entropy, hashed, single use and expiring.",
+        "method": "source",
+        "result": "rand.Text 128-bit token, sha256 lookup, status and expiry checked, cleared on use.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "routes%2Fweb.go%23POST%20%2Fsubscribe%2F%7Bslug%7D::app%2Fcontrollers%2Fnewsletter.go%23Subscribe::profile%2Fquick%2Fall-in-scope-subsystems::ATTACK-CLASSES.md%23Business%20logic",
+    "canonical_refs": {
+      "surface": "routes/web.go#POST /subscribe/{slug}",
+      "boundary": "app/controllers/newsletter.go#Subscribe",
+      "subsystem": "profile/quick/all-in-scope-subsystems",
+      "attack_class": "ATTACK-CLASSES.md#Business logic"
+    },
+    "surface": "routes/web.go#POST /subscribe/{slug}",
+    "boundary": "app/controllers/newsletter.go#Subscribe",
+    "subsystem": "profile/quick/all-in-scope-subsystems",
+    "attack_class": "ATTACK-CLASSES.md#Business logic",
+    "starting_paths": [
+      "routes/web.go",
+      "app/controllers/newsletter.go",
+      "app/models/newsletter.go"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Business logic",
+    "selected_companion_blocks": [],
+    "excluded_blocks": [],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "hunter-main",
+    "reviewed_paths": [
+      "routes/web.go",
+      "app/controllers/newsletter.go",
+      "app/models/newsletter.go"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-main",
+        "reviewed_paths": [
+          "routes/web.go",
+          "app/controllers/newsletter.go",
+          "app/models/newsletter.go"
+        ],
+        "invariant": "Confirmation volume per address and project is bounded.",
+        "method": "source",
+        "result": "Only a 60 second cooldown exists; unbounded repetition confirmed.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "vukem-email:subscribe:unbounded-confirmation-mail"
+    ],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "routes%2Fweb.go%23POST%20%2Fsubscribe%2F%7Bslug%7D::app%2Fcontrollers%2Fnewsletter.go%23originAllowed::profile%2Fquick%2Fall-in-scope-subsystems::ATTACK-CLASSES.md%23Access%20control",
+    "canonical_refs": {
+      "surface": "routes/web.go#POST /subscribe/{slug}",
+      "boundary": "app/controllers/newsletter.go#originAllowed",
+      "subsystem": "profile/quick/all-in-scope-subsystems",
+      "attack_class": "ATTACK-CLASSES.md#Access control"
+    },
+    "surface": "routes/web.go#POST /subscribe/{slug}",
+    "boundary": "app/controllers/newsletter.go#originAllowed",
+    "subsystem": "profile/quick/all-in-scope-subsystems",
+    "attack_class": "ATTACK-CLASSES.md#Access control",
+    "starting_paths": [
+      "routes/web.go",
+      "app/controllers/newsletter.go"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Access control",
+    "selected_companion_blocks": [],
+    "excluded_blocks": [],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "hunter-main",
+    "reviewed_paths": [
+      "routes/web.go",
+      "app/controllers/newsletter.go"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-main",
+        "reviewed_paths": [
+          "routes/web.go",
+          "app/controllers/newsletter.go"
+        ],
+        "invariant": "Cross-origin browsers are limited to the allowlist; Origin-less callers remain public by design.",
+        "method": "source",
+        "result": "Origin allowlist and CORS prefix scope hold.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "routes%2Fweb.go%23POST%20%2Funsubscribe%2Fone-click::app%2Fnewsletter%2Fmail.go%23UnsubscribeToken::profile%2Fquick%2Fall-in-scope-subsystems::ATTACK-CLASSES.md%23Cryptography%20and%20secrets",
+    "canonical_refs": {
+      "surface": "routes/web.go#POST /unsubscribe/one-click",
+      "boundary": "app/newsletter/mail.go#UnsubscribeToken",
+      "subsystem": "profile/quick/all-in-scope-subsystems",
+      "attack_class": "ATTACK-CLASSES.md#Cryptography and secrets"
+    },
+    "surface": "routes/web.go#POST /unsubscribe/one-click",
+    "boundary": "app/newsletter/mail.go#UnsubscribeToken",
+    "subsystem": "profile/quick/all-in-scope-subsystems",
+    "attack_class": "ATTACK-CLASSES.md#Cryptography and secrets",
+    "starting_paths": [
+      "routes/web.go",
+      "app/controllers/newsletter.go",
+      "app/newsletter/mail.go"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Cryptography and secrets",
+    "selected_companion_blocks": [],
+    "excluded_blocks": [],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "hunter-main",
+    "reviewed_paths": [
+      "routes/web.go",
+      "app/controllers/newsletter.go",
+      "app/newsletter/mail.go"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-main",
+        "reviewed_paths": [
+          "routes/web.go",
+          "app/controllers/newsletter.go",
+          "app/newsletter/mail.go"
+        ],
+        "invariant": "Unsubscribe requires a valid HMAC bound to the subscriber id; GET never changes state.",
+        "method": "source",
+        "result": "hmac.Equal over current and previous keys; GET pages only render.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "routes%2Fweb.go%23POST%20%2Fwebhooks%2Fresend::app%2Fcontrollers%2Fwebhooks.go%23ResendWebhook::profile%2Fquick%2Fall-in-scope-subsystems::ATTACK-CLASSES.md%23Access%20control",
+    "canonical_refs": {
+      "surface": "routes/web.go#POST /webhooks/resend",
+      "boundary": "app/controllers/webhooks.go#ResendWebhook",
+      "subsystem": "profile/quick/all-in-scope-subsystems",
+      "attack_class": "ATTACK-CLASSES.md#Access control"
+    },
+    "surface": "routes/web.go#POST /webhooks/resend",
+    "boundary": "app/controllers/webhooks.go#ResendWebhook",
+    "subsystem": "profile/quick/all-in-scope-subsystems",
+    "attack_class": "ATTACK-CLASSES.md#Access control",
+    "starting_paths": [
+      "routes/web.go",
+      "app/controllers/webhooks.go"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Access control",
+    "selected_companion_blocks": [],
+    "excluded_blocks": [],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "hunter-main",
+    "reviewed_paths": [
+      "routes/web.go",
+      "app/controllers/webhooks.go"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-main",
+        "reviewed_paths": [
+          "routes/web.go",
+          "app/controllers/webhooks.go"
+        ],
+        "invariant": "Webhook is signature verified, replay windowed and deduplicated; fails closed without secret.",
+        "method": "source",
+        "result": "Route registered only with a secret; verify and dedupe middleware precede the handler.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "site%2Fsrc%2Fpages%2Fdocs%2F%5B...slug%5D.astro%23static%20docs::site%2Fnginx.conf.template%23server::profile%2Fquick%2Fall-in-scope-subsystems::ATTACK-CLASSES.md%23Feature%20abuse%20and%20data%20leakage",
+    "canonical_refs": {
+      "surface": "site/src/pages/docs/[...slug].astro#static docs",
+      "boundary": "site/nginx.conf.template#server",
+      "subsystem": "profile/quick/all-in-scope-subsystems",
+      "attack_class": "ATTACK-CLASSES.md#Feature abuse and data leakage"
+    },
+    "surface": "site/src/pages/docs/[...slug].astro#static docs",
+    "boundary": "site/nginx.conf.template#server",
+    "subsystem": "profile/quick/all-in-scope-subsystems",
+    "attack_class": "ATTACK-CLASSES.md#Feature abuse and data leakage",
+    "starting_paths": [
+      "site/src/pages/docs/[...slug].astro",
+      "site/lib/mdx.tsx",
+      "site/components/mdx/code-block.tsx",
+      "site/nginx.conf.template",
+      "site/Dockerfile"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Feature abuse and data leakage",
+    "selected_companion_blocks": [],
+    "excluded_blocks": [],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "hunter-main",
+    "reviewed_paths": [
+      "site/src/pages/docs/[...slug].astro",
+      "site/lib/mdx.tsx",
+      "site/components/mdx/code-block.tsx",
+      "site/nginx.conf.template",
+      "site/Dockerfile"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-main",
+        "reviewed_paths": [
+          "site/src/pages/docs/[...slug].astro",
+          "site/lib/mdx.tsx",
+          "site/components/mdx/code-block.tsx",
+          "site/nginx.conf.template",
+          "site/Dockerfile"
+        ],
+        "invariant": "Static site renders trusted repo content; headers set.",
+        "method": "source",
+        "result": "Content is repository authored; shiki output only; no secrets or dynamic input.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": []
+  }
+]
