@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- Public form endpoints reject bodies over 8 KiB; broader Go and browser tests cover every public route, admin-only routes, edge cases, and API error shapes.
 - Dashboard subscriber counts use one grouped query instead of one per status.
 - Add indexes on deliveries (`campaign_id`, `status`) and campaigns (`project_id`, `id`) for the delivery worker and dashboard.
 - Confirmation email shows a copyable fallback link so the plain-text part reads cleanly; an end-to-end test covers subscribe, confirm, campaign, unsubscribe and resubscribe.

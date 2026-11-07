@@ -61,9 +61,7 @@ try {
       name: "Ready for the inbox?",
     }),
   ).toBeVisible();
-  await page
-    .getByRole("button", { name: "Confirm and send campaign" })
-    .click();
+  await page.getByRole("button", { name: "Confirm and send campaign" }).click();
   await expect(
     page.getByRole("heading", { name: "Conversations that connect." }),
   ).toBeVisible();
@@ -105,6 +103,35 @@ try {
     path: join(tmpdir(), "vukem-email-subscribe-mobile.png"),
     fullPage: true,
   });
+  // Every link and button on the public pages.
+  await publicPage.goto(root + "/login");
+  await expect(
+    publicPage.getByRole("link", { name: "Continue with Google" }),
+  ).toHaveAttribute("href", "/auth/google/redirect");
+  await publicPage.goto(root + "/confirm?token=" + "x".repeat(30));
+  await expect(
+    publicPage.getByRole("heading", { name: "Confirm your subscription." }),
+  ).toBeVisible();
+  await publicPage.getByRole("button", { name: "Confirm my email" }).click();
+  await expect(
+    publicPage.getByText(/Invalid, used, or expired link/),
+  ).toBeVisible();
+  await publicPage.goto(root + "/confirm");
+  await expect(
+    publicPage.getByRole("button", { name: "Confirm my email" }),
+  ).toBeDisabled();
+  await publicPage.goto(
+    root + "/unsubscribe?subscriber=1&token=" + "a".repeat(64),
+  );
+  await expect(
+    publicPage.getByRole("heading", { name: "We will miss you." }),
+  ).toBeVisible();
+  await publicPage.getByRole("button", { name: "Unsubscribe" }).click();
+  await expect(
+    publicPage.getByRole("button", { name: "Unsubscribe" }),
+  ).toBeVisible();
+  await publicPage.goto(root + "/subscribe/does-not-exist");
+  await expect(publicPage.getByText(/not found/i).first()).toBeVisible();
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(root + "/");
   await expect(
@@ -118,7 +145,7 @@ try {
     throw new Error("Dashboard overflows mobile viewport");
   if (errors.length) throw new Error(errors.join("\n"));
   console.log(
-    "Browser smoke passed: dashboard, subscriber search, editor, preview, campaign send, projects, public subscription and mobile.",
+    "Browser smoke passed: dashboard, subscriber search, editor, preview, campaign send, projects, public subscription, public confirm/unsubscribe pages and mobile.",
   );
   await guest.close();
 } finally {

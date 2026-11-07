@@ -86,6 +86,8 @@ func Web(r *router.Router, app *vukem.App) error {
 		return err
 	}
 	s.States = cache.Store()
+	// Public forms carry one short field; the framework default is 10 MiB.
+	publicBody := middleware.BodyLimit(8 << 10)
 	limit := ratelimit.Middleware(ratelimit.NewMemory(10, time.Minute), ratelimit.ByIP)
 	r.Get("/login", func(c *web.Ctx) error {
 		return inertia.Render(c, "Login", inertia.Props{"configured": app.Source.Get("SOCIAL_GOOGLE_CLIENT_ID") != ""})
@@ -121,12 +123,12 @@ func Web(r *router.Router, app *vukem.App) error {
 	r.Get("/api/subscribers/export", controllers.Protected(c.Export)).Name("subscribers.export")
 	r.Get("/subscribe", c.Landing).Name("subscribe.host")
 	r.Get("/subscribe/{slug}", c.Landing).Name("subscribe.show")
-	r.Post("/subscribe/{slug}", c.Subscribe).Use(limit).Name("subscribe.store")
+	r.Post("/subscribe/{slug}", c.Subscribe).Use(limit, publicBody).Name("subscribe.store")
 	r.Get("/confirm", c.ConfirmPage).Name("confirm.show")
-	r.Post("/confirm", c.Confirm).Use(limit).Name("confirm.store")
+	r.Post("/confirm", c.Confirm).Use(limit, publicBody).Name("confirm.store")
 	r.Get("/unsubscribe", c.UnsubscribePage).Name("unsubscribe.show")
 	// No per-IP limit: mailbox providers deliver many one-click requests from shared addresses. The HMAC token is the credential.
-	r.Post("/unsubscribe/one-click", c.OneClickUnsubscribe).Name("unsubscribe.one-click")
+	r.Post("/unsubscribe/one-click", c.OneClickUnsubscribe).Use(publicBody).Name("unsubscribe.one-click")
 	if secret := app.Source.Get("RESEND_WEBHOOK_SECRET"); secret != "" {
 		verify, err := webhook.Standard(secret, webhook.StandardOptions{MaxBody: 256 << 10})
 		if err != nil {
@@ -134,6 +136,6 @@ func Web(r *router.Router, app *vukem.App) error {
 		}
 		r.Post("/webhooks/resend", c.ResendWebhook).Use(controllers.SvixHeaders, verify, webhook.Dedupe(cache.Store(), controllers.SvixID, webhook.DedupeOptions{})).Name("webhooks.resend")
 	}
-	r.Post("/unsubscribe", c.Unsubscribe).Use(limit).Name("unsubscribe.store")
+	r.Post("/unsubscribe", c.Unsubscribe).Use(limit, publicBody).Name("unsubscribe.store")
 	return nil
 }
