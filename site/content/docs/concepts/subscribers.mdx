@@ -3,8 +3,6 @@ title: Subscribers
 description: Sign-up, confirmation, filters, and unsubscribe.
 ---
 
-# Subscribers
-
 New subscriptions start as pending. The system sends a confirmation email; only an explicit action by the recipient confirms the subscription. Random tokens are stored as hashes, expire after 24 hours, and work only once.
 
 Signed unsubscribe links require no login. Opening a link with GET shows a page without canceling the subscription. Confirmation and cancellation require a later action so email scanners cannot change subscription status.

@@ -3,8 +3,6 @@ title: Security
 description: Authentication, subscription, and rendering boundaries.
 ---
 
-# Security
-
 Administrative access requires Google OIDC and a verified email address. Public data never includes subscriber addresses, confirmation hashes, OAuth tokens, or credentials. Administrative queries are scoped to the active project.
 
 Double opt-in uses hashed, expiring, single-use tokens. Unsubscribe links are signed. GET requests cannot confirm or cancel subscriptions. The queue checks status before every delivery.
