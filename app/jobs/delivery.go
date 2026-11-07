@@ -103,6 +103,6 @@ func deliver(app *vukem.App, ctx context.Context, job SendDelivery) (result erro
 		}
 		return err
 	}
-	_, err = orm.QueryOf[models.Delivery](db).Where("id", "=", d.ID).Update(ctx, orm.Set{"status": "accepted"})
+	_, err = orm.QueryOf[models.Delivery](db).Where("id", "=", d.ID).Where("status", "=", "queued").Update(ctx, orm.Set{"status": "accepted"})
 	return err
 }

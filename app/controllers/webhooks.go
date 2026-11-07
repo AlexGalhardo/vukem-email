@@ -52,7 +52,7 @@ func (n *NewsletterController) ResendWebhook(c *web.Ctx) error {
 	}
 	ctx := c.Context()
 	if id, err := strconv.ParseInt(ev.Data.Tags["delivery"], 10, 64); err == nil {
-		if _, err := orm.QueryOf[models.Delivery](n.DB).Where("id", "=", id).WhereIn("status", "accepted", "delivered").Update(ctx, orm.Set{"status": status}); err != nil {
+		if _, err := orm.QueryOf[models.Delivery](n.DB).Where("id", "=", id).WhereIn("status", "queued", "accepted", "delivered").Update(ctx, orm.Set{"status": status}); err != nil {
 			return err
 		}
 	}
