@@ -15,6 +15,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- Dashboard subscriber counts use one grouped query instead of one per status.
+- Add indexes on deliveries (`campaign_id`, `status`) and campaigns (`project_id`, `id`) for the delivery worker and dashboard.
 - Confirmation email shows a copyable fallback link so the plain-text part reads cleanly; an end-to-end test covers subscribe, confirm, campaign, unsubscribe and resubscribe.
 - **deps:** Bump vukem to v0.38.0.
 

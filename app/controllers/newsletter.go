@@ -286,14 +286,26 @@ func (n *NewsletterController) Dashboard(c *web.Ctx) error {
 	if id != 0 && p.ID == 0 {
 		return errs.ErrNotFound
 	}
-	stats := map[string]int64{}
-	for _, status := range []string{"pending", "confirmed", "unsubscribed"} {
-		count, err := orm.QueryOf[models.Subscriber](n.DB).Where("project_id", "=", p.ID).Where("status", "=", status).Count(ctx)
-		if err != nil {
+	stats := map[string]int64{"pending": 0, "confirmed": 0, "unsubscribed": 0, "suppressed": 0}
+	// One grouped query replaces one count per status.
+	statusRows, err := n.DB.QueryContext(ctx, "SELECT status, COUNT(*) FROM subscribers WHERE project_id = "+n.DB.Dialect().Placeholder(1)+" GROUP BY status", p.ID)
+	if err != nil {
+		return err
+	}
+	for statusRows.Next() {
+		var status string
+		var count int64
+		if err := statusRows.Scan(&status, &count); err != nil {
+			statusRows.Close()
 			return err
 		}
 		stats[status] = count
 	}
+	if err := statusRows.Err(); err != nil {
+		statusRows.Close()
+		return err
+	}
+	statusRows.Close()
 	q := orm.QueryOf[models.Subscriber](n.DB).Where("project_id", "=", p.ID)
 	if search := c.Query("q"); search != "" {
 		q = q.Where("email", "LIKE", "%"+search+"%")

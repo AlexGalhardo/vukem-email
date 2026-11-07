@@ -8,5 +8,6 @@ func All() []schema.Migration {
 	return []schema.Migration{
 		newsletter(),
 		suppressions(),
+		indexes(),
 	}
 }
