@@ -10,3 +10,5 @@ New subscriptions start as pending. The system sends a confirmation email; only 
 Signed unsubscribe links require no login. Opening a link with GET shows a page without canceling the subscription. Confirmation and cancellation require a later action so email scanners cannot change subscription status.
 
 The dashboard provides search, filters, pagination, administrative unsubscribe, and CSV export per project. The delivery queue rechecks subscriber status immediately before sending.
+
+Every email is sent with an HTML and a plain-text part (derived from the HTML), a hidden preheader, and an unsubscribe link in the footer. After unsubscribing, the same address can subscribe again: it goes through a new double opt-in with a fresh token, and only then receives campaigns.

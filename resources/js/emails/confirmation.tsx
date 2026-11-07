@@ -8,6 +8,7 @@ import {
   Hr,
   Html,
   Preview,
+  Section,
   Text,
 } from "@react-email/components";
 export default function Confirmation() {
@@ -35,21 +36,31 @@ export default function Confirmation() {
           </Text>
           <Heading style={{ fontSize: "28px" }}>One more step.</Heading>
           <Text style={{ color: "#525252", lineHeight: "26px" }}>
-            You are one click away from updates from{" "}
-            {"{{.Project.Name}}"}. Confirm that this email belongs to you to
-            join the list.
+            You are one click away from updates from {"{{.Project.Name}}"}.
+            Confirm that this email belongs to you to join the list.
           </Text>
-          <Button
-            href="{{.URL}}"
+          <Section style={{ margin: "24px 0" }}>
+            <Button
+              href="{{.URL}}"
+              style={{
+                backgroundColor: "#171717",
+                color: "#fff",
+                padding: "14px 24px",
+                borderRadius: "6px",
+              }}
+            >
+              Confirm my subscription →
+            </Button>
+          </Section>
+          <Text
             style={{
-              backgroundColor: "#171717",
-              color: "#fff",
-              padding: "14px 24px",
-              borderRadius: "6px",
+              fontSize: "12px",
+              color: "#737373",
+              wordBreak: "break-all",
             }}
           >
-            Confirm my subscription →
-          </Button>
+            Button not working? Copy this link into your browser: {"{{.URL}}"}
+          </Text>
           <Hr style={{ borderColor: "#eee", margin: "32px 0" }} />
           <Text style={{ fontSize: "12px", color: "#737373" }}>
             This link expires in 24 hours. If you did not request this

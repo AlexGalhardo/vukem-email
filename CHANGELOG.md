@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- Confirmation email shows a copyable fallback link so the plain-text part reads cleanly; an end-to-end test covers subscribe, confirm, campaign, unsubscribe and resubscribe.
 - **deps:** Bump vukem to v0.38.0.
 
 ## [0.3.0] - 2026-11-04
