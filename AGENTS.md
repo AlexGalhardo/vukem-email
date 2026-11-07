@@ -1,6 +1,6 @@
 # Vukem Email
 
-- Stack: Vukem v0.37, Go, Inertia v3, React, shadcn/ui. PostgreSQL in production; SQLite in tests/local development.
+- Stack: Vukem v0.39, Go, Inertia v3, React, shadcn/ui. PostgreSQL in production; SQLite in tests/local development.
 - Keep production authentication exclusively Google OIDC with verified `aleexgvieira@gmail.com`. Never add a development login endpoint or an authentication bypass to production routes. Browser fixtures live only in `_test.go` files.
 - Preserve double opt-in, hashed single-use confirmation tokens, signed unsubscribe links, and project isolation. GET requests must not confirm or cancel subscriptions.
 - Campaign JS executes only in QuickJS WebAssembly (`scripts/isolated-mdx.ts`). Never evaluate author code in Node, expose host callbacks or expand its imports to arbitrary server modules. Validate the serialized tree and sanitize the rendered HTML.
