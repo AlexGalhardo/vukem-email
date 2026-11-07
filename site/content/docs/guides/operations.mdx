@@ -3,8 +3,6 @@ title: Operations
 description: Migrations, healthchecks, verification, and diagnostics.
 ---
 
-# Operations
-
 The web service exposes `/up` for healthchecks. Run `/app/app migrate` before releasing new versions. Use a separate queue worker with the same application and database settings.
 
 ```bash
@@ -14,4 +12,8 @@ go vet ./...
 go test -race ./...
 ```
 
-The root README covers local setup. Do not run migrations alongside an incompatible worker version. Monitor delivery, bounce, and complaint events in Resend until webhook ingestion is available.
+The root README covers local setup. Do not run migrations alongside an incompatible worker version. Configure the Resend webhook (see Resend webhooks) so bounces and complaints suppress addresses automatically.
+
+## Caching
+
+Hashed build assets under `/build/assets/` are served `public, max-age=31536000, immutable`. HTML pages are not publicly cacheable because each response carries a CSP nonce. Indexes cover subscribers by project, status and email, deliveries by campaign and status, and campaigns by project. `RUN_PERF_TESTS=1 go test ./tests -run DashboardPerformance -v` times the dashboard against 30,000 subscribers.

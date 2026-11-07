@@ -1,0 +1,28 @@
+import type { APIRoute } from "astro";
+import { getAllDocs, getNavGroups } from "@/lib/content";
+import { site } from "@/lib/site";
+
+export const prerender = true;
+
+export const GET: APIRoute = () => {
+  const docs = new Map(getAllDocs().map((d) => [d.href, d]));
+  const lines = [
+    `# ${site.name}`,
+    "",
+    `> ${site.tagline} Vukem Email is a self-hosted newsletter service built on the Vukem Go framework.`,
+    "",
+    `Full documentation in one file: ${site.url}/llms-full.txt`,
+    "",
+  ];
+
+  for (const group of getNavGroups()) {
+    lines.push(`## ${group.title}`, "");
+    for (const item of group.items) {
+      const doc = docs.get(item.href);
+      lines.push(`- [${item.title}](${site.url}${item.href}/): ${doc?.description ?? ""}`);
+    }
+    lines.push("");
+  }
+
+  return new Response(lines.join("\n"), { headers: { "Content-Type": "text/plain; charset=utf-8" } });
+};

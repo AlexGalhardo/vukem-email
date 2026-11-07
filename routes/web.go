@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"fmt"
 	vukem "github.com/AlexGalhardo/vukem"
 	"github.com/AlexGalhardo/vukem-email/app/controllers"
 	"github.com/AlexGalhardo/vukem-email/resources"
@@ -11,14 +12,57 @@ import (
 	"github.com/AlexGalhardo/vukem/router"
 	"github.com/AlexGalhardo/vukem/social"
 	"github.com/AlexGalhardo/vukem/web"
+	"github.com/AlexGalhardo/vukem/webhook"
+	"net/http"
+	"net/url"
 	"strings"
 	"time"
 )
 
+var publicPOST = []string{"POST /subscribe/{slug}", "POST /unsubscribe/one-click", "POST /webhooks/resend"}
+
+func allowedOrigins(raw string) ([]string, error) {
+	var out []string
+	for o := range strings.SplitSeq(raw, ",") {
+		if o = strings.TrimSpace(o); o == "" {
+			continue
+		}
+		u, err := url.Parse(o)
+		if err != nil || u.Scheme == "" || u.Host == "" || u.Path != "" || u.RawQuery != "" || o == "*" {
+			return nil, fmt.Errorf("NEWSLETTER_ALLOWED_ORIGINS: %q must be an exact origin such as https://example.com", o)
+		}
+		out = append(out, o)
+	}
+	return out, nil
+}
+
+func onlyPrefix(prefix string, mw middleware.Middleware) middleware.Middleware {
+	return func(next http.Handler) http.Handler {
+		wrapped := mw(next)
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if strings.HasPrefix(r.URL.Path, prefix) {
+				wrapped.ServeHTTP(w, r)
+				return
+			}
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
 func Web(r *router.Router, app *vukem.App) error {
-	if err := vukem.DefaultMiddleware(app, r); err != nil {
+	origins, err := allowedOrigins(app.Source.Get("NEWSLETTER_ALLOWED_ORIGINS"))
+	if err != nil {
 		return err
 	}
+	cors, err := middleware.CORS(middleware.CORSConfig{AllowedOrigins: origins, AllowedMethods: []string{"POST", "OPTIONS"}, AllowedHeaders: []string{"Content-Type", "Accept"}, MaxAge: time.Hour})
+	if err != nil {
+		return err
+	}
+	// Public subscribe is cookieless and CSRF-exempt: controllers.Subscribe enforces the Origin allowlist itself.
+	if err := vukem.DefaultMiddlewareWith(app, r, vukem.MiddlewareOptions{SessionBypass: publicPOST, CSRFBypass: publicPOST}); err != nil {
+		return err
+	}
+	r.UseServer(onlyPrefix("/subscribe/", cors))
 	r.UseServer(middleware.Gzip())
 	r.UseServer(middleware.StaticFS(resources.Public(), middleware.StaticConfig{Prefix: "/"}))
 	r.Use(app.Inertia.Middleware)
@@ -29,7 +73,7 @@ func Web(r *router.Router, app *vukem.App) error {
 	if err != nil {
 		return err
 	}
-	c := &controllers.NewsletterController{App: app, DB: db}
+	c := &controllers.NewsletterController{App: app, DB: db, AllowedOrigins: origins}
 	key, err := app.DeriveKey("social.state", 32)
 	if err != nil {
 		return err
@@ -42,6 +86,8 @@ func Web(r *router.Router, app *vukem.App) error {
 		return err
 	}
 	s.States = cache.Store()
+	// Public forms carry one short field; the framework default is 10 MiB.
+	publicBody := middleware.BodyLimit(8 << 10)
 	limit := ratelimit.Middleware(ratelimit.NewMemory(10, time.Minute), ratelimit.ByIP)
 	r.Get("/login", func(c *web.Ctx) error {
 		return inertia.Render(c, "Login", inertia.Props{"configured": app.Source.Get("SOCIAL_GOOGLE_CLIENT_ID") != ""})
@@ -77,10 +123,19 @@ func Web(r *router.Router, app *vukem.App) error {
 	r.Get("/api/subscribers/export", controllers.Protected(c.Export)).Name("subscribers.export")
 	r.Get("/subscribe", c.Landing).Name("subscribe.host")
 	r.Get("/subscribe/{slug}", c.Landing).Name("subscribe.show")
-	r.Post("/subscribe/{slug}", c.Subscribe).Use(limit).Name("subscribe.store")
+	r.Post("/subscribe/{slug}", c.Subscribe).Use(limit, publicBody).Name("subscribe.store")
 	r.Get("/confirm", c.ConfirmPage).Name("confirm.show")
-	r.Post("/confirm", c.Confirm).Use(limit).Name("confirm.store")
+	r.Post("/confirm", c.Confirm).Use(limit, publicBody).Name("confirm.store")
 	r.Get("/unsubscribe", c.UnsubscribePage).Name("unsubscribe.show")
-	r.Post("/unsubscribe", c.Unsubscribe).Use(limit).Name("unsubscribe.store")
+	// No per-IP limit: mailbox providers deliver many one-click requests from shared addresses. The HMAC token is the credential.
+	r.Post("/unsubscribe/one-click", c.OneClickUnsubscribe).Use(publicBody).Name("unsubscribe.one-click")
+	if secret := app.Source.Get("RESEND_WEBHOOK_SECRET"); secret != "" {
+		verify, err := webhook.Standard(secret, webhook.StandardOptions{MaxBody: 256 << 10})
+		if err != nil {
+			return err
+		}
+		r.Post("/webhooks/resend", c.ResendWebhook).Use(controllers.SvixHeaders, verify, webhook.Dedupe(cache.Store(), controllers.SvixID, webhook.DedupeOptions{})).Name("webhooks.resend")
+	}
+	r.Post("/unsubscribe", c.Unsubscribe).Use(limit, publicBody).Name("unsubscribe.store")
 	return nil
 }

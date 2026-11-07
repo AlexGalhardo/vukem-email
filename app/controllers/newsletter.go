@@ -19,7 +19,9 @@ import (
 	"html/template"
 	"net/http"
 	"net/mail"
+	"net/url"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -43,8 +45,24 @@ func Protected(next web.HandlerFunc) web.HandlerFunc {
 }
 
 type NewsletterController struct {
-	App *vukem.App
-	DB  *database.DB
+	App            *vukem.App
+	DB             *database.DB
+	AllowedOrigins []string
+}
+
+// originAllowed is the CSRF substitute for the public subscribe endpoint: a
+// browser always sends Origin on cross-origin POSTs, so anything that is
+// neither same-origin nor allowlisted is rejected.
+func (n *NewsletterController) originAllowed(r *http.Request) bool {
+	origin := r.Header.Get("Origin")
+	if origin == "" {
+		return r.Header.Get("Sec-Fetch-Site") != "cross-site"
+	}
+	if slices.Contains(n.AllowedOrigins, origin) {
+		return true
+	}
+	u, err := url.Parse(origin)
+	return err == nil && strings.EqualFold(u.Host, r.Host)
 }
 
 func number(s string) int64 { n, _ := strconv.ParseInt(s, 10, 64); return n }
@@ -84,6 +102,9 @@ func (n *NewsletterController) Landing(c *web.Ctx) error {
 	return inertia.Render(c, "Subscribe", inertia.Props{"project": p})
 }
 func (n *NewsletterController) Subscribe(c *web.Ctx) error {
+	if !n.originAllowed(c.Request()) {
+		return errs.ErrForbidden
+	}
 	p, err := n.project(c)
 	if err != nil {
 		return err
@@ -96,7 +117,11 @@ func (n *NewsletterController) Subscribe(c *web.Ctx) error {
 	if !validEmail(email) {
 		return errs.New(422, "Enter a valid email address.")
 	}
-	if in["website"] == "" {
+	suppressed, err := orm.QueryOf[models.Suppression](n.DB).Where("project_id", "=", p.ID).Where("email", "=", email).Count(c.Context())
+	if err != nil {
+		return err
+	}
+	if in["website"] == "" && suppressed == 0 {
 		err = n.DB.Tx(c.Context(), func(tx *database.Tx) error {
 			if _, err := orm.QueryOf[models.Project](tx).Where("id", "=", p.ID).LockForUpdate().First(c.Context()); err != nil {
 				return err
@@ -162,6 +187,22 @@ func (n *NewsletterController) Unsubscribe(c *web.Ctx) error {
 	if err != nil {
 		return err
 	}
+	return n.unsubscribe(c, in)
+}
+
+// OneClickUnsubscribe implements RFC 8058: mail providers POST
+// "List-Unsubscribe=One-Click" to the signed URL from the List-Unsubscribe header.
+func (n *NewsletterController) OneClickUnsubscribe(c *web.Ctx) error {
+	in, err := input(c)
+	if err != nil {
+		return err
+	}
+	if in["List-Unsubscribe"] != "One-Click" {
+		return errs.New(400, "Missing List-Unsubscribe=One-Click body.")
+	}
+	return n.unsubscribe(c, in)
+}
+func (n *NewsletterController) unsubscribe(c *web.Ctx, in map[string]string) error {
 	id := number(in["subscriber"])
 	key, err := n.App.DeriveKey("newsletter.unsubscribe", 32)
 	if err != nil {
@@ -245,14 +286,26 @@ func (n *NewsletterController) Dashboard(c *web.Ctx) error {
 	if id != 0 && p.ID == 0 {
 		return errs.ErrNotFound
 	}
-	stats := map[string]int64{}
-	for _, status := range []string{"pending", "confirmed", "unsubscribed"} {
-		count, err := orm.QueryOf[models.Subscriber](n.DB).Where("project_id", "=", p.ID).Where("status", "=", status).Count(ctx)
-		if err != nil {
+	stats := map[string]int64{"pending": 0, "confirmed": 0, "unsubscribed": 0, "suppressed": 0}
+	// One grouped query replaces one count per status.
+	statusRows, err := n.DB.QueryContext(ctx, "SELECT status, COUNT(*) FROM subscribers WHERE project_id = "+n.DB.Dialect().Placeholder(1)+" GROUP BY status", p.ID)
+	if err != nil {
+		return err
+	}
+	for statusRows.Next() {
+		var status string
+		var count int64
+		if err := statusRows.Scan(&status, &count); err != nil {
+			statusRows.Close()
 			return err
 		}
 		stats[status] = count
 	}
+	if err := statusRows.Err(); err != nil {
+		statusRows.Close()
+		return err
+	}
+	statusRows.Close()
 	q := orm.QueryOf[models.Subscriber](n.DB).Where("project_id", "=", p.ID)
 	if search := c.Query("q"); search != "" {
 		q = q.Where("email", "LIKE", "%"+search+"%")
@@ -313,10 +366,10 @@ func (n *NewsletterController) campaignInput(c *web.Ctx) (models.Project, map[st
 		return p, nil, "", err
 	}
 	if in["subject"] == "" || len(in["subject"]) > 200 || strings.ContainsAny(in["subject"], "\r\n") {
-			return p, nil, "", errs.New(422, "Enter a subject of up to 200 characters.")
+		return p, nil, "", errs.New(422, "Enter a subject of up to 200 characters.")
 	}
 	if in["source"] == "" || (in["mode"] != "markdown" && in["mode"] != "mdx" && in["mode"] != "components") {
-			return p, nil, "", errs.New(422, "Choose a format and write some content.")
+		return p, nil, "", errs.New(422, "Choose a format and write some content.")
 	}
 	html, err := newsletter.Render(c.Context(), in["mode"], in["source"])
 	if err != nil {

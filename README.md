@@ -22,6 +22,8 @@ Vukem Email is a personal newsletter dashboard built with [Vukem](https://vukem.
 - Private dashboard with Google sign-in restricted to one verified owner account.
 - Isolated projects with their own public subscription domain and sender address.
 - Double opt-in with expiring, single-use confirmation links and signed unsubscribe links.
+- Public JSON subscribe endpoint with a CORS allowlist for external sites ([contract](docs/subscribe-api.md)).
+- RFC 8058 one-click unsubscribe and Resend webhooks that suppress hard bounces and complaints per project.
 - Markdown, MDX, and React Email campaigns with a sandboxed preview. Authored JavaScript runs only in QuickJS WebAssembly.
 - Persistent delivery queue with per-recipient status checks, stable message IDs, retries, and provider idempotency.
 
@@ -50,10 +52,13 @@ go vet ./...
 go test -race ./...
 ```
 
+Optional: `RUN_BROWSER_TESTS=1` runs the Chromium smoke test, `TEST_DATABASE_URL` the PostgreSQL workflow, and `RUN_PERF_TESTS=1` times the dashboard on 30,000 subscribers.
+
 ## Documentation
 
 - [Online documentation](https://email.vukem.dev/docs/introduction) and its [source](site/).
 - [Installation](https://email.vukem.dev/docs/installation), [configuration](https://email.vukem.dev/docs/configuration), and [Railway deployment](https://email.vukem.dev/docs/deployment).
+- [Subscribe API](https://email.vukem.dev/docs/guides/subscribe-api) and [Resend webhooks](https://email.vukem.dev/docs/guides/resend-webhooks).
 - [Google OIDC](https://email.vukem.dev/docs/guides/google-oidc) and [security](https://email.vukem.dev/docs/guides/security).
 - [AGENTS.md](AGENTS.md) for repository instructions.
 

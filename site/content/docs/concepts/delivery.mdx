@@ -3,10 +3,14 @@ title: Delivery
 description: Queue jobs, retries, stable IDs, and idempotency.
 ---
 
-# Delivery
-
 The worker processes persistent jobs for individual recipients. It rechecks subscription status before calling the provider. Each delivery has a stable message ID and an idempotency key tied to the campaign and subscriber.
 
-States are `queued`, `accepted`, `skipped`, and `failed`. Inspect failures with `/app/app queue:failed` and retry them with `/app/app queue:retry`.
+States are `queued`, `accepted`, `skipped`, `failed`, and, after Resend webhooks, `delivered`, `bounced`, and `complained`. Inspect failures with `/app/app queue:failed` and retry them with `/app/app queue:retry`.
 
 Retries stop 23 hours after job creation, before Resend's 24-hour idempotency limit. Set `QUEUE_CONCURRENCY` according to your sending account's limits.
+
+## One-click unsubscribe (RFC 8058)
+
+With `MAIL_MAILER=resend`, every campaign email carries `List-Unsubscribe: <https://{project domain}/unsubscribe/one-click?subscriber=ID&token=SIGNED>` and `List-Unsubscribe-Post: List-Unsubscribe=One-Click`. Gmail, Yahoo and Apple Mail show an unsubscribe button that sends `POST /unsubscribe/one-click` with the body `List-Unsubscribe=One-Click`.
+
+The endpoint needs no session or CSRF token: the HMAC token in the URL is the credential and is validated the same way as the link in the email footer. It has no per-IP rate limit because mailbox providers send many requests from shared addresses. A `GET` never unsubscribes. Other mailers (`array`, `log`, `smtp`) send without these headers because the framework mail API cannot carry custom headers; the footer link still works.

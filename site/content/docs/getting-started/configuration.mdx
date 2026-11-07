@@ -3,8 +3,6 @@ title: Configuration
 description: Essential settings for the app, database, authentication, and email.
 ---
 
-# Configuration
-
 Start with `.env.example`. Never commit `.env`, credentials, or SQLite databases.
 
 | Variable | Purpose |
@@ -14,6 +12,8 @@ Start with `.env.example`. Never commit `.env`, credentials, or SQLite databases
 | `DATABASE_URL` | PostgreSQL connection in production. |
 | `SOCIAL_GOOGLE_CLIENT_ID` / `SOCIAL_GOOGLE_CLIENT_SECRET` | Google OAuth Web client. |
 | `MAIL_MAILER` / `RESEND_API_KEY` | Resend delivery when `MAIL_MAILER=resend`. |
+| `NEWSLETTER_ALLOWED_ORIGINS` | Comma-separated origins allowed to call `POST /subscribe/{slug}` cross-origin, for example `https://hexascore.app`. Empty disables CORS. |
+| `RESEND_WEBHOOK_SECRET` | Enables `POST /webhooks/resend` (bounce and complaint suppression). |
 | `QUEUE_CONNECTION` | Use `database` for a persistent queue. |
 
 When rotating `APP_KEY`, keep older keys in `APP_PREVIOUS_KEYS` while existing sessions and signed links remain valid. Set `APP_DEBUG=false` in production.

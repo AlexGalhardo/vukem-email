@@ -67,7 +67,11 @@ func deliver(app *vukem.App, ctx context.Context, job SendDelivery) (result erro
 	if err != nil {
 		return err
 	}
-	if s.Status != "confirmed" || s.ProjectID != c.ProjectID {
+	suppressed, err := orm.QueryOf[models.Suppression](db).Where("project_id", "=", c.ProjectID).Where("email", "=", s.Email).Count(ctx)
+	if err != nil {
+		return err
+	}
+	if s.Status != "confirmed" || s.ProjectID != c.ProjectID || suppressed > 0 {
 		_, err = orm.QueryOf[models.Delivery](db).Where("id", "=", d.ID).Update(ctx, orm.Set{"status": "skipped"})
 		return err
 	}
@@ -80,6 +84,7 @@ func deliver(app *vukem.App, ctx context.Context, job SendDelivery) (result erro
 		return err
 	}
 	url := "https://" + p.Domain + "/unsubscribe?subscriber=" + strconv.FormatInt(s.ID, 10) + "&token=" + newsletter.UnsubscribeToken(key, s.ID)
+	oneClick := newsletter.OneClickURL(p.Domain, s.ID, newsletter.UnsubscribeToken(key, s.ID))
 	mailer, err := app.Mailer()
 	if err != nil {
 		return err
@@ -89,7 +94,8 @@ func deliver(app *vukem.App, ctx context.Context, job SendDelivery) (result erro
 		return err
 	}
 	msg.ID = fmt.Sprintf("newsletter-%d-%d", c.ID, s.ID)
-	if err = mailer.Transport().Send(ctx, msg); err != nil {
+	msg.Tags = map[string]string{"project": strconv.FormatInt(p.ID, 10), "campaign": strconv.FormatInt(c.ID, 10), "delivery": strconv.FormatInt(d.ID, 10)}
+	if err = newsletter.SendWithHeaders(ctx, app, msg, newsletter.ListUnsubscribeHeaders(oneClick)); err != nil {
 		if attempt, ok := queue.AttemptFrom(ctx); ok && attempt.Last() {
 			if _, updateErr := orm.QueryOf[models.Delivery](db).Where("id", "=", d.ID).Update(ctx, orm.Set{"status": "failed"}); updateErr != nil {
 				return updateErr
@@ -97,6 +103,6 @@ func deliver(app *vukem.App, ctx context.Context, job SendDelivery) (result erro
 		}
 		return err
 	}
-	_, err = orm.QueryOf[models.Delivery](db).Where("id", "=", d.ID).Update(ctx, orm.Set{"status": "accepted"})
+	_, err = orm.QueryOf[models.Delivery](db).Where("id", "=", d.ID).Where("status", "=", "queued").Update(ctx, orm.Set{"status": "accepted"})
 	return err
 }

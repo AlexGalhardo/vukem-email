@@ -1,5 +1,5 @@
 # GoReleaser builds the application binaries for a version tag, creates the
-# GitHub release, and attaches archives, checksums, SBOMs and signatures.
+# GitHub release (notes come from CHANGELOG.md, kept as published), and attaches archives, checksums, SBOMs and signatures.
 # Run npm ci after extracting an archive: dynamic campaign rendering requires
 # Node.js and the production dependencies listed in package-lock.json.
 version: 2
@@ -58,4 +58,5 @@ changelog:
   disable: true
 
 release:
+  mode: keep-existing
   prerelease: auto
