@@ -3,8 +3,6 @@ title: Delivery
 description: Queue jobs, retries, stable IDs, and idempotency.
 ---
 
-# Delivery
-
 The worker processes persistent jobs for individual recipients. It rechecks subscription status before calling the provider. Each delivery has a stable message ID and an idempotency key tied to the campaign and subscriber.
 
 States are `queued`, `accepted`, `skipped`, `failed`, and, after Resend webhooks, `delivered`, `bounced`, and `complained`. Inspect failures with `/app/app queue:failed` and retry them with `/app/app queue:retry`.

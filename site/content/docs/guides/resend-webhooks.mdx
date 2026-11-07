@@ -3,8 +3,6 @@ title: Resend webhooks
 description: Delivery events, signature verification, and automatic suppression of bounced addresses.
 ---
 
-# Resend webhooks
-
 `POST /webhooks/resend` receives `email.delivered`, `email.bounced` and `email.complained` events. The route exists only when `RESEND_WEBHOOK_SECRET` is set.
 
 ## Setup

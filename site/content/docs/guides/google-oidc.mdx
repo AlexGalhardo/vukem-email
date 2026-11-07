@@ -3,8 +3,6 @@ title: Google OIDC
 description: Configure the only permitted administrative sign-in.
 ---
 
-# Google OIDC
-
 Create an OAuth Client ID of type Web application in Google Cloud Console. Register `https://email.hexascore.app/auth/google/callback` as an authorized redirect URI. In testing mode, add `aleexgvieira@gmail.com` as a test user.
 
 Set `SOCIAL_GOOGLE_CLIENT_ID` and `SOCIAL_GOOGLE_CLIENT_SECRET`. Vukem validates single-use state, PKCE, nonce, ID token signature, issuer, audience, and expiration. An administrative session is created only for the authorized, verified address.
