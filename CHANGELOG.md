@@ -23,6 +23,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Confirmation email shows a copyable fallback link so the plain-text part reads cleanly; an end-to-end test covers subscribe, confirm, campaign, unsubscribe and resubscribe.
 - **deps:** Bump vukem to v0.38.0.
 
+### Fixed
+
+- **security:** Run the campaign renderer subprocess with an allowlisted environment so a renderer bug cannot read `APP_KEY`, provider keys or `DATABASE_URL` (audit SA-002).
+
 ## [0.3.0] - 2026-11-04
 
 ### Added
