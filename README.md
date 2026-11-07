@@ -43,7 +43,7 @@ go run ./cmd/app migrate
 go run ./cmd/app
 ```
 
-Open [http://localhost:3000](http://localhost:3000). Google sign-in is required locally too. For development with live reload, install Vukem v0.37.0 and run `vukem serve`.
+Open [http://localhost:3000](http://localhost:3000). Google sign-in is required locally too. For development with live reload, install Vukem v0.39.0 and run `vukem serve`.
 
 ```bash
 npm run check
