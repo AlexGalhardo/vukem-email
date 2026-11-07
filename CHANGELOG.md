@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Changed
+
+- Require vukem v0.39.1, which sends Resend addresses as `email` or `Name <email>` (campaign and confirmation mail failed with "Invalid from" on v0.39.0).
+
 ## [0.4.0] - 2026-11-07
 
 ### Added
