@@ -13,12 +13,14 @@ type Project struct {
 
 type Subscriber struct {
 	orm.Model
-	ProjectID       int64  `json:"project_id"`
-	Email           string `json:"email"`
-	Status          string `json:"status"`
-	TokenHash       string `json:"-"`
-	ExpiresAt       int64  `json:"-"`
-	LastRequestedAt int64  `json:"-"`
+	ProjectID          int64  `json:"project_id"`
+	Email              string `json:"email"`
+	Status             string `json:"status"`
+	TokenHash          string `json:"-"`
+	ExpiresAt          int64  `json:"-"`
+	LastRequestedAt    int64  `json:"-"`
+	Confirmations      int64  `json:"-"`
+	ConfirmationsSince int64  `json:"-"`
 }
 
 type Campaign struct {

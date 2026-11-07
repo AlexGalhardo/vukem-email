@@ -134,6 +134,21 @@ func (n *NewsletterController) Subscribe(c *web.Ctx) error {
 			if err == nil && (s.Status == "confirmed" || now-s.LastRequestedAt < 60) {
 				return nil
 			}
+			// Caps keep the public endpoint from mailing a third party at will; the 202 below stays the same.
+			if now-s.ConfirmationsSince >= 86400 {
+				s.Confirmations, s.ConfirmationsSince = 0, now
+			}
+			if s.Confirmations >= maxConfirmationsPerDay {
+				return nil
+			}
+			recent, err := orm.QueryOf[models.Subscriber](tx).Where("project_id", "=", p.ID).Where("last_requested_at", ">", now-3600).Count(c.Context())
+			if err != nil {
+				return err
+			}
+			if recent >= maxConfirmationsPerProjectHour {
+				return nil
+			}
+			s.Confirmations++
 			token := rand.Text()
 			s.ProjectID = p.ID
 			s.Email = email
@@ -157,6 +172,12 @@ func (n *NewsletterController) Subscribe(c *web.Ctx) error {
 	}
 	return c.JSON(http.StatusAccepted, web.Map{"message": "If this address can be subscribed, you will receive a confirmation link. Check your spam folder too."})
 }
+
+const (
+	maxConfirmationsPerDay         = 3
+	maxConfirmationsPerProjectHour = 500
+)
+
 func (n *NewsletterController) ConfirmPage(c *web.Ctx) error {
 	c.Writer().Header().Set("Referrer-Policy", "no-referrer")
 	return inertia.Render(c, "SubscriptionAction", inertia.Props{"action": "confirm", "token": c.Query("token"), "subscriber": ""})
