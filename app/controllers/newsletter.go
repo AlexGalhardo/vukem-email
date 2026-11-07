@@ -19,7 +19,9 @@ import (
 	"html/template"
 	"net/http"
 	"net/mail"
+	"net/url"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -43,8 +45,24 @@ func Protected(next web.HandlerFunc) web.HandlerFunc {
 }
 
 type NewsletterController struct {
-	App *vukem.App
-	DB  *database.DB
+	App            *vukem.App
+	DB             *database.DB
+	AllowedOrigins []string
+}
+
+// originAllowed is the CSRF substitute for the public subscribe endpoint: a
+// browser always sends Origin on cross-origin POSTs, so anything that is
+// neither same-origin nor allowlisted is rejected.
+func (n *NewsletterController) originAllowed(r *http.Request) bool {
+	origin := r.Header.Get("Origin")
+	if origin == "" {
+		return r.Header.Get("Sec-Fetch-Site") != "cross-site"
+	}
+	if slices.Contains(n.AllowedOrigins, origin) {
+		return true
+	}
+	u, err := url.Parse(origin)
+	return err == nil && strings.EqualFold(u.Host, r.Host)
 }
 
 func number(s string) int64 { n, _ := strconv.ParseInt(s, 10, 64); return n }
@@ -84,6 +102,9 @@ func (n *NewsletterController) Landing(c *web.Ctx) error {
 	return inertia.Render(c, "Subscribe", inertia.Props{"project": p})
 }
 func (n *NewsletterController) Subscribe(c *web.Ctx) error {
+	if !n.originAllowed(c.Request()) {
+		return errs.ErrForbidden
+	}
 	p, err := n.project(c)
 	if err != nil {
 		return err
@@ -313,10 +334,10 @@ func (n *NewsletterController) campaignInput(c *web.Ctx) (models.Project, map[st
 		return p, nil, "", err
 	}
 	if in["subject"] == "" || len(in["subject"]) > 200 || strings.ContainsAny(in["subject"], "\r\n") {
-			return p, nil, "", errs.New(422, "Enter a subject of up to 200 characters.")
+		return p, nil, "", errs.New(422, "Enter a subject of up to 200 characters.")
 	}
 	if in["source"] == "" || (in["mode"] != "markdown" && in["mode"] != "mdx" && in["mode"] != "components") {
-			return p, nil, "", errs.New(422, "Choose a format and write some content.")
+		return p, nil, "", errs.New(422, "Choose a format and write some content.")
 	}
 	html, err := newsletter.Render(c.Context(), in["mode"], in["source"])
 	if err != nil {

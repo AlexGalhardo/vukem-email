@@ -1,0 +1,48 @@
+---
+title: Subscribe API
+description: Public JSON endpoint and CORS contract for sign-up forms on external sites.
+---
+
+# Subscribe API
+
+External sites subscribe visitors with one cross-origin `POST`. The endpoint is public, cookieless and rate limited per IP (10 requests per minute).
+
+```http
+POST /subscribe/{slug}
+Content-Type: application/json
+Accept: application/json
+
+{"email": "ana@example.com"}
+```
+
+`{slug}` is the project slug. `website` is a honeypot field: leave it empty.
+
+## Responses
+
+| Status | Meaning |
+| --- | --- |
+| 202 | Accepted. The body is always `{"message": "..."}` and identical whether or not an email was sent, so addresses cannot be enumerated. The person still has to confirm by email (double opt-in). |
+| 403 | The `Origin` is not allowlisted. |
+| 404 | Unknown project slug. |
+| 422 | Invalid or missing `email`. |
+| 429 | Rate limit exceeded; honor `Retry-After`. |
+| 400 | Malformed body. |
+
+Errors are `application/problem+json` (RFC 9457) with `type`, `title`, `status`, `detail` (when useful), `instance` and `request_id`.
+
+## CORS
+
+Set `NEWSLETTER_ALLOWED_ORIGINS` to a comma-separated list of exact origins, for example `https://hexascore.app`. Paths and `*` are rejected at boot.
+
+- Preflight `OPTIONS /subscribe/{slug}` answers 204 with `POST, OPTIONS`, headers `Content-Type, Accept` and a one hour cache.
+- Allowed origins are echoed in `Access-Control-Allow-Origin` with `Vary: Origin`. Credentials are never allowed; do not send cookies.
+- Other origins receive 403 and no email is sent.
+- Only `/subscribe/{slug}` is CORS-enabled. The dashboard and every other route stay same-origin and keep CSRF protection.
+
+```ts
+const res = await fetch("https://email.hexascore.app/subscribe/hexascore", {
+  method: "POST",
+  headers: { "Content-Type": "application/json", Accept: "application/json" },
+  body: JSON.stringify({ email }),
+});
+```

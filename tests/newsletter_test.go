@@ -14,6 +14,7 @@ import (
 	"github.com/AlexGalhardo/vukem-email/app/models"
 	"github.com/AlexGalhardo/vukem-email/app/newsletter"
 	"github.com/AlexGalhardo/vukem-email/bootstrap"
+	"github.com/AlexGalhardo/vukem/database"
 	"github.com/AlexGalhardo/vukem/orm"
 	"github.com/AlexGalhardo/vukem/queue"
 	"github.com/AlexGalhardo/vukem/vukemtest"
@@ -27,11 +28,15 @@ func setup(t *testing.T) (*vukemtest.App, models.Project) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	return app, seedProject(t, db)
+}
+func seedProject(t *testing.T, db *database.DB) models.Project {
+	t.Helper()
 	p := models.Project{Name: "Hexascore", Slug: "hexascore", Domain: "news.hexascore.app", FromEmail: "newsletter@hexascore.app", Description: "Project updates"}
 	if err := orm.Create(t.Context(), db, &p); err != nil {
 		t.Fatal(err)
 	}
-	return app, p
+	return p
 }
 func admin(t *testing.T, app *vukemtest.App) *vukemtest.Client {
 	return app.Client(t).WithSession(map[string]any{"admin": controllers.AdminEmail})
