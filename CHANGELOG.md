@@ -26,6 +26,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 
+- **site:** Doc pages are dated by the author date, so a rebase merge no longer turns the `Last updated` check red; the `.githooks/pre-push` hook refreshes `site/content/last-updated.json` before a push.
 - Public subscribe caps confirmation emails at 3 per address per 24 hours and 500 per project per hour (SA-001).
 - **security:** Run the campaign renderer subprocess with an allowlisted environment so a renderer bug cannot read `APP_KEY`, provider keys or `DATABASE_URL` (audit SA-002).
 - **security:** Stop persisting the GitHub token in the CodeQL workflow checkout (audit SA-003).

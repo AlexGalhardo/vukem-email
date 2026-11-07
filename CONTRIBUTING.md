@@ -4,7 +4,7 @@ Thank you for helping improve Vukem Email. Open an issue for a substantial chang
 
 ## Local setup
 
-Use Go 1.27.3+, Node 24+ and PostgreSQL for integration tests. Copy `.env.example` to `.env`, install dependencies with `npm ci`, generate `APP_KEY`, run `npm run build`, then `go run ./cmd/app migrate` and `go run ./cmd/app`. A valid Google OAuth client is required for administrative login even locally.
+Use Go 1.27.3+, Node 24+ and PostgreSQL for integration tests. Copy `.env.example` to `.env`, install dependencies with `npm ci`, generate `APP_KEY`, run `npm run build`, then `go run ./cmd/app migrate` and `go run ./cmd/app`. Run `git config core.hooksPath .githooks` once: the hooks check commit messages and refresh the doc dates in `site/content/last-updated.json` before a push. A valid Google OAuth client is required for administrative login even locally.
 
 ## Verification
 
