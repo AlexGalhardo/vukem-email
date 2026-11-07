@@ -36,7 +36,7 @@ jobs:
       - run: npm run build
       - name: Documentation build
         working-directory: site
-        run: npm ci && npm run build
+        run: npm ci && npm run lint && npm run check:mdx && npm run test:scripts && npm run build
       - run: git diff --exit-code -- resources/emails
       - run: test -z "$(gofmt -l app bootstrap cmd database resources routes tests)"
       - run: go vet ./...
