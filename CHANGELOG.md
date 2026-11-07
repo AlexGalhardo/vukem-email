@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- RFC 8058 one-click unsubscribe: `List-Unsubscribe` and `List-Unsubscribe-Post` headers on campaign emails (Resend) and `POST /unsubscribe/one-click`.
 - CORS allowlist (`NEWSLETTER_ALLOWED_ORIGINS`) for the public `POST /subscribe/{slug}` endpoint, with preflight support, no credentials, and a documented JSON contract (`docs/subscribe-api.md`).
 - **security:** Vendor the Cloudflare security-audit skill and run it on pull requests.
 

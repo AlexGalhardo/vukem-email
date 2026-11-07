@@ -80,6 +80,7 @@ func deliver(app *vukem.App, ctx context.Context, job SendDelivery) (result erro
 		return err
 	}
 	url := "https://" + p.Domain + "/unsubscribe?subscriber=" + strconv.FormatInt(s.ID, 10) + "&token=" + newsletter.UnsubscribeToken(key, s.ID)
+	oneClick := newsletter.OneClickURL(p.Domain, s.ID, newsletter.UnsubscribeToken(key, s.ID))
 	mailer, err := app.Mailer()
 	if err != nil {
 		return err
@@ -89,7 +90,7 @@ func deliver(app *vukem.App, ctx context.Context, job SendDelivery) (result erro
 		return err
 	}
 	msg.ID = fmt.Sprintf("newsletter-%d-%d", c.ID, s.ID)
-	if err = mailer.Transport().Send(ctx, msg); err != nil {
+	if err = newsletter.SendWithHeaders(ctx, app, msg, newsletter.ListUnsubscribeHeaders(oneClick)); err != nil {
 		if attempt, ok := queue.AttemptFrom(ctx); ok && attempt.Last() {
 			if _, updateErr := orm.QueryOf[models.Delivery](db).Where("id", "=", d.ID).Update(ctx, orm.Set{"status": "failed"}); updateErr != nil {
 				return updateErr
