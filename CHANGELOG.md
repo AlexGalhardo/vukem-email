@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- **docs:** Agent guidance covers the shared framework feedback file (`VE-` ids), the public subscribe contract, the release pattern, the Astro site and `last-updated`, and the security-audit skill.
 - Migrate the documentation site from Next.js to Astro 7.4 with the vukem.dev shell (static output served by nginx); same pages and URLs, `npm run preview` replaces `npm run start`.
 - Public form endpoints reject bodies over 8 KiB; broader Go and browser tests cover every public route, admin-only routes, edge cases, and API error shapes.
 - Dashboard subscriber counts use one grouped query instead of one per status.
