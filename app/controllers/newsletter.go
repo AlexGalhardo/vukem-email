@@ -506,8 +506,23 @@ func (n *NewsletterController) CampaignHealth(c *web.Ctx) error {
 	if err != nil {
 		return err
 	}
-	deliveries, err := orm.QueryOf[models.Delivery](n.DB).Where("campaign_id", "=", campaign.ID).GroupCount[string](ctx, "status")
+	// Plain GROUP BY instead of the ORM's generic GroupCount method: CodeQL's Go
+	// extractor cannot handle generic methods yet and fails the whole analysis.
+	deliveries := map[string]int64{}
+	rows, err := n.DB.QueryContext(ctx, "SELECT status, COUNT(*) FROM deliveries WHERE campaign_id = "+n.DB.Dialect().Placeholder(1)+" GROUP BY status", campaign.ID)
 	if err != nil {
+		return err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var status string
+		var count int64
+		if err := rows.Scan(&status, &count); err != nil {
+			return err
+		}
+		deliveries[status] = count
+	}
+	if err := rows.Err(); err != nil {
 		return err
 	}
 	var oldest int64
