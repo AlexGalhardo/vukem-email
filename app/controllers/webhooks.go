@@ -3,7 +3,6 @@ package controllers
 import (
 	"encoding/json"
 	"io"
-	"net/http"
 	"strconv"
 	"strings"
 
@@ -12,20 +11,6 @@ import (
 	"github.com/AlexGalhardo/vukem/orm"
 	"github.com/AlexGalhardo/vukem/web"
 )
-
-// SvixHeaders maps Resend's svix-* headers to the webhook-* names that
-// webhook.Standard verifies (same scheme; see VE-3 in vukem-feedback.md).
-func SvixHeaders(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		for _, name := range []string{"id", "timestamp", "signature"} {
-			r.Header.Set("webhook-"+name, r.Header.Get("svix-"+name))
-		}
-		next.ServeHTTP(w, r)
-	})
-}
-
-// SvixID is the event id used for deduplication.
-func SvixID(r *http.Request) string { return r.Header.Get("svix-id") }
 
 type resendEvent struct {
 	Type string `json:"type"`
