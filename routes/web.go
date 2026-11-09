@@ -118,6 +118,7 @@ func Web(r *router.Router, app *vukem.App) error {
 	r.Post("/api/projects", controllers.Protected(c.CreateProject)).Name("projects.store")
 	r.Post("/api/campaigns", controllers.Protected(c.SaveCampaign)).Name("campaigns.store")
 	r.Post("/api/campaigns/{id}/send", controllers.Protected(c.SendCampaign)).Name("campaigns.send")
+	r.Get("/api/campaigns/{id}/health", controllers.Protected(c.CampaignHealth)).Name("campaigns.health")
 	r.Get("/api/preview/{token}", controllers.Protected(c.PreviewDocument)).Name("campaigns.preview.document")
 	r.Post("/api/preview", controllers.Protected(c.Preview)).Name("campaigns.preview")
 	r.Get("/api/subscribers/export", controllers.Protected(c.Export)).Name("subscribers.export")

@@ -493,6 +493,31 @@ func (n *NewsletterController) SendCampaign(c *web.Ctx) error {
 	}
 	return c.JSON(202, web.Map{"message": "Campaign queued. Delivery respects confirmation and unsubscribe status."})
 }
+
+// stalledAfter is how long a delivery may wait in "queued" before the campaign
+// is reported as stalled: the worker normally drains a campaign in minutes.
+const stalledAfter = 15 * time.Minute
+
+// CampaignHealth reports how a campaign's deliveries are progressing, so a
+// stuck queue shows without opening the database.
+func (n *NewsletterController) CampaignHealth(c *web.Ctx) error {
+	ctx := c.Context()
+	campaign, err := orm.QueryOf[models.Campaign](n.DB).Find(ctx, number(c.Param("id")))
+	if err != nil {
+		return err
+	}
+	deliveries, err := orm.QueryOf[models.Delivery](n.DB).Where("campaign_id", "=", campaign.ID).GroupCount[string](ctx, "status")
+	if err != nil {
+		return err
+	}
+	var oldest int64
+	if d, err := orm.QueryOf[models.Delivery](n.DB).Where("campaign_id", "=", campaign.ID).Where("status", "=", "queued").OrderBy("created_at", orm.Asc).First(ctx); err == nil {
+		oldest = int64(time.Since(d.CreatedAt).Seconds())
+	} else if !errors.Is(err, orm.ErrNotFound) {
+		return err
+	}
+	return c.JSON(200, web.Map{"status": campaign.Status, "recipients": campaign.Recipients, "deliveries": deliveries, "oldest_queued_seconds": oldest, "stalled": oldest > int64(stalledAfter.Seconds())})
+}
 func (n *NewsletterController) Export(c *web.Ctx) error {
 	id := number(c.Query("project"))
 	if _, err := orm.QueryOf[models.Project](n.DB).Find(c.Context(), id); err != nil {
