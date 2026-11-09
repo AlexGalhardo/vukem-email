@@ -134,7 +134,7 @@ func Web(r *router.Router, app *vukem.App) error {
 		if err != nil {
 			return err
 		}
-		r.Post("/webhooks/resend", c.ResendWebhook).Use(controllers.SvixHeaders, verify, webhook.Dedupe(cache.Store(), controllers.SvixID, webhook.DedupeOptions{})).Name("webhooks.resend")
+		r.Post("/webhooks/resend", c.ResendWebhook).Use(verify, webhook.Dedupe(cache.Store(), webhook.StandardID, webhook.DedupeOptions{})).Name("webhooks.resend")
 	}
 	r.Post("/unsubscribe", c.Unsubscribe).Use(limit, publicBody).Name("unsubscribe.store")
 	return nil
