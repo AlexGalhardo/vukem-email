@@ -15,6 +15,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - **ci:** Dependabot no longer proposes TypeScript 7 for `site/`: typescript-eslint 8.x peers `typescript <6.1.0`, so `npm ci` failed with ERESOLVE.
 - Require vukem v0.39.1, which sends Resend addresses as `email` or `Name <email>` (campaign and confirmation mail failed with "Invalid from" on v0.39.0).
 
+### Fixed
+
+- **delivery:** A permanent Resend failure (`queue.ErrPermanent`, any 4xx except 408/409/429) now marks the delivery `failed` immediately, so the campaign reaches `completed` instead of staying `queued` and `stalled` (audit H1).
+
 ## [0.4.0] - 2026-11-07
 
 ### Added
