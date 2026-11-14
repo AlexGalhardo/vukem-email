@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM node:24.22.0-alpine3.24 AS assets
+FROM node:26.13.0-alpine3.24 AS assets
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --no-audit --no-fund
@@ -15,7 +15,7 @@ COPY --from=assets /app/resources/public/build ./resources/public/build
 COPY --from=assets /app/resources/emails ./resources/emails
 RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/app ./cmd/app
 
-FROM node:24.22.0-alpine3.24 AS runtime
+FROM node:26.13.0-alpine3.24 AS runtime
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev --no-audit --no-fund && mkdir -p scripts storage && chown node:node storage
