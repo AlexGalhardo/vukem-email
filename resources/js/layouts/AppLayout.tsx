@@ -242,15 +242,17 @@ export default function AppLayout({
       <SidebarInset>
         <header className="h-16 flex items-center border-b border-border px-5 md:px-9 gap-3">
           <SidebarTrigger aria-label="Toggle sidebar (Ctrl+B)" />
-          <span className="text-muted-foreground text-sm">
+          <span className="hidden sm:inline text-muted-foreground text-sm">
             Personal workspace
           </span>
-          <span className="text-muted-foreground/50">/</span>
-          <span className="text-sm">{project.name || "Your projects"}</span>
-          <span className="ml-1 text-[10px] rounded border border-border px-1.5 py-0.5 text-muted-foreground">
+          <span className="hidden sm:inline text-muted-foreground/50">/</span>
+          <span className="min-w-0 truncate text-sm">
+            {project.name || "Your projects"}
+          </span>
+          <span className="ml-1 hidden sm:inline text-[10px] rounded border border-border px-1.5 py-0.5 text-muted-foreground">
             Personal
           </span>
-          <div className="ml-auto flex gap-4 items-center">
+          <div className="ml-auto flex shrink-0 gap-4 items-center">
             <button
               type="button"
               aria-label={
