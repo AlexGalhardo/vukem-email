@@ -23,6 +23,12 @@ export interface Campaign {
   recipients: number;
   created_at: string;
 }
+export interface ApiToken {
+  id: string;
+  name: string;
+  abilities: string[];
+  last_used_at: string | null;
+}
 export type Mode = "markdown" | "mdx" | "components";
 export interface DashboardProps {
   projects: Project[];
@@ -32,6 +38,7 @@ export interface DashboardProps {
   stats: Record<string, number>;
   deliveryStats: Record<string, Record<string, number>>;
   trackingStats: Record<string, Record<string, number>>;
+  apiTokens: ApiToken[];
   total: number;
   page: number;
   filters: { q: string; status: string };

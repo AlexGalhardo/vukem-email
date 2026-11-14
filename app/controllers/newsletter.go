@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"context"
 	"crypto/hmac"
 	"crypto/rand"
 	"encoding/csv"
@@ -10,6 +11,7 @@ import (
 	"github.com/AlexGalhardo/vukem-email/app/jobs"
 	"github.com/AlexGalhardo/vukem-email/app/models"
 	"github.com/AlexGalhardo/vukem-email/app/newsletter"
+	"github.com/AlexGalhardo/vukem/auth"
 	"github.com/AlexGalhardo/vukem/cache"
 	"github.com/AlexGalhardo/vukem/database"
 	"github.com/AlexGalhardo/vukem/errs"
@@ -122,55 +124,61 @@ func (n *NewsletterController) Subscribe(c *web.Ctx) error {
 		return err
 	}
 	if in["website"] == "" && suppressed == 0 {
-		err = n.DB.Tx(c.Context(), func(tx *database.Tx) error {
-			if _, err := orm.QueryOf[models.Project](tx).Where("id", "=", p.ID).LockForUpdate().First(c.Context()); err != nil {
-				return err
-			}
-			s, err := orm.QueryOf[models.Subscriber](tx).Where("project_id", "=", p.ID).Where("email", "=", email).First(c.Context())
-			if err != nil && !errors.Is(err, orm.ErrNotFound) {
-				return err
-			}
-			now := time.Now().Unix()
-			if err == nil && (s.Status == "confirmed" || now-s.LastRequestedAt < 60) {
-				return nil
-			}
-			// Caps keep the public endpoint from mailing a third party at will; the 202 below stays the same.
-			if now-s.ConfirmationsSince >= 86400 {
-				s.Confirmations, s.ConfirmationsSince = 0, now
-			}
-			if s.Confirmations >= maxConfirmationsPerDay {
-				return nil
-			}
-			recent, err := orm.QueryOf[models.Subscriber](tx).Where("project_id", "=", p.ID).Where("last_requested_at", ">", now-3600).Count(c.Context())
-			if err != nil {
-				return err
-			}
-			if recent >= maxConfirmationsPerProjectHour {
-				return nil
-			}
-			s.Confirmations++
-			token := rand.Text()
-			s.ProjectID = p.ID
-			s.Email = email
-			s.Status = "pending"
-			s.TokenHash = newsletter.Hash(token)
-			s.ExpiresAt = now + 86400
-			s.LastRequestedAt = now
-			if s.ID == 0 {
-				err = orm.Create(c.Context(), tx, &s)
-			} else {
-				err = orm.Update(c.Context(), tx, &s)
-			}
-			if err != nil {
-				return err
-			}
-			return n.App.MailLaterTx(c.Context(), tx, newsletter.Confirmation{Project: p, Email: email, URL: "https://" + p.Domain + "/confirm?token=" + token})
-		})
-		if err != nil {
+		if err := n.requestConfirmation(c.Context(), p, email); err != nil {
 			return err
 		}
 	}
 	return c.JSON(http.StatusAccepted, web.Map{"message": "If this address can be subscribed, you will receive a confirmation link. Check your spam folder too."})
+}
+
+// requestConfirmation creates or refreshes the pending subscriber and queues
+// its confirmation email (double opt-in), within the per-address and
+// per-project caps. Hitting a cap is not an error: no email is queued.
+func (n *NewsletterController) requestConfirmation(ctx context.Context, p models.Project, email string) error {
+	return n.DB.Tx(ctx, func(tx *database.Tx) error {
+		if _, err := orm.QueryOf[models.Project](tx).Where("id", "=", p.ID).LockForUpdate().First(ctx); err != nil {
+			return err
+		}
+		s, err := orm.QueryOf[models.Subscriber](tx).Where("project_id", "=", p.ID).Where("email", "=", email).First(ctx)
+		if err != nil && !errors.Is(err, orm.ErrNotFound) {
+			return err
+		}
+		now := time.Now().Unix()
+		if err == nil && (s.Status == "confirmed" || now-s.LastRequestedAt < 60) {
+			return nil
+		}
+		// Caps keep the public endpoint from mailing a third party at will; the 202 below stays the same.
+		if now-s.ConfirmationsSince >= 86400 {
+			s.Confirmations, s.ConfirmationsSince = 0, now
+		}
+		if s.Confirmations >= maxConfirmationsPerDay {
+			return nil
+		}
+		recent, err := orm.QueryOf[models.Subscriber](tx).Where("project_id", "=", p.ID).Where("last_requested_at", ">", now-3600).Count(ctx)
+		if err != nil {
+			return err
+		}
+		if recent >= maxConfirmationsPerProjectHour {
+			return nil
+		}
+		s.Confirmations++
+		token := rand.Text()
+		s.ProjectID = p.ID
+		s.Email = email
+		s.Status = "pending"
+		s.TokenHash = newsletter.Hash(token)
+		s.ExpiresAt = now + 86400
+		s.LastRequestedAt = now
+		if s.ID == 0 {
+			err = orm.Create(ctx, tx, &s)
+		} else {
+			err = orm.Update(ctx, tx, &s)
+		}
+		if err != nil {
+			return err
+		}
+		return n.App.MailLaterTx(ctx, tx, newsletter.Confirmation{Project: p, Email: email, URL: "https://" + p.Domain + "/confirm?token=" + token})
+	})
 }
 
 const (
@@ -244,7 +252,7 @@ func (n *NewsletterController) unsubscribe(c *web.Ctx, in map[string]string) err
 	if id <= 0 || !valid {
 		return errs.ErrForbidden
 	}
-	if err := n.cancelSubscription(c, id); err != nil {
+	if err := n.cancelSubscription(c, id, 0); err != nil {
 		return err
 	}
 	return c.JSON(200, web.Map{"message": "Subscription canceled. You will not receive new campaigns."})
@@ -253,8 +261,12 @@ func (n *NewsletterController) unsubscribe(c *web.Ctx, in map[string]string) err
 // cancelSubscription moves a pending or confirmed subscriber to unsubscribed.
 // A suppressed subscriber (hard bounce, complaint) keeps that status so the
 // dashboard still shows why it is blocked.
-func (n *NewsletterController) cancelSubscription(c *web.Ctx, id int64) (err error) {
-	_, err = orm.QueryOf[models.Subscriber](n.DB).Where("id", "=", id).WhereIn("status", "pending", "confirmed").Update(c.Context(), orm.Set{"status": "unsubscribed", "token_hash": "", "expires_at": int64(0)})
+func (n *NewsletterController) cancelSubscription(c *web.Ctx, id int64, projectID int64) (err error) {
+	q := orm.QueryOf[models.Subscriber](n.DB).Where("id", "=", id)
+	if projectID != 0 {
+		q = q.Where("project_id", "=", projectID)
+	}
+	_, err = q.WhereIn("status", "pending", "confirmed").Update(c.Context(), orm.Set{"status": "unsubscribed", "token_hash": "", "expires_at": int64(0)})
 	return err
 }
 func (n *NewsletterController) CreateProject(c *web.Ctx) error {
@@ -381,12 +393,18 @@ func (n *NewsletterController) Dashboard(c *web.Ctx) error {
 	if err != nil {
 		return err
 	}
+	apiTokens := []auth.Token{}
+	if p.ID != 0 {
+		if apiTokens, err = n.liveTokens(ctx, strconv.FormatInt(p.ID, 10)); err != nil {
+			return err
+		}
+	}
 	stats["campaigns"], err = orm.QueryOf[models.Campaign](n.DB).Where("project_id", "=", p.ID).Count(ctx)
 	if err != nil {
 		return err
 	}
 
-	return inertia.Render(c, "Dashboard", inertia.Props{"projects": projects, "project": p, "subscribers": subscribers, "campaigns": campaigns, "stats": stats, "deliveryStats": deliveryStats, "trackingStats": tracking, "total": total, "page": page, "filters": web.Map{"q": c.Query("q"), "status": c.Query("status")}, "admin": AdminEmail})
+	return inertia.Render(c, "Dashboard", inertia.Props{"projects": projects, "project": p, "subscribers": subscribers, "campaigns": campaigns, "stats": stats, "deliveryStats": deliveryStats, "trackingStats": tracking, "apiTokens": apiTokens, "total": total, "page": page, "filters": web.Map{"q": c.Query("q"), "status": c.Query("status")}, "admin": AdminEmail})
 }
 func (n *NewsletterController) campaignInput(c *web.Ctx) (models.Project, map[string]string, string, error) {
 	in, err := input(c)
@@ -457,14 +475,24 @@ func (n *NewsletterController) Preview(c *web.Ctx) error {
 	return c.JSON(200, web.Map{"url": "/api/preview/" + token})
 }
 func (n *NewsletterController) SendCampaign(c *web.Ctx) error {
+	return n.queueCampaign(c, number(c.Param("id")), 0)
+}
+
+// queueCampaign fans a draft campaign out to the confirmed subscribers of its
+// project. A non-zero projectID restricts it to that project's campaigns (API
+// tokens); a campaign of another project is reported as not found.
+func (n *NewsletterController) queueCampaign(c *web.Ctx, id, projectID int64) error {
 	q, err := n.App.Queue()
 	if err != nil {
 		return err
 	}
 	err = n.DB.Tx(c.Context(), func(tx *database.Tx) error {
-		campaign, err := orm.QueryOf[models.Campaign](tx).Where("id", "=", number(c.Param("id"))).LockForUpdate().First(c.Context())
+		campaign, err := orm.QueryOf[models.Campaign](tx).Where("id", "=", id).LockForUpdate().First(c.Context())
 		if err != nil {
 			return err
+		}
+		if projectID != 0 && campaign.ProjectID != projectID {
+			return errs.ErrNotFound
 		}
 		if campaign.Status != "draft" {
 			return errs.New(409, "This campaign is already queued for delivery.")
@@ -592,7 +620,7 @@ func (n *NewsletterController) AdminUnsubscribe(c *web.Ctx) error {
 	if _, err := orm.QueryOf[models.Subscriber](n.DB).Find(c.Context(), id); err != nil {
 		return err
 	}
-	if err := n.cancelSubscription(c, id); err != nil {
+	if err := n.cancelSubscription(c, id, 0); err != nil {
 		return err
 	}
 	return c.JSON(200, web.Map{"message": "Subscription canceled."})
