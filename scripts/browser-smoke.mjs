@@ -133,6 +133,24 @@ try {
   ).toBeVisible();
   await publicPage.goto(root + "/subscribe/does-not-exist");
   await expect(publicPage.getByText(/not found/i).first()).toBeVisible();
+  for (const [path, heading] of [
+    ["/lists", "Your lists."],
+    ["/bounces", "Bounces and complaints."],
+    ["/api-tokens", "Connect your apps."],
+  ]) {
+    await page.goto(root + path);
+    await expect(page.getByRole("heading", { name: heading })).toBeVisible();
+  }
+  const sidebar = page.locator("[data-slot=sidebar]").first();
+  await expect(sidebar).toHaveAttribute("data-state", "expanded");
+  await page.keyboard.press("Control+b");
+  await expect(sidebar).toHaveAttribute("data-state", "collapsed");
+  await page.keyboard.press("Control+b");
+  await expect(sidebar).toHaveAttribute("data-state", "expanded");
+  await page.getByRole("button", { name: "Switch to dark theme" }).click();
+  await expect(page.locator("html")).toHaveClass(/dark/);
+  await page.getByRole("button", { name: "Switch to light theme" }).click();
+  await expect(page.locator("html")).not.toHaveClass(/dark/);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(root + "/");
   await expect(
@@ -152,7 +170,7 @@ try {
     );
   if (errors.length) throw new Error(errors.join("\n"));
   console.log(
-    "Browser smoke passed: dashboard, subscriber search, editor, preview, campaign send, projects, public subscription, public confirm/unsubscribe pages and mobile.",
+    "Browser smoke passed: dashboard, subscriber search, editor, preview, campaign send, projects, lists, bounces, API tokens, sidebar shortcut, theme toggle, public subscription, public confirm/unsubscribe pages and mobile.",
   );
   await guest.close();
 } finally {
