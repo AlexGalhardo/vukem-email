@@ -23,6 +23,13 @@ export interface Campaign {
   recipients: number;
   created_at: string;
 }
+export interface Bounce {
+  id: number;
+  email: string;
+  type: "hard" | "soft" | "complaint";
+  reason: string;
+  created_at: string;
+}
 export interface ApiToken {
   id: string;
   name: string;
@@ -39,6 +46,7 @@ export interface DashboardProps {
   deliveryStats: Record<string, Record<string, number>>;
   trackingStats: Record<string, Record<string, number>>;
   apiTokens: ApiToken[];
+  bounces: Bounce[];
   total: number;
   page: number;
   filters: { q: string; status: string };
