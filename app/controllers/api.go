@@ -182,7 +182,8 @@ func (n *NewsletterController) liveTokens(ctx context.Context, owner string) ([]
 	if err != nil {
 		return nil, err
 	}
-	return slices.DeleteFunc(all, func(t auth.Token) bool { return t.RevokedAt != nil }), nil
+	// Never nil: it is an Inertia prop and a JSON null would crash the page.
+	return slices.DeleteFunc(append([]auth.Token{}, all...), func(t auth.Token) bool { return t.RevokedAt != nil }), nil
 }
 
 // RevokeAPIToken revokes a token of the project in the path.

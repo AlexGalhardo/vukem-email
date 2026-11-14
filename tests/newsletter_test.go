@@ -62,6 +62,10 @@ func TestSecurity_AdminAccess(t *testing.T) {
 		}
 	}
 }
+func TestAPITokensPageGetsEmptyListNotNull(t *testing.T) {
+	app, _ := setup(t)
+	admin(t, app).Get("/api-tokens").AssertInertia("Dashboard").PropEquals("apiTokens", []any{})
+}
 func TestDoubleOptInAndTokenLifecycle(t *testing.T) {
 	app, p := setup(t)
 	client := app.Client(t)
