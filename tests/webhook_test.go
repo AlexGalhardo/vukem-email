@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/AlexGalhardo/vukem-email/app/controllers"
 	"github.com/AlexGalhardo/vukem-email/app/models"
 	"github.com/AlexGalhardo/vukem-email/bootstrap"
 	"github.com/AlexGalhardo/vukem/orm"
@@ -223,5 +224,43 @@ func TestWebhookSuppressionIsIdempotent(t *testing.T) {
 	rows, err := orm.QueryOf[models.Suppression](db).Where("email", "=", "twice@example.com").Get(t.Context())
 	if err != nil || len(rows) != 1 || rows[0].Reason != "hard_bounce" {
 		t.Fatalf("suppressions = %+v, %v", rows, err)
+	}
+}
+
+func TestWebhookLogsBouncesAndSuppressesAfterSoftBounceLimit(t *testing.T) {
+	app, p := webhookApp(t)
+	db, _ := app.DB()
+	s := models.Subscriber{ProjectID: p.ID, Email: "flaky@example.com", Status: "confirmed"}
+	if err := orm.Create(t.Context(), db, &s); err != nil {
+		t.Fatal(err)
+	}
+	soft := fmt.Sprintf(`{"type":"email.bounced","data":{"to":[%q],"tags":{"project":"%d"},"bounce":{"type":"Transient","message":"mailbox full"}}}`, s.Email, p.ID)
+	for i := 1; i < controllers.SoftBounceLimit; i++ {
+		post(signed(app.Client(t), fmt.Sprintf("soft_%d", i), time.Now(), soft), soft).AssertStatus(200)
+		if subscriberStatus(t, app, s.ID) != "confirmed" {
+			t.Fatalf("suppressed after only %d soft bounces", i)
+		}
+	}
+	// A redelivered event id must not count twice.
+	post(signed(app.Client(t), "soft_1", time.Now(), soft), soft).AssertStatus(200)
+	if subscriberStatus(t, app, s.ID) != "confirmed" {
+		t.Fatal("a duplicate event counted as a new soft bounce")
+	}
+	post(signed(app.Client(t), "soft_last", time.Now(), soft), soft).AssertStatus(200)
+	if subscriberStatus(t, app, s.ID) != "suppressed" {
+		t.Fatalf("subscriber must be suppressed after %d soft bounces", controllers.SoftBounceLimit)
+	}
+	sup, err := orm.QueryOf[models.Suppression](db).Where("email", "=", s.Email).First(t.Context())
+	if err != nil || sup.Reason != "soft_bounce_limit" {
+		t.Fatalf("suppression = %+v, %v", sup, err)
+	}
+	rows, err := orm.QueryOf[models.Bounce](db).Where("email", "=", s.Email).Get(t.Context())
+	if err != nil || len(rows) != controllers.SoftBounceLimit || rows[0].Type != "soft" || rows[0].Reason != "mailbox full" || rows[0].SubscriberID != s.ID {
+		t.Fatalf("bounces = %+v, %v", rows, err)
+	}
+	hard := fmt.Sprintf(`{"type":"email.bounced","data":{"to":["gone@example.com"],"tags":{"project":"%d"},"bounce":{"type":"Permanent"}}}`, p.ID)
+	post(signed(app.Client(t), "hard_1", time.Now(), hard), hard).AssertStatus(200)
+	if n, _ := orm.QueryOf[models.Bounce](db).Where("type", "=", "hard").Count(t.Context()); n != 1 {
+		t.Fatalf("hard bounces logged = %d", n)
 	}
 }

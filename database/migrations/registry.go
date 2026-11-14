@@ -10,5 +10,6 @@ func All() []schema.Migration {
 		suppressions(),
 		indexes(),
 		confirmationCaps(),
+		bounces(),
 	}
 }

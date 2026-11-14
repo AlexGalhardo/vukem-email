@@ -48,3 +48,17 @@ type Suppression struct {
 	Email     string `json:"email"`
 	Reason    string `json:"reason"`
 }
+
+// Bounce is one bounce or complaint reported by Resend. Type is "hard",
+// "soft" or "complaint"; EventID (the Svix message id) makes a redelivered
+// event idempotent.
+type Bounce struct {
+	orm.Model
+	ProjectID    int64  `json:"project_id"`
+	Email        string `json:"email"`
+	SubscriberID int64  `json:"subscriber_id"`
+	DeliveryID   int64  `json:"delivery_id"`
+	Type         string `json:"type"`
+	Reason       string `json:"reason"`
+	EventID      string `json:"-"`
+}
