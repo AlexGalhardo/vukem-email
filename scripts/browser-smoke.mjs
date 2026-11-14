@@ -138,12 +138,18 @@ try {
   await expect(
     page.getByRole("heading", { name: "Every connection matters." }),
   ).toBeVisible();
-  if (
-    await page.evaluate(
-      () => document.documentElement.scrollWidth > innerWidth + 1,
-    )
-  )
-    throw new Error("Dashboard overflows mobile viewport");
+  const overflow = await page.evaluate(() =>
+    document.documentElement.scrollWidth > innerWidth + 1
+      ? [...document.querySelectorAll("body *")]
+          .filter((el) => el.getBoundingClientRect().right > innerWidth + 1)
+          .slice(0, 5)
+          .map((el) => `${el.tagName.toLowerCase()}.${el.className}`)
+      : null,
+  );
+  if (overflow)
+    throw new Error(
+      `Dashboard overflows mobile viewport: ${overflow.join(" | ")}`,
+    );
   if (errors.length) throw new Error(errors.join("\n"));
   console.log(
     "Browser smoke passed: dashboard, subscriber search, editor, preview, campaign send, projects, public subscription, public confirm/unsubscribe pages and mobile.",
