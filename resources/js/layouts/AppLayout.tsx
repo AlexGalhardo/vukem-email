@@ -1,19 +1,22 @@
 import { Link, router, usePage } from "@inertiajs/react";
 import {
   ArrowUpRight,
-  ChevronDown,
   CircleHelp,
   FileText,
   Globe2,
+  KeyRound,
   LayoutDashboard,
+  List,
   LogOut,
   Mail,
-  Plus,
+  Moon,
   Send,
   Settings2,
+  ShieldAlert,
+  Sun,
   Users,
 } from "lucide-react";
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -35,16 +38,39 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
+  SidebarRail,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import type { Project } from "@/types";
 
 const nav = [
   { href: "/", label: "Overview", icon: LayoutDashboard },
+  { href: "/projects", label: "Projects", icon: Globe2 },
+  { href: "/lists", label: "Lists", icon: List },
   { href: "/subscribers", label: "Subscribers", icon: Users },
   { href: "/campaigns", label: "Campaigns", icon: Mail },
-  { href: "/projects", label: "Projects", icon: Globe2 },
+  { href: "/bounces", label: "Bounces", icon: ShieldAlert },
+  { href: "/api-tokens", label: "API tokens", icon: KeyRound },
 ];
+
+function useTheme(): [boolean, () => void] {
+  const [dark, setDark] = useState(false);
+  useEffect(() => {
+    setDark(document.documentElement.classList.contains("dark"));
+  }, []);
+  const toggle = () => {
+    const next = !dark;
+    document.documentElement.classList.toggle("dark", next);
+    try {
+      localStorage.setItem("theme", next ? "dark" : "light");
+    } catch {
+      // Storage can be blocked; the choice then lasts for this page view only.
+    }
+    setDark(next);
+  };
+  return [dark, toggle];
+}
+
 export default function AppLayout({
   children,
   project,
@@ -55,32 +81,44 @@ export default function AppLayout({
   projects: Project[];
 }) {
   const path = usePage().url.split("?")[0];
+  const [dark, toggleTheme] = useTheme();
   const link = (href: string) =>
     `${href}${project.id ? `?project=${project.id}` : ""}`;
   return (
     <SidebarProvider>
-      <Sidebar className="border-r border-border">
-        <SidebarHeader className="p-5">
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded-md focus:bg-background focus:px-3 focus:py-2 focus:text-sm focus:border focus:border-border"
+      >
+        Skip to content
+      </a>
+      <Sidebar collapsible="icon" className="border-r border-border">
+        <SidebarHeader className="p-5 group-data-[collapsible=icon]:p-2">
           <Link
             href={link("/")}
             className="flex items-center gap-2.5 font-semibold tracking-tight text-lg"
           >
-            <span className="brand-mark">
+            <span className="brand-mark shrink-0">
               <Send size={17} />
             </span>
-            vukem
-            <span className="font-normal text-muted-foreground">email</span>
+            <span className="group-data-[collapsible=icon]:hidden">vukem</span>
+            <span className="font-normal text-muted-foreground group-data-[collapsible=icon]:hidden">
+              email
+            </span>
           </Link>
-          <div className="mt-7 mb-2 text-[10px] tracking-[.14em] text-muted-foreground font-medium">
+          <div className="mt-7 mb-2 text-[10px] tracking-[.14em] text-muted-foreground font-medium group-data-[collapsible=icon]:hidden">
             WORKSPACE
           </div>
           <Select
             value={project.id ? String(project.id) : undefined}
             onValueChange={(value) => router.get(path, { project: value })}
           >
-            <SelectTrigger className="w-full bg-sidebar-accent border-border h-11">
+            <SelectTrigger
+              aria-label="Project"
+              className="w-full group-data-[collapsible=icon]:hidden bg-sidebar-accent border-border h-11"
+            >
               <div className="flex items-center gap-2">
-                <span className="flex size-6 items-center justify-center rounded bg-white/10 text-xs font-semibold">
+                <span className="flex size-6 items-center justify-center rounded bg-foreground/10 text-xs font-semibold">
                   {project.name?.slice(0, 1) || "+"}
                 </span>
                 <SelectValue placeholder="Select a project" />
@@ -106,6 +144,7 @@ export default function AppLayout({
                   <SidebarMenuItem key={item.href}>
                     <SidebarMenuButton
                       asChild
+                      tooltip={item.label}
                       isActive={
                         path === item.href ||
                         (item.href === "/campaigns" &&
@@ -136,6 +175,7 @@ export default function AppLayout({
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
+                  tooltip="Settings"
                   isActive={path === "/settings"}
                   className="h-10 px-3"
                 >
@@ -146,7 +186,11 @@ export default function AppLayout({
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild className="h-10 px-3">
+                <SidebarMenuButton
+                  asChild
+                  tooltip="Documentation"
+                  className="h-10 px-3"
+                >
                   <a
                     href="https://email.vukem.dev/docs/introduction"
                     target="_blank"
@@ -161,8 +205,8 @@ export default function AppLayout({
             </SidebarMenu>
           </SidebarGroup>
         </SidebarContent>
-        <SidebarFooter className="p-4">
-          <div className="rounded-lg border border-border p-3 mb-3">
+        <SidebarFooter className="p-4 group-data-[collapsible=icon]:p-2">
+          <div className="rounded-lg border border-border p-3 mb-3 group-data-[collapsible=icon]:hidden">
             <div className="flex gap-2 items-center text-xs font-medium">
               <span className="size-1.5 bg-emerald-400 rounded-full" />
               Made for your projects
@@ -177,7 +221,7 @@ export default function AppLayout({
             <div className="rounded-full bg-[#c6efb9] text-[#20451a] size-8 grid place-items-center text-xs font-semibold">
               AG
             </div>
-            <div className="min-w-0 flex-1">
+            <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
               <div className="text-xs font-medium">Alex Galhardo</div>
               <div className="text-[10px] text-muted-foreground truncate">
                 Personal workspace
@@ -186,17 +230,18 @@ export default function AppLayout({
             <button
               type="button"
               aria-label="Sign out"
-              className="text-muted-foreground hover:text-foreground"
+              className="text-muted-foreground hover:text-foreground group-data-[collapsible=icon]:hidden"
               onClick={() => router.post("/logout")}
             >
               <LogOut size={15} />
             </button>
           </div>
         </SidebarFooter>
+        <SidebarRail />
       </Sidebar>
       <SidebarInset>
         <header className="h-16 flex items-center border-b border-border px-5 md:px-9 gap-3">
-          <SidebarTrigger className="md:hidden" />
+          <SidebarTrigger aria-label="Toggle sidebar (Ctrl+B)" />
           <span className="text-muted-foreground text-sm">
             Personal workspace
           </span>
@@ -206,6 +251,16 @@ export default function AppLayout({
             Personal
           </span>
           <div className="ml-auto flex gap-4 items-center">
+            <button
+              type="button"
+              aria-label={
+                dark ? "Switch to light theme" : "Switch to dark theme"
+              }
+              className="text-muted-foreground hover:text-foreground rounded-md p-1"
+              onClick={toggleTheme}
+            >
+              {dark ? <Sun size={17} /> : <Moon size={17} />}
+            </button>
             <a
               href="https://email.vukem.dev/docs/introduction"
               target="_blank"
@@ -220,7 +275,10 @@ export default function AppLayout({
             </div>
           </div>
         </header>
-        <main className="mx-auto w-full max-w-[1500px] px-5 py-8 md:px-9 md:py-10">
+        <main
+          id="main"
+          className="mx-auto w-full max-w-[1500px] px-5 py-8 md:px-9 md:py-10"
+        >
           {children}
         </main>
         <footer className="mt-auto mx-5 md:mx-9 py-5 border-t border-border flex justify-between text-[11px] text-muted-foreground">
