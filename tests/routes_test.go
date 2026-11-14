@@ -31,7 +31,7 @@ func TestPublicRoutes(t *testing.T) {
 func TestDashboardRoutesRequireTheAdmin(t *testing.T) {
 	app, p := setup(t)
 	id := strconv.FormatInt(p.ID, 10)
-	pages := []string{"/", "/subscribers", "/campaigns", "/campaigns/new", "/projects", "/settings"}
+	pages := []string{"/", "/subscribers", "/campaigns", "/campaigns/new", "/projects", "/lists", "/bounces", "/api-tokens", "/settings"}
 	apis := []struct{ method, path string }{
 		{"POST", "/api/projects"}, {"POST", "/api/campaigns"}, {"POST", "/api/campaigns/1/send"}, {"POST", "/api/preview"},
 		{"POST", "/api/subscribers/1/unsubscribe"}, {"GET", "/api/subscribers/export?project=" + id}, {"GET", "/api/preview/sometoken"},
