@@ -1,10 +1,11 @@
 {{/* layout: none */}}<!doctype html>
-<html lang="en" class="dark" data-hydrating>
+<html lang="en" data-hydrating>
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Vukem Email</title>
 	<meta property="csp-nonce" nonce="{{cspNonce}}">
+	<script{{with cspNonce}} nonce="{{.}}"{{end}}>try{var t=localStorage.getItem("theme");if(t==="dark"||(t!=="light"&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.classList.add("dark")}catch(e){}</script>
 	{{analytics}}
 	{{viteReactRefresh}}
 	{{vite "resources/css/app.css" "resources/js/app.tsx"}}
