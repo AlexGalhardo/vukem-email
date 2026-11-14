@@ -249,6 +249,7 @@ func (n *NewsletterController) unsubscribe(c *web.Ctx, in map[string]string) err
 	}
 	return c.JSON(200, web.Map{"message": "Subscription canceled. You will not receive new campaigns."})
 }
+
 // cancelSubscription moves a pending or confirmed subscriber to unsubscribed.
 // A suppressed subscriber (hard bounce, complaint) keeps that status so the
 // dashboard still shows why it is blocked.
@@ -376,12 +377,16 @@ func (n *NewsletterController) Dashboard(c *web.Ctx) error {
 		return err
 	}
 	rows.Close()
+	tracking, err := n.trackingStats(ctx, p.ID)
+	if err != nil {
+		return err
+	}
 	stats["campaigns"], err = orm.QueryOf[models.Campaign](n.DB).Where("project_id", "=", p.ID).Count(ctx)
 	if err != nil {
 		return err
 	}
 
-	return inertia.Render(c, "Dashboard", inertia.Props{"projects": projects, "project": p, "subscribers": subscribers, "campaigns": campaigns, "stats": stats, "deliveryStats": deliveryStats, "total": total, "page": page, "filters": web.Map{"q": c.Query("q"), "status": c.Query("status")}, "admin": AdminEmail})
+	return inertia.Render(c, "Dashboard", inertia.Props{"projects": projects, "project": p, "subscribers": subscribers, "campaigns": campaigns, "stats": stats, "deliveryStats": deliveryStats, "trackingStats": tracking, "total": total, "page": page, "filters": web.Map{"q": c.Query("q"), "status": c.Query("status")}, "admin": AdminEmail})
 }
 func (n *NewsletterController) campaignInput(c *web.Ctx) (models.Project, map[string]string, string, error) {
 	in, err := input(c)
@@ -541,7 +546,11 @@ func (n *NewsletterController) CampaignHealth(c *web.Ctx) error {
 	} else if !errors.Is(err, orm.ErrNotFound) {
 		return err
 	}
-	return c.JSON(200, web.Map{"status": campaign.Status, "recipients": campaign.Recipients, "deliveries": deliveries, "oldest_queued_seconds": oldest, "stalled": oldest > int64(stalledAfter.Seconds())})
+	tracking, err := n.trackingStats(ctx, campaign.ProjectID)
+	if err != nil {
+		return err
+	}
+	return c.JSON(200, web.Map{"status": campaign.Status, "recipients": campaign.Recipients, "deliveries": deliveries, "tracking": tracking[campaign.ID], "oldest_queued_seconds": oldest, "stalled": oldest > int64(stalledAfter.Seconds())})
 }
 func (n *NewsletterController) Export(c *web.Ctx) error {
 	id := number(c.Query("project"))

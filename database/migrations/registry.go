@@ -11,5 +11,6 @@ func All() []schema.Migration {
 		indexes(),
 		confirmationCaps(),
 		bounces(),
+		deliveryEvents(),
 	}
 }

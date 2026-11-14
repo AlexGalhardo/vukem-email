@@ -3,11 +3,11 @@ title: Resend webhooks
 description: Delivery events, signature verification, and automatic suppression of bounced addresses.
 ---
 
-`POST /webhooks/resend` receives `email.delivered`, `email.bounced` and `email.complained` events. In production the app refuses to boot without `RESEND_WEBHOOK_SECRET`, so bounce and complaint handling can never be silently off. In other environments an empty secret disables the route (404) and logs a warning.
+`POST /webhooks/resend` receives `email.delivered`, `email.bounced`, `email.complained`, `email.opened` and `email.clicked` events. In production the app refuses to boot without `RESEND_WEBHOOK_SECRET`, so bounce and complaint handling can never be silently off. In other environments an empty secret disables the route (404) and logs a warning.
 
 ## Setup
 
-1. In Resend, add a webhook for `https://email.hexascore.app/webhooks/resend` with the three events above.
+1. In Resend, add a webhook for `https://email.hexascore.app/webhooks/resend` with the five events above. Opens and clicks only arrive if open and click tracking are enabled for the sending domain in Resend; the app adds no pixel or redirect of its own.
 2. Copy its signing secret (`whsec_...`) into `RESEND_WEBHOOK_SECRET`.
 
 ## Verification
@@ -31,5 +31,11 @@ Every campaign and confirmation email is tagged with its project (campaign email
 Every bounce and complaint is also stored in the `bounces` table (project, address, subscriber, delivery, type `hard`, `soft` or `complaint`, the provider message, and the Svix event id, which keeps redeliveries from counting twice). The limit is `controllers.SoftBounceLimit` and the window `controllers.SoftBounceWindow`.
 
 Delivery states only move forward: `queued`, `accepted`, `delivered`, `bounced`, `complained`. A late or repeated event never overwrites a stronger state (a `delivered` that arrives after a `bounced` changes nothing). Suppression rows are written with an insert that ignores conflicts, so concurrent or retried events for one address converge on a single row and the first reason is kept.
+
+## Opens and clicks
+
+`email.opened` and `email.clicked` are stored per delivery (the `delivery` tag) in the `delivery_events` table and never change the delivery status. A redelivered event id is stored once. The click URL is kept without its query string and fragment, because campaign links can carry personal tokens. Events for an unknown delivery are ignored with `200`.
+
+The dashboard campaign table shows unique opens and clicks (distinct deliveries). `GET /api/campaigns/{id}/health` returns `tracking` with `opens`, `unique_opens`, `clicks` and `unique_clicks`. Opens are approximate: mail clients that prefetch images (Apple Mail Privacy Protection) report opens that no person made.
 
 Suppression is per project. A suppressed address never receives campaigns (the queue worker checks the list right before sending) and the public subscribe endpoint keeps answering 202 without sending a confirmation email, so the response does not reveal the state. Removing an address from the list requires deleting its row in `suppressions`.
