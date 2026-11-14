@@ -104,3 +104,21 @@ func TestCampaignCarriesListUnsubscribeHeaders(t *testing.T) {
 	target := strings.TrimSuffix(strings.TrimPrefix(link, "<https://news.hexascore.app"), ">")
 	app.Client(t).Do(http.MethodPost, target, strings.NewReader("List-Unsubscribe=One-Click"), "application/x-www-form-urlencoded").AssertStatus(200)
 }
+
+func TestUnsubscribeNeverOverwritesSuppressed(t *testing.T) {
+	app, p := setup(t)
+	db, _ := app.DB()
+	s := models.Subscriber{ProjectID: p.ID, Email: "blocked@example.com", Status: "suppressed"}
+	if err := orm.Create(t.Context(), db, &s); err != nil {
+		t.Fatal(err)
+	}
+	app.Client(t).Do(http.MethodPost, oneClickURL(t, app, p.Domain, s.ID), strings.NewReader("List-Unsubscribe=One-Click"), "application/x-www-form-urlencoded").AssertStatus(200)
+	if subscriberStatus(t, app, s.ID) != "suppressed" {
+		t.Fatal("token unsubscribe must keep suppressed")
+	}
+	admin(t, app).PostJSON("/api/subscribers/"+strconv.FormatInt(s.ID, 10)+"/unsubscribe", map[string]string{}).AssertStatus(200)
+	if subscriberStatus(t, app, s.ID) != "suppressed" {
+		t.Fatal("admin unsubscribe must keep suppressed")
+	}
+	admin(t, app).PostJSON("/api/subscribers/999999/unsubscribe", map[string]string{}).AssertStatus(404)
+}

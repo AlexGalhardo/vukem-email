@@ -20,6 +20,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - **delivery:** A permanent Resend failure (`queue.ErrPermanent`, any 4xx except 408/409/429) now marks the delivery `failed` immediately, so the campaign reaches `completed` instead of staying `queued` and `stalled` (audit H1).
 - **renderer:** A renderer timeout, a missing `node` or an OOM kill is now a 500 with the truncated stderr logged, no longer a 422 "Invalid content". Only rejected content (`scripts/render-email.tsx` exits 65) and the size limits return 422 (audit H5).
 - **webhooks:** Boot fails in production when `RESEND_WEBHOOK_SECRET` is empty instead of silently dropping the `/webhooks/resend` route; other environments log a warning (audit M3).
+- **webhooks:** Delivery state from Resend events only moves forward (`queued` < `accepted` < `delivered` < `bounced` < `complained`), and suppression is an insert-or-ignore, so out-of-order events and concurrent duplicates no longer lose data or return 500 (audit M4).
+- **unsubscribe:** The signed-link, one-click and admin unsubscribe only move `pending` or `confirmed` subscribers; a `suppressed` subscriber keeps its status (audit M5).
 
 ## [0.4.0] - 2026-11-07
 

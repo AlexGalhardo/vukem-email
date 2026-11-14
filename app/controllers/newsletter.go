@@ -244,11 +244,17 @@ func (n *NewsletterController) unsubscribe(c *web.Ctx, in map[string]string) err
 	if id <= 0 || !valid {
 		return errs.ErrForbidden
 	}
-	_, err = orm.QueryOf[models.Subscriber](n.DB).Where("id", "=", id).Update(c.Context(), orm.Set{"status": "unsubscribed", "token_hash": "", "expires_at": int64(0)})
-	if err != nil {
+	if err := n.cancelSubscription(c, id); err != nil {
 		return err
 	}
 	return c.JSON(200, web.Map{"message": "Subscription canceled. You will not receive new campaigns."})
+}
+// cancelSubscription moves a pending or confirmed subscriber to unsubscribed.
+// A suppressed subscriber (hard bounce, complaint) keeps that status so the
+// dashboard still shows why it is blocked.
+func (n *NewsletterController) cancelSubscription(c *web.Ctx, id int64) (err error) {
+	_, err = orm.QueryOf[models.Subscriber](n.DB).Where("id", "=", id).WhereIn("status", "pending", "confirmed").Update(c.Context(), orm.Set{"status": "unsubscribed", "token_hash": "", "expires_at": int64(0)})
+	return err
 }
 func (n *NewsletterController) CreateProject(c *web.Ctx) error {
 	in, err := input(c)
@@ -573,12 +579,12 @@ func (n *NewsletterController) Export(c *web.Ctx) error {
 }
 
 func (n *NewsletterController) AdminUnsubscribe(c *web.Ctx) error {
-	count, err := orm.QueryOf[models.Subscriber](n.DB).Where("id", "=", number(c.Param("id"))).Update(c.Context(), orm.Set{"status": "unsubscribed", "token_hash": "", "expires_at": int64(0)})
-	if err != nil {
+	id := number(c.Param("id"))
+	if _, err := orm.QueryOf[models.Subscriber](n.DB).Find(c.Context(), id); err != nil {
 		return err
 	}
-	if count == 0 {
-		return errs.ErrNotFound
+	if err := n.cancelSubscription(c, id); err != nil {
+		return err
 	}
 	return c.JSON(200, web.Map{"message": "Subscription canceled."})
 }
