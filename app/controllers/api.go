@@ -196,3 +196,28 @@ func (n *NewsletterController) RevokeAPIToken(c *web.Ctx) error {
 	}
 	return c.JSON(200, web.Map{"message": "Token revoked."})
 }
+
+// SeedProjectToken returns a new API token for the project with that slug,
+// creating the project first when it does not exist. It backs the local
+// integration seed command and is never routed.
+func (n *NewsletterController) SeedProjectToken(ctx context.Context, p models.Project, abilities []string) (string, error) {
+	existing, err := orm.QueryOf[models.Project](n.DB).Where("slug", "=", p.Slug).First(ctx)
+	switch {
+	case err == nil:
+		p = existing
+	case errors.Is(err, orm.ErrNotFound):
+		if err := orm.Create(ctx, n.DB, &p); err != nil {
+			return "", err
+		}
+	default:
+		return "", err
+	}
+	for i, a := range abilities {
+		abilities[i] = strings.TrimSpace(a)
+		if !slices.Contains(allAbilities, abilities[i]) {
+			return "", errors.New("unknown ability " + strconv.Quote(a))
+		}
+	}
+	plain, _, err := n.tokens().Create(ctx, strconv.FormatInt(p.ID, 10), "integration", abilities, 0)
+	return plain, err
+}

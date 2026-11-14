@@ -287,7 +287,7 @@ func TestBouncesPageIsScopedToTheProject(t *testing.T) {
 			t.Fatal(i, err)
 		}
 	}
-	page := admin(t, app).Get("/bounces?project="+strconv.FormatInt(p.ID, 10)).AssertStatus(200).AssertInertia("Dashboard")
+	page := admin(t, app).Get("/bounces?project=" + strconv.FormatInt(p.ID, 10)).AssertStatus(200).AssertInertia("Dashboard")
 	page.PropEquals("bounces.0.email", "gone@example.com").PropEquals("bounces.0.type", "hard")
 	admin(t, app).Get("/?project="+strconv.FormatInt(p.ID, 10)).AssertInertia("Dashboard").PropEquals("bounces", []any{})
 }
