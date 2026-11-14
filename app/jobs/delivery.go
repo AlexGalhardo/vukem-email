@@ -2,6 +2,7 @@ package jobs
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"html/template"
 	"strconv"
@@ -29,7 +30,8 @@ func deliver(app *vukem.App, ctx context.Context, job SendDelivery) (result erro
 	}
 	defer func() {
 		if result != nil {
-			if attempt, ok := queue.AttemptFrom(ctx); ok && attempt.Last() {
+			// ErrPermanent stops the queue's retries on attempt 1, where Last() is still false.
+			if attempt, ok := queue.AttemptFrom(ctx); errors.Is(result, queue.ErrPermanent) || (ok && attempt.Last()) {
 				if _, updateErr := orm.QueryOf[models.Delivery](db).Where("id", "=", d.ID).Where("status", "=", "queued").Update(ctx, orm.Set{"status": "failed"}); updateErr != nil {
 					result = fmt.Errorf("settle delivery: %w", updateErr)
 					return
@@ -96,11 +98,6 @@ func deliver(app *vukem.App, ctx context.Context, job SendDelivery) (result erro
 	msg.ID = fmt.Sprintf("newsletter-%d-%d", c.ID, s.ID)
 	msg.Tags = map[string]string{"project": strconv.FormatInt(p.ID, 10), "campaign": strconv.FormatInt(c.ID, 10), "delivery": strconv.FormatInt(d.ID, 10)}
 	if err = newsletter.SendWithHeaders(ctx, app, msg, newsletter.ListUnsubscribeHeaders(oneClick)); err != nil {
-		if attempt, ok := queue.AttemptFrom(ctx); ok && attempt.Last() {
-			if _, updateErr := orm.QueryOf[models.Delivery](db).Where("id", "=", d.ID).Update(ctx, orm.Set{"status": "failed"}); updateErr != nil {
-				return updateErr
-			}
-		}
 		return err
 	}
 	_, err = orm.QueryOf[models.Delivery](db).Where("id", "=", d.ID).Where("status", "=", "queued").Update(ctx, orm.Set{"status": "accepted"})
