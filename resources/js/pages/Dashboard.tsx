@@ -19,13 +19,12 @@ import {
   Sparkles,
   Users,
 } from "lucide-react";
-import { useEffect, useState, type FormEvent } from "react";
-import AppLayout from "@/layouts/AppLayout";
+import { type FormEvent, useEffect, useState } from "react";
+import ApiTokens from "@/components/ApiTokens";
 import Composer from "@/components/Composer";
 import ProjectForm from "@/components/ProjectForm";
-import ApiTokens from "@/components/ApiTokens";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -42,8 +41,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import AppLayout from "@/layouts/AppLayout";
 import { api } from "@/lib/api";
 import type { Campaign, DashboardProps, Project, Subscriber } from "@/types";
+
 const labels: Record<string, string> = {
   pending: "Pending",
   confirmed: "Confirmed",
@@ -115,9 +116,7 @@ export default function Dashboard(props: DashboardProps) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      setError(
-        "Could not copy. Select and copy the address manually.",
-      );
+      setError("Could not copy. Select and copy the address manually.");
     }
   }
   const title =
@@ -143,7 +142,10 @@ export default function Dashboard(props: DashboardProps) {
   useEffect(() => {
     if (path === "/campaigns" && campaigns.some((c) => c.status === "queued")) {
       const id = setInterval(
-        () => router.reload({ only: ["campaigns", "deliveryStats", "trackingStats"] }),
+        () =>
+          router.reload({
+            only: ["campaigns", "deliveryStats", "trackingStats"],
+          }),
         15000,
       );
       return () => clearInterval(id);
@@ -231,17 +233,13 @@ export default function Dashboard(props: DashboardProps) {
                 Your first newsletter starts here.
               </h2>
               <p className="text-sm text-muted-foreground max-w-md mx-auto mt-3 mb-7 leading-7">
-                Create a project, connect your subdomain, and welcome people
-                who want to follow your journey.
+                Create a project, connect your subdomain, and welcome people who
+                want to follow your journey.
               </p>
               <ProjectForm />
               <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-2xl mx-auto text-left">
                 {[
-                  [
-                    "01",
-                    "Connect your project",
-                    "Your own domain and sender.",
-                  ],
+                  ["01", "Connect your project", "Your own domain and sender."],
                   [
                     "02",
                     "Invite your audience",
@@ -358,8 +356,8 @@ export default function Dashboard(props: DashboardProps) {
                     to share?
                   </h2>
                   <p className="text-xs leading-6 text-muted-foreground mt-3 mb-7 max-w-64">
-                    An update, an idea, or a look behind the scenes.
-                    Your audience wants to hear it.
+                    An update, an idea, or a look behind the scenes. Your
+                    audience wants to hear it.
                   </p>
                   <Button
                     asChild
@@ -551,11 +549,7 @@ export default function Dashboard(props: DashboardProps) {
                   <p className="text-xs text-muted-foreground mt-4">
                     Another project. New connections.
                   </p>
-                  <div
-                    id="add-project-trigger"
-                    className="mt-4"
-                    onClick={(e) => e.stopPropagation()}
-                  >
+                  <div id="add-project-trigger" className="mt-4">
                     <ProjectForm small />
                   </div>
                 </div>
@@ -665,6 +659,7 @@ function Audience({ stats }: { stats: Record<string, number> }) {
       </div>
       <div
         className="flex gap-1 h-8 rounded overflow-hidden mt-6 bg-muted/50"
+        role="img"
         aria-label="Subscriber distribution"
       >
         {total ? (

@@ -1,6 +1,7 @@
-import { chromium, expect } from "@playwright/test";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { chromium, expect } from "@playwright/test";
+
 const browser = await chromium.launch({
   executablePath: process.env.BROWSER_EXECUTABLE || "/usr/bin/chromium",
   headless: true,

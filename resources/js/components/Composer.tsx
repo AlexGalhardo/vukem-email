@@ -1,4 +1,3 @@
-import { useRef, useState } from "react";
 import { router } from "@inertiajs/react";
 import {
   ArrowLeft,
@@ -12,19 +11,21 @@ import {
   Send,
   Smartphone,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/lib/api";
 import type { Campaign, Mode, Project } from "@/types";
+
 const markdown =
   "# We have news.\n\nHello! 👋\n\nA new edition of our newsletter is here.\n\n## What we are building\n\n- **Something new** to make your day easier\n- Improvements you asked for\n- Behind-the-scenes stories and next steps\n\n[Explore the news →](https://hexascore.app)\n\n---\n\nThanks for being part of this journey.\n\nUntil next time,\n\n**Alex**";
 const mdx =
@@ -137,6 +138,7 @@ export default function Composer({
       <div className="mb-7 flex flex-wrap gap-4 justify-between items-start">
         <div>
           <button
+            type="button"
             className="text-xs text-muted-foreground flex gap-1.5 items-center mb-4 hover:text-foreground"
             onClick={() => router.visit(`/campaigns?project=${project.id}`)}
           >
@@ -174,10 +176,10 @@ export default function Composer({
         </div>
       )}
       {notice && (
-        <div role="status" className="notice mb-5">
+        <output className="notice mb-5 block">
           <Check size={14} />
           {notice}
-        </div>
+        </output>
       )}
       <div className="grid grid-cols-1 xl:grid-cols-[1fr_1fr] gap-5">
         <section className="panel overflow-hidden">
@@ -197,7 +199,8 @@ export default function Composer({
               className="bg-transparent border-0 px-0 shadow-none text-base focus-visible:ring-0"
             />
             <div className="text-[11px] text-muted-foreground mt-3">
-              From: <span className="text-foreground">{project.from_email}</span>
+              From:{" "}
+              <span className="text-foreground">{project.from_email}</span>
             </div>
           </div>
           <div className="p-3 flex gap-1 border-b border-border">
@@ -250,6 +253,7 @@ export default function Composer({
               <div className="flex flex-wrap gap-1.5">
                 {Object.keys(snippets).map((name) => (
                   <button
+                    type="button"
                     key={name}
                     onClick={() => insert(snippets[name])}
                     className="text-[10px] border border-border bg-muted/50 hover:bg-muted px-2 py-1 rounded"
@@ -360,9 +364,7 @@ export default function Composer({
             checked again before delivery.
           </p>
           <Button disabled={!!busy} onClick={() => act("send")}>
-            {busy === "send"
-              ? "Queuing…"
-              : "Confirm and send campaign"}
+            {busy === "send" ? "Queuing…" : "Confirm and send campaign"}
             <Send size={14} />
           </Button>
         </DialogContent>

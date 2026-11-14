@@ -1,4 +1,5 @@
 import { renderContent } from "./email-renderer";
+
 let input = "";
 for await (const chunk of process.stdin) {
   input += chunk;

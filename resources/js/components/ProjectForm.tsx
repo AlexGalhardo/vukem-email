@@ -1,9 +1,7 @@
-import { useState, type FormEvent } from "react";
 import { router } from "@inertiajs/react";
 import { ArrowRight, Globe2, Plus } from "lucide-react";
+import { type FormEvent, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -12,6 +10,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/lib/api";
 import type { Project } from "@/types";
 export default function ProjectForm({
@@ -56,9 +56,7 @@ export default function ProjectForm({
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>
-            {project
-              ? "Configure project"
-              : "A new project. A new audience."}
+            {project ? "Configure project" : "A new project. A new audience."}
           </DialogTitle>
           <DialogDescription>
             Connect a subdomain and sender for your newsletter.
@@ -118,11 +116,7 @@ export default function ProjectForm({
             </p>
           )}
           <Button type="submit" disabled={busy} className="w-full">
-            {busy
-              ? "Saving…"
-              : project
-                ? "Save changes"
-                : "Create project"}
+            {busy ? "Saving…" : project ? "Save changes" : "Create project"}
             <ArrowRight size={15} />
           </Button>
         </form>
@@ -138,6 +132,7 @@ export function Field({
   children: React.ReactNode;
 }) {
   return (
+    // biome-ignore lint/a11y/noLabelWithoutControl: the input is passed as children and nested in the label
     <label className="block">
       <span className="block text-xs font-medium mb-2">{label}</span>
       {children}

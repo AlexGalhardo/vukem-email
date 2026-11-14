@@ -14,22 +14,6 @@ import {
   Users,
 } from "lucide-react";
 import type { ReactNode } from "react";
-import type { Project } from "@/types";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarProvider,
-  SidebarTrigger,
-  SidebarInset,
-} from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -38,6 +22,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarInset,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
+import type { Project } from "@/types";
+
 const nav = [
   { href: "/", label: "Overview", icon: LayoutDashboard },
   { href: "/subscribers", label: "Subscribers", icon: Users },
@@ -183,6 +184,7 @@ export default function AppLayout({
               </div>
             </div>
             <button
+              type="button"
               aria-label="Sign out"
               className="text-muted-foreground hover:text-foreground"
               onClick={() => router.post("/logout")}

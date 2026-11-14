@@ -1,8 +1,8 @@
-import React from "react";
-import { isolatedMdx } from "./isolated-mdx";
 import * as Email from "@react-email/components";
 import { render } from "@react-email/render";
+import React from "react";
 import sanitizeHtml from "sanitize-html";
+import { isolatedMdx } from "./isolated-mdx";
 
 export const components = {
   Button: Email.Button,
