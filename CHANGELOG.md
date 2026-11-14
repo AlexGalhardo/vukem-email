@@ -12,6 +12,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - **bounces:** Add a `bounces` table that logs every hard bounce, soft bounce and complaint from Resend; the address is suppressed after 3 soft bounces within 30 days (`controllers.SoftBounceLimit`, `SoftBounceWindow`) (audit M2).
 - **tracking:** Store Resend `email.opened` and `email.clicked` events per delivery (`delivery_events`) and show unique opens and clicks per campaign in the dashboard and in the campaign health endpoint. No own pixel or redirect (audit H3).
 - **api:** Per-project API tokens (vukem `auth.Tokens`, hashed at rest, explicit abilities `subscribers:write` and `campaigns:send`) created and revoked in Settings, with `Authorization: Bearer` routes under `/api/v1` to subscribe (double opt-in kept), unsubscribe and send campaigns, rate limited per IP and per token. See `docs/api-tokens.md` (audit H4).
+- **dashboard:** Collapsible icon sidebar (Ctrl+B, rail, tooltips, skip link) with Overview, Projects, Lists, Subscribers, Campaigns, Bounces and API tokens; new Lists (a project is a list), Bounces (hard, soft, complaint) and API tokens pages; light and dark theme with a toggle and a no-flash script. No templates page: the model has none (ROADMAP 10.b).
+- **integration:** `compose.integration.yaml` runs vukem-email, PostgreSQL and Mailpit; `integration:seed` creates a project and prints an API token without Google sign-in (refused in production); `docs/integrations.md` documents the HexaScore API call and the EletroRadar static form on the existing public `POST /subscribe/{slug}` (ROADMAP 10.c).
+- **tests:** Public subscribe rate limit (429), honeypot and seed token tests.
 
 ### Changed
 
