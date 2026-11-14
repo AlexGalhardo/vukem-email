@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - **ci:** Dependabot no longer proposes TypeScript 7 for `site/`: typescript-eslint 8.x peers `typescript <6.1.0`, so `npm ci` failed with ERESOLVE.
 - Require vukem v0.39.1, which sends Resend addresses as `email` or `Name <email>` (campaign and confirmation mail failed with "Invalid from" on v0.39.0).
 - **send:** `SendCampaign` creates deliveries with one multi-row insert per batch of 500 (`orm.CreateMany`) instead of one insert per subscriber; jobs are still enqueued one by one because vukem has no bulk dispatch (audit H2).
+- **site:** Serve the docs site with a pinned Caddy image (`caddy:2.11.9-alpine`, `site/Caddyfile`) instead of nginx; same headers, cache rules and 404 page. Dependabot PR for the nginx tag can be closed (audit M6).
 
 ### Fixed
 

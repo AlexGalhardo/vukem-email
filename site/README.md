@@ -27,6 +27,6 @@ Search, `llms.txt`, `llms-full.txt`, `sitemap.xml` and `search-index.json` pick 
 
 ## Deploy (Railway `docs` service)
 
-The service builds the `Dockerfile` in this folder (root directory `site`): `npm ci` and `npm run build` in a Node 24 stage, then the `out/` directory is served by `nginx:1.31.0-alpine` on `$PORT` (default 3000, set by Railway). There is no Node process at runtime and no start command to configure. To run without Docker, build with `npm ci && npm run build` and serve `out/` with any static server that maps `/docs/x/` to `x/index.html`. Set `SITE_URL=https://email.vukem.dev` at build time if the canonical host differs.
+The service builds the `Dockerfile` in this folder (root directory `site`): `npm ci` and `npm run build` in a Node 24 stage, then the `out/` directory is served by `caddy:2.11.9-alpine` (see `Caddyfile`) on `$PORT` (default 3000, set by Railway). There is no Node process at runtime and no start command to configure. To run without Docker, build with `npm ci && npm run build` and serve `out/` with any static server that maps `/docs/x/` to `x/index.html`. Set `SITE_URL=https://email.vukem.dev` at build time if the canonical host differs.
 
 The web app and queue worker use the root Dockerfile.

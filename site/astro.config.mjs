@@ -6,7 +6,7 @@ import { defineConfig } from "astro/config";
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 
-// Static HTML served by the nginx image in Dockerfile. "/" and "/docs" open the introduction.
+// Static HTML served by the Caddy image in Dockerfile. "/" and "/docs" open the introduction.
 export default defineConfig({
   site: "https://email.vukem.dev",
   output: "static",
