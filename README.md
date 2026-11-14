@@ -53,6 +53,19 @@ Vukem Email follows [Semantic Versioning](https://semver.org) and tags releases 
 
 Changes are listed in [CHANGELOG.md](CHANGELOG.md), which follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## Container image
+
+Each `vX.Y.Z` tag also publishes `ghcr.io/alexgalhardo/vukem-email` and `docker.io/<user>/vukem-email` with the tags `X.Y.Z`, `X.Y` and (stable tags only) `latest`, for `linux/amd64` and `linux/arm64`, signed with cosign and attested. The docs site has no image.
+
+The release builds the image first and smoke-tests it before pushing: it starts `compose.integration.yaml` (PostgreSQL, Mailpit, migrate, app) on that image and requires `/up` to answer 200. Locally:
+
+```sh
+docker build -t vukem-email:integration .
+docker compose -f compose.integration.yaml up -d --wait --no-build
+curl -fsS http://127.0.0.1:3010/up
+docker compose -f compose.integration.yaml down -v
+```
+
 ## Contributing
 
 Thank you for considering a contribution to Vukem Email.
