@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- **release:** The tag workflow publishes the `vukem-email` image to GHCR and Docker Hub (`X.Y.Z`, `X.Y`, `latest` on stable tags), smoke-tested through `compose.integration.yaml` before the push, signed with cosign and attested.
 - **docs:** Add `docs/audit-2026-11-14.md`, the gap analysis against a minimal listmonk.
 - **bounces:** Add a `bounces` table that logs every hard bounce, soft bounce and complaint from Resend; the address is suppressed after 3 soft bounces within 30 days (`controllers.SoftBounceLimit`, `SoftBounceWindow`) (audit M2).
 - **tracking:** Store Resend `email.opened` and `email.clicked` events per delivery (`delivery_events`) and show unique opens and clicks per campaign in the dashboard and in the campaign health endpoint. No own pixel or redirect (audit H3).
