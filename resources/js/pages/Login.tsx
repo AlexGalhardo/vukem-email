@@ -26,8 +26,8 @@ export default function Login({ configured }: { configured: boolean }) {
             to go further.
           </h1>
           <p className="mt-4 text-sm text-muted-foreground leading-6">
-            Sign in to create campaigns, follow your audience, and connect
-            with your subscribers.
+            Sign in to create campaigns, follow your audience, and connect with
+            your subscribers.
           </p>
           <Button
             asChild
@@ -65,13 +65,10 @@ export default function Login({ configured }: { configured: boolean }) {
             Administrator access only
           </div>
           {!configured && (
-            <p
-              role="status"
-              className="mt-6 text-xs text-amber-300 border border-amber-300/20 rounded-lg p-3"
-            >
+            <output className="mt-6 block text-xs text-amber-300 border border-amber-300/20 rounded-lg p-3">
               Sign-in will be available after Google OAuth credentials are
               configured.
-            </p>
+            </output>
           )}
         </section>
         <div className="absolute bottom-8 text-xs text-muted-foreground">

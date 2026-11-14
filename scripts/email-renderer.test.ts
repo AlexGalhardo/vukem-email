@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { renderContent } from "./email-renderer";
+
 test("Markdown renders GFM tables, links, code, lists and strikethrough", async () => {
   const result = await renderContent(
     "markdown",

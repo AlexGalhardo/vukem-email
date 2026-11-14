@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Body,
   Container,
@@ -9,6 +8,7 @@ import {
   Preview,
   Text,
 } from "@react-email/components";
+import React from "react";
 export default function Campaign() {
   return (
     <Html lang="en">
@@ -36,9 +36,8 @@ export default function Campaign() {
           <div>{"{{.Body}}"}</div>
           <Hr style={{ borderColor: "#eee", margin: "32px 0" }} />
           <Text style={{ fontSize: "12px", color: "#737373" }}>
-            You are receiving this email because you confirmed your
-            subscription to{" "}
-            {"{{.Project.Name}}"}.
+            You are receiving this email because you confirmed your subscription
+            to {"{{.Project.Name}}"}.
           </Text>
           <Link
             href="{{.UnsubscribeURL}}"

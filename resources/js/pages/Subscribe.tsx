@@ -1,6 +1,6 @@
 import { Head } from "@inertiajs/react";
 import { ArrowRight, Check, CheckCheck, Send } from "lucide-react";
-import { useState, type FormEvent } from "react";
+import { type FormEvent, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { api } from "@/lib/api";
@@ -50,22 +50,17 @@ export default function Subscribe({ project }: { project: Project }) {
           <h1 className="text-5xl md:text-6xl font-semibold tracking-[-.05em] leading-[1.1]">
             The next chapter,
             <br />
-            <span className="text-muted-foreground">
-              in your inbox.
-            </span>
+            <span className="text-muted-foreground">in your inbox.</span>
           </h1>
           <p className="text-muted-foreground mt-6 max-w-md mx-auto text-sm md:text-base leading-7">
             {project.description ||
               `Updates, behind-the-scenes stories, and ideas from ${project.name}. Subscribe to follow what we are building.`}
           </p>
           {message ? (
-            <div
-              role="status"
-              className="rounded-xl border border-emerald-400/20 bg-emerald-400/5 p-6 mt-8 text-sm leading-6"
-            >
+            <output className="block rounded-xl border border-emerald-400/20 bg-emerald-400/5 p-6 mt-8 text-sm leading-6">
               <CheckCheck className="mx-auto mb-3 text-emerald-400" />
               {message}
-            </div>
+            </output>
           ) : (
             <form onSubmit={submit} className="mt-9 max-w-md mx-auto">
               <label htmlFor="email" className="sr-only">

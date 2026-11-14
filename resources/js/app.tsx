@@ -1,4 +1,5 @@
 import { createInertiaApp } from "@inertiajs/react";
+
 createInertiaApp({
   nonce: document.querySelector<HTMLMetaElement>('meta[property="csp-nonce"]')
     ?.nonce,
