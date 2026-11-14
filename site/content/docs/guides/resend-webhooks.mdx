@@ -3,7 +3,7 @@ title: Resend webhooks
 description: Delivery events, signature verification, and automatic suppression of bounced addresses.
 ---
 
-`POST /webhooks/resend` receives `email.delivered`, `email.bounced` and `email.complained` events. The route exists only when `RESEND_WEBHOOK_SECRET` is set.
+`POST /webhooks/resend` receives `email.delivered`, `email.bounced` and `email.complained` events. In production the app refuses to boot without `RESEND_WEBHOOK_SECRET`, so bounce and complaint handling can never be silently off. In other environments an empty secret disables the route (404) and logs a warning.
 
 ## Setup
 

@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"errors"
 	"fmt"
 	vukem "github.com/AlexGalhardo/vukem"
 	"github.com/AlexGalhardo/vukem-email/app/controllers"
@@ -13,6 +14,7 @@ import (
 	"github.com/AlexGalhardo/vukem/social"
 	"github.com/AlexGalhardo/vukem/web"
 	"github.com/AlexGalhardo/vukem/webhook"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"strings"
@@ -130,7 +132,13 @@ func Web(r *router.Router, app *vukem.App) error {
 	r.Get("/unsubscribe", c.UnsubscribePage).Name("unsubscribe.show")
 	// No per-IP limit: mailbox providers deliver many one-click requests from shared addresses. The HMAC token is the credential.
 	r.Post("/unsubscribe/one-click", c.OneClickUnsubscribe).Use(publicBody).Name("unsubscribe.one-click")
-	if secret := app.Source.Get("RESEND_WEBHOOK_SECRET"); secret != "" {
+	secret := app.Source.Get("RESEND_WEBHOOK_SECRET")
+	if secret == "" && app.Config.Env == "production" {
+		return errors.New("RESEND_WEBHOOK_SECRET is required in production: without it bounces and complaints are never recorded")
+	}
+	if secret == "" {
+		slog.Warn("RESEND_WEBHOOK_SECRET is empty: /webhooks/resend is disabled")
+	} else {
 		verify, err := webhook.Standard(secret, webhook.StandardOptions{MaxBody: 256 << 10})
 		if err != nil {
 			return err
