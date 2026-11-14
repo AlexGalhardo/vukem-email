@@ -21,7 +21,10 @@ import (
 	"time"
 )
 
-var publicPOST = []string{"POST /subscribe/{slug}", "POST /unsubscribe/one-click", "POST /webhooks/resend"}
+// apiV1 are the token-authenticated routes: no session and no CSRF check, the bearer token is the credential.
+var apiV1 = []string{"POST /api/v1/subscribers", "PATCH /api/v1/subscribers/{id}", "POST /api/v1/campaigns/{id}/send"}
+
+var publicPOST = append([]string{"POST /subscribe/{slug}", "POST /unsubscribe/one-click", "POST /webhooks/resend"}, apiV1...)
 
 func allowedOrigins(raw string) ([]string, error) {
 	var out []string
@@ -124,6 +127,14 @@ func Web(r *router.Router, app *vukem.App) error {
 	r.Get("/api/preview/{token}", controllers.Protected(c.PreviewDocument)).Name("campaigns.preview.document")
 	r.Post("/api/preview", controllers.Protected(c.Preview)).Name("campaigns.preview")
 	r.Get("/api/subscribers/export", controllers.Protected(c.Export)).Name("subscribers.export")
+	r.Post("/api/projects/{id}/tokens", controllers.Protected(c.CreateAPIToken)).Name("projects.tokens.store")
+	r.Post("/api/projects/{id}/tokens/{token}/revoke", controllers.Protected(c.RevokeAPIToken)).Name("projects.tokens.revoke")
+	// The per-IP limit comes first: made-up tokens would each get a fresh per-token bucket.
+	apiIP := ratelimit.Middleware(ratelimit.NewMemory(300, time.Minute), ratelimit.ByIP)
+	apiToken := ratelimit.Middleware(ratelimit.NewMemory(60, time.Minute), ratelimit.ByToken)
+	r.Post("/api/v1/subscribers", c.APIToken(controllers.AbilitySubscribersWrite, c.APISubscribe)).Use(apiIP, apiToken, publicBody).Name("api.subscribers.store")
+	r.Patch("/api/v1/subscribers/{id}", c.APIToken(controllers.AbilitySubscribersWrite, c.APIUpdateSubscriber)).Use(apiIP, apiToken, publicBody).Name("api.subscribers.update")
+	r.Post("/api/v1/campaigns/{id}/send", c.APIToken(controllers.AbilityCampaignsSend, c.APISendCampaign)).Use(apiIP, apiToken, publicBody).Name("api.campaigns.send")
 	r.Get("/subscribe", c.Landing).Name("subscribe.host")
 	r.Get("/subscribe/{slug}", c.Landing).Name("subscribe.show")
 	r.Post("/subscribe/{slug}", c.Subscribe).Use(limit, publicBody).Name("subscribe.store")

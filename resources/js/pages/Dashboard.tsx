@@ -23,6 +23,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import AppLayout from "@/layouts/AppLayout";
 import Composer from "@/components/Composer";
 import ProjectForm from "@/components/ProjectForm";
+import ApiTokens from "@/components/ApiTokens";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -98,6 +99,7 @@ export default function Dashboard(props: DashboardProps) {
     filters,
     deliveryStats,
     trackingStats,
+    apiTokens,
   } = props;
   const url = usePage().url,
     path = url.split("?")[0],
@@ -616,6 +618,7 @@ export default function Dashboard(props: DashboardProps) {
                   ))}
                 </div>
               </section>
+              <ApiTokens project={project} tokens={apiTokens} />
               <section className="panel p-6 lg:col-span-2">
                 <div className="flex gap-3 items-center">
                   <Code2 size={17} />

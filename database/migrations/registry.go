@@ -12,5 +12,6 @@ func All() []schema.Migration {
 		confirmationCaps(),
 		bounces(),
 		deliveryEvents(),
+		accessTokens(),
 	}
 }
