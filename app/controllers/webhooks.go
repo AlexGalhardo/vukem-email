@@ -23,6 +23,21 @@ type resendEvent struct {
 	} `json:"data"`
 }
 
+// deliveryRank orders the delivery states Resend events can set. An event
+// never moves a delivery to a weaker state, so out-of-order or repeated
+// events cannot lose information (a late "delivered" after "bounced").
+var deliveryRank = map[string]int{"queued": 0, "accepted": 1, "delivered": 2, "bounced": 3, "complained": 4}
+
+func weakerThan(status string) []any {
+	var out []any
+	for s, rank := range deliveryRank {
+		if rank < deliveryRank[status] {
+			out = append(out, s)
+		}
+	}
+	return out
+}
+
 // ResendWebhook records delivery outcomes. Signature, replay window and
 // deduplication are enforced by the route middleware. Hard bounces and
 // complaints suppress the address for the project that sent the message.
@@ -37,7 +52,7 @@ func (n *NewsletterController) ResendWebhook(c *web.Ctx) error {
 	}
 	ctx := c.Context()
 	if id, err := strconv.ParseInt(ev.Data.Tags["delivery"], 10, 64); err == nil {
-		if _, err := orm.QueryOf[models.Delivery](n.DB).Where("id", "=", id).WhereIn("status", "queued", "accepted", "delivered").Update(ctx, orm.Set{"status": status}); err != nil {
+		if _, err := orm.QueryOf[models.Delivery](n.DB).Where("id", "=", id).WhereIn("status", weakerThan(status)...).Update(ctx, orm.Set{"status": status}); err != nil {
 			return err
 		}
 	}
@@ -48,15 +63,10 @@ func (n *NewsletterController) ResendWebhook(c *web.Ctx) error {
 	}
 	email := strings.ToLower(strings.TrimSpace(ev.Data.To[0]))
 	reason := map[string]string{"email.bounced": "hard_bounce", "email.complained": "complaint"}[ev.Type]
-	existing, err := orm.QueryOf[models.Suppression](n.DB).Where("project_id", "=", projectID).Where("email", "=", email).Count(ctx)
-	if err != nil {
+	// Svix retries and concurrent events for one address race on the unique (project_id, email) index; the first row wins.
+	sup := models.Suppression{ProjectID: projectID, Email: email, Reason: reason}
+	if err := orm.Upsert(ctx, n.DB, &sup, orm.OnConflict{Columns: []string{"project_id", "email"}, DoNothing: true}); err != nil {
 		return err
-	}
-	if existing == 0 {
-		sup := models.Suppression{ProjectID: projectID, Email: email, Reason: reason}
-		if err := orm.Create(ctx, n.DB, &sup); err != nil {
-			return err
-		}
 	}
 	if _, err := orm.QueryOf[models.Subscriber](n.DB).Where("project_id", "=", projectID).Where("email", "=", email).Update(ctx, orm.Set{"status": "suppressed", "token_hash": "", "expires_at": int64(0)}); err != nil {
 		return err

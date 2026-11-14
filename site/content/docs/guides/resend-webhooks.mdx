@@ -28,4 +28,6 @@ Every campaign and confirmation email is tagged with its project (campaign email
 | `email.bounced` with other types | Delivery `bounced`; nothing else (soft bounces may recover). |
 | `email.complained` | Delivery `complained`; the address is suppressed. |
 
+Delivery states only move forward: `queued`, `accepted`, `delivered`, `bounced`, `complained`. A late or repeated event never overwrites a stronger state (a `delivered` that arrives after a `bounced` changes nothing). Suppression rows are written with an insert that ignores conflicts, so concurrent or retried events for one address converge on a single row and the first reason is kept.
+
 Suppression is per project. A suppressed address never receives campaigns (the queue worker checks the list right before sending) and the public subscribe endpoint keeps answering 202 without sending a confirmation email, so the response does not reveal the state. Removing an address from the list requires deleting its row in `suppressions`.

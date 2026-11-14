@@ -172,3 +172,56 @@ func TestWebhookDisabledWithoutSecret(t *testing.T) {
 	app, _ := setup(t)
 	post(app.Client(t), "{}").AssertStatus(404)
 }
+
+func TestWebhookNeverRegressesDeliveryState(t *testing.T) {
+	app, p := webhookApp(t)
+	db, _ := app.DB()
+	s := models.Subscriber{ProjectID: p.ID, Email: "order@example.com", Status: "confirmed"}
+	c := models.Campaign{ProjectID: p.ID, Subject: "S", Mode: "markdown", Source: "x", BodyHTML: "x", Status: "completed"}
+	if err := orm.Create(t.Context(), db, &s); err != nil {
+		t.Fatal(err)
+	}
+	if err := orm.Create(t.Context(), db, &c); err != nil {
+		t.Fatal(err)
+	}
+	d := models.Delivery{CampaignID: c.ID, SubscriberID: s.ID, Status: "accepted"}
+	if err := orm.Create(t.Context(), db, &d); err != nil {
+		t.Fatal(err)
+	}
+	send := func(id, kind, extra string) {
+		t.Helper()
+		body := fmt.Sprintf(`{"type":%q,"data":{"to":[%q],"tags":{"project":"%d","delivery":"%d"}%s}}`, kind, s.Email, p.ID, d.ID, extra)
+		post(signed(app.Client(t), id, time.Now(), body), body).AssertStatus(200)
+	}
+	status := func() string {
+		got, _ := orm.QueryOf[models.Delivery](db).Find(t.Context(), d.ID)
+		return got.Status
+	}
+	hard := `,"bounce":{"type":"Permanent"}`
+	for _, step := range []struct{ id, kind, extra, want string }{
+		{"o1", "email.bounced", hard, "bounced"},
+		{"o2", "email.delivered", "", "bounced"},
+		{"o3", "email.complained", "", "complained"},
+		{"o4", "email.bounced", hard, "complained"},
+		{"o5", "email.delivered", "", "complained"},
+	} {
+		send(step.id, step.kind, step.extra)
+		if got := status(); got != step.want {
+			t.Fatalf("after %s delivery = %s, want %s", step.kind, got, step.want)
+		}
+	}
+}
+
+func TestWebhookSuppressionIsIdempotent(t *testing.T) {
+	app, p := webhookApp(t)
+	db, _ := app.DB()
+	body := fmt.Sprintf(`{"type":"email.bounced","data":{"to":["twice@example.com"],"tags":{"project":"%d"},"bounce":{"type":"Permanent"}}}`, p.ID)
+	complaint := event("email.complained", "twice@example.com", p.ID, "")
+	post(signed(app.Client(t), "s1", time.Now(), body), body).AssertStatus(200)
+	post(signed(app.Client(t), "s2", time.Now(), body), body).AssertStatus(200)
+	post(signed(app.Client(t), "s3", time.Now(), complaint), complaint).AssertStatus(200)
+	rows, err := orm.QueryOf[models.Suppression](db).Where("email", "=", "twice@example.com").Get(t.Context())
+	if err != nil || len(rows) != 1 || rows[0].Reason != "hard_bounce" {
+		t.Fatalf("suppressions = %+v, %v", rows, err)
+	}
+}
