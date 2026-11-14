@@ -3,14 +3,14 @@
   "docs/concepts/delivery.mdx": "2026-11-07T10:30:49-03:00",
   "docs/concepts/projects.mdx": "2026-11-07T10:30:49-03:00",
   "docs/concepts/subscribers.mdx": "2026-11-07T10:30:49-03:00",
-  "docs/getting-started/configuration.mdx": "2026-11-07T10:30:49-03:00",
+  "docs/getting-started/configuration.mdx": "2026-11-14T14:41:19-03:00",
   "docs/getting-started/deployment.mdx": "2026-11-07T10:30:50-03:00",
   "docs/getting-started/installation.mdx": "2026-11-11T17:41:47-03:00",
   "docs/getting-started/introduction.mdx": "2026-11-07T10:30:49-03:00",
   "docs/guides/email-content.mdx": "2026-11-07T10:30:49-03:00",
   "docs/guides/google-oidc.mdx": "2026-11-07T10:30:49-03:00",
   "docs/guides/operations.mdx": "2026-11-07T10:30:49-03:00",
-  "docs/guides/resend-webhooks.mdx": "2026-11-07T10:30:49-03:00",
+  "docs/guides/resend-webhooks.mdx": "2026-11-14T14:46:54-03:00",
   "docs/guides/security.mdx": "2026-11-07T10:30:49-03:00",
   "docs/guides/subscribe-api.mdx": "2026-11-07T10:30:49-03:00"
 }
