@@ -62,3 +62,14 @@ type Bounce struct {
 	Reason       string `json:"reason"`
 	EventID      string `json:"-"`
 }
+
+// DeliveryEvent is an open or click Resend reported for one delivery. Type is
+// "opened" or "clicked"; URL is the clicked link without query or fragment.
+type DeliveryEvent struct {
+	orm.Model
+	DeliveryID int64  `json:"delivery_id"`
+	CampaignID int64  `json:"campaign_id"`
+	Type       string `json:"type"`
+	URL        string `json:"url"`
+	EventID    string `json:"-"`
+}

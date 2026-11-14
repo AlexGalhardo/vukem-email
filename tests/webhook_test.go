@@ -264,3 +264,51 @@ func TestWebhookLogsBouncesAndSuppressesAfterSoftBounceLimit(t *testing.T) {
 		t.Fatalf("hard bounces logged = %d", n)
 	}
 }
+
+func TestWebhookRecordsOpensAndClicksPerDelivery(t *testing.T) {
+	app, p := webhookApp(t)
+	db, _ := app.DB()
+	c := models.Campaign{ProjectID: p.ID, Subject: "S", Mode: "markdown", Source: "x", BodyHTML: "x", Status: "completed"}
+	if err := orm.Create(t.Context(), db, &c); err != nil {
+		t.Fatal(err)
+	}
+	var ds []models.Delivery
+	for _, email := range []string{"a@example.com", "b@example.com"} {
+		s := models.Subscriber{ProjectID: p.ID, Email: email, Status: "confirmed"}
+		if err := orm.Create(t.Context(), db, &s); err != nil {
+			t.Fatal(err)
+		}
+		d := models.Delivery{CampaignID: c.ID, SubscriberID: s.ID, Status: "delivered"}
+		if err := orm.Create(t.Context(), db, &d); err != nil {
+			t.Fatal(err)
+		}
+		ds = append(ds, d)
+	}
+	send := func(id, kind string, deliveryID int64, extra string) {
+		t.Helper()
+		body := fmt.Sprintf(`{"type":%q,"data":{"to":["x@example.com"],"tags":{"project":"%d","delivery":"%d"}%s}}`, kind, p.ID, deliveryID, extra)
+		post(signed(app.Client(t), id, time.Now(), body), body).AssertStatus(200)
+	}
+	send("e1", "email.opened", ds[0].ID, "")
+	send("e2", "email.opened", ds[0].ID, "")
+	send("e2", "email.opened", ds[0].ID, "")
+	send("e3", "email.opened", ds[1].ID, "")
+	send("e4", "email.clicked", ds[0].ID, `,"click":{"link":"https://example.com/post?utm=1&token=secret#frag"}`)
+	send("e5", "email.opened", 999999, "")
+
+	events, err := orm.QueryOf[models.DeliveryEvent](db).Where("type", "=", "clicked").Get(t.Context())
+	if err != nil || len(events) != 1 || events[0].URL != "https://example.com/post" || events[0].CampaignID != c.ID {
+		t.Fatalf("click events = %+v, %v", events, err)
+	}
+	for _, d := range ds {
+		if got, _ := orm.QueryOf[models.Delivery](db).Find(t.Context(), d.ID); got.Status != "delivered" {
+			t.Fatalf("an engagement event must not change the delivery status: %s", got.Status)
+		}
+	}
+	id := strconv.FormatInt(c.ID, 10)
+	res := admin(t, app).GetJSON("/api/campaigns/" + id + "/health").AssertStatus(200)
+	res.AssertJSONPath("tracking.opens", float64(3))
+	res.AssertJSONPath("tracking.unique_opens", float64(2))
+	res.AssertJSONPath("tracking.clicks", float64(1))
+	admin(t, app).Get("/").AssertStatus(200).AssertInertia("Dashboard").PropEquals("trackingStats."+id+".unique_opens", float64(2))
+}

@@ -97,6 +97,7 @@ export default function Dashboard(props: DashboardProps) {
     page,
     filters,
     deliveryStats,
+    trackingStats,
   } = props;
   const url = usePage().url,
     path = url.split("?")[0],
@@ -140,7 +141,7 @@ export default function Dashboard(props: DashboardProps) {
   useEffect(() => {
     if (path === "/campaigns" && campaigns.some((c) => c.status === "queued")) {
       const id = setInterval(
-        () => router.reload({ only: ["campaigns", "deliveryStats"] }),
+        () => router.reload({ only: ["campaigns", "deliveryStats", "trackingStats"] }),
         15000,
       );
       return () => clearInterval(id);
@@ -439,6 +440,7 @@ export default function Dashboard(props: DashboardProps) {
                         <TableHead>Recipients</TableHead>
                         <TableHead>Accepted by provider</TableHead>
                         <TableHead>Failed / skipped</TableHead>
+                        <TableHead>Opens / clicks</TableHead>
                         <TableHead>Date</TableHead>
                         <TableHead />
                       </TableRow>
@@ -466,6 +468,10 @@ export default function Dashboard(props: DashboardProps) {
                           <TableCell className="text-muted-foreground">
                             {deliveryStats[c.id]?.failed || 0} /{" "}
                             {deliveryStats[c.id]?.skipped || 0}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {trackingStats[c.id]?.unique_opens || 0} /{" "}
+                            {trackingStats[c.id]?.unique_clicks || 0}
                           </TableCell>
                           <TableCell className="text-muted-foreground text-xs whitespace-nowrap">
                             {date(c.created_at)}

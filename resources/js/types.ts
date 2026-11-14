@@ -31,6 +31,7 @@ export interface DashboardProps {
   campaigns: Campaign[];
   stats: Record<string, number>;
   deliveryStats: Record<string, Record<string, number>>;
+  trackingStats: Record<string, Record<string, number>>;
   total: number;
   page: number;
   filters: { q: string; status: string };
