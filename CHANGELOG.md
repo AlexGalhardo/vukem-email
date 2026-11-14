@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Fixed
 
 - **delivery:** A permanent Resend failure (`queue.ErrPermanent`, any 4xx except 408/409/429) now marks the delivery `failed` immediately, so the campaign reaches `completed` instead of staying `queued` and `stalled` (audit H1).
+- **renderer:** A renderer timeout, a missing `node` or an OOM kill is now a 500 with the truncated stderr logged, no longer a 422 "Invalid content". Only rejected content (`scripts/render-email.tsx` exits 65) and the size limits return 422 (audit H5).
 
 ## [0.4.0] - 2026-11-07
 

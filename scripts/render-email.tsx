@@ -9,5 +9,6 @@ try {
   process.stdout.write(await renderContent(mode, source));
 } catch {
   process.stderr.write("Invalid email content\n");
-  process.exitCode = 1;
+  // 65 tells the Go caller the content was rejected; any other exit is an infrastructure failure.
+  process.exitCode = 65;
 }
