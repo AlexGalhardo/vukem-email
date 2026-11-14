@@ -1,6 +1,6 @@
 # API tokens
 
-Server-to-server API for one project (a project is a list). Tokens are created and revoked by the admin in Settings, under "API tokens", or with `POST /api/projects/{id}/tokens` and `POST /api/projects/{id}/tokens/{token}/revoke` (admin session).
+Server-to-server API for one project (a project is a list). Tokens are created and revoked by the admin in the dashboard under "API tokens", or with `POST /api/projects/{id}/tokens` and `POST /api/projects/{id}/tokens/{token}/revoke` (admin session).
 
 ## Tokens
 
