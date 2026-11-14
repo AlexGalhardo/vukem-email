@@ -11,10 +11,12 @@ import {
   ExternalLink,
   Globe2,
   Inbox,
+  List as ListIcon,
   Mail,
   Plus,
   Search,
   Send,
+  ShieldAlert,
   ShieldCheck,
   Sparkles,
   Users,
@@ -45,6 +47,54 @@ import AppLayout from "@/layouts/AppLayout";
 import { api } from "@/lib/api";
 import type { Campaign, DashboardProps, Project, Subscriber } from "@/types";
 
+const pages: Record<
+  string,
+  { head: string; title: string; description: string }
+> = {
+  "/": {
+    head: "Overview",
+    title: "Every connection matters.",
+    description:
+      "A closer look at your newsletter and the people on the other side.",
+  },
+  "/subscribers": {
+    head: "Subscribers",
+    title: "Your audience.",
+    description: "People who chose to follow what you are building.",
+  },
+  "/campaigns": {
+    head: "Campaigns",
+    title: "Conversations that connect.",
+    description: "One good idea, one message, and your next connection.",
+  },
+  "/projects": {
+    head: "Projects",
+    title: "A place for every project.",
+    description: "Manage your newsletters, domains, and senders in one place.",
+  },
+  "/lists": {
+    head: "Lists",
+    title: "Your lists.",
+    description:
+      "Each project is one list: its subscribers receive its campaigns.",
+  },
+  "/bounces": {
+    head: "Bounces",
+    title: "Bounces and complaints.",
+    description:
+      "Addresses that failed or complained. Hard bounces and complaints suppress the address.",
+  },
+  "/api-tokens": {
+    head: "API tokens",
+    title: "Connect your apps.",
+    description: "Project-scoped tokens for the /api/v1 endpoints.",
+  },
+  "/settings": {
+    head: "Settings",
+    title: "Make it yours.",
+    description: "The connections behind your newsletter.",
+  },
+};
 const labels: Record<string, string> = {
   pending: "Pending",
   confirmed: "Confirmed",
@@ -52,6 +102,10 @@ const labels: Record<string, string> = {
   draft: "Draft",
   queued: "Queued",
   completed: "Processed",
+  hard: "Hard",
+  soft: "Soft",
+  complaint: "Complaint",
+  suppressed: "Suppressed",
 };
 function Status({ value }: { value: string }) {
   return (
@@ -101,6 +155,7 @@ export default function Dashboard(props: DashboardProps) {
     deliveryStats,
     trackingStats,
     apiTokens,
+    bounces,
   } = props;
   const url = usePage().url,
     path = url.split("?")[0],
@@ -119,26 +174,8 @@ export default function Dashboard(props: DashboardProps) {
       setError("Could not copy. Select and copy the address manually.");
     }
   }
-  const title =
-    path === "/subscribers"
-      ? "Your audience."
-      : path === "/campaigns"
-        ? "Conversations that connect."
-        : path === "/projects"
-          ? "A place for every project."
-          : path === "/settings"
-            ? "Make it yours."
-            : "Every connection matters.";
-  const description =
-    path === "/subscribers"
-      ? "People who chose to follow what you are building."
-      : path === "/campaigns"
-        ? "One good idea, one message, and your next connection."
-        : path === "/projects"
-          ? "Manage your newsletters, domains, and senders in one place."
-          : path === "/settings"
-            ? "The connections behind your newsletter."
-            : "A closer look at your newsletter and the people on the other side.";
+  const meta = pages[path] ?? pages["/"];
+  const { title, description } = meta;
   useEffect(() => {
     if (path === "/campaigns" && campaigns.some((c) => c.status === "queued")) {
       const id = setInterval(
@@ -153,21 +190,7 @@ export default function Dashboard(props: DashboardProps) {
   }, [path, campaigns]);
   return (
     <AppLayout project={project} projects={projects}>
-      <Head
-        title={
-          path === "/subscribers"
-            ? "Subscribers"
-            : path === "/campaigns/new"
-              ? "New campaign"
-              : path === "/campaigns"
-                ? "Campaigns"
-                : path === "/projects"
-                  ? "Projects"
-                  : path === "/settings"
-                    ? "Settings"
-                    : "Overview"
-        }
-      />
+      <Head title={path === "/campaigns/new" ? "New campaign" : meta.head} />
       {path === "/campaigns/new" && hasProject ? (
         <Composer
           key={`${project.id}-${query.get("campaign") || "new"}`}
@@ -193,7 +216,8 @@ export default function Dashboard(props: DashboardProps) {
                 <ProjectForm />
               ) : (
                 hasProject &&
-                path !== "/settings" && (
+                path !== "/settings" &&
+                path !== "/api-tokens" && (
                   <>
                     <Button
                       asChild
@@ -556,6 +580,125 @@ export default function Dashboard(props: DashboardProps) {
               </div>
             </div>
           )}
+          {hasProject && path === "/api-tokens" && (
+            <div className="grid">
+              <ApiTokens project={project} tokens={apiTokens} />
+            </div>
+          )}
+          {hasProject && path === "/lists" && (
+            <div className="panel">
+              <div className="panel-heading">
+                <div className="flex items-center gap-2">
+                  <ListIcon size={15} />
+                  <h2 className="section-title">All lists</h2>
+                  <Badge variant="secondary">{projects.length}</Badge>
+                </div>
+              </div>
+              <div className="overflow-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="pl-6">List (project)</TableHead>
+                      <TableHead>Public page</TableHead>
+                      <TableHead>Confirmed</TableHead>
+                      <TableHead>Pending</TableHead>
+                      <TableHead>Unsubscribed</TableHead>
+                      <TableHead>Suppressed</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {projects.map((p) => {
+                      const current = p.id === project.id;
+                      return (
+                        <TableRow key={p.id}>
+                          <TableCell className="pl-6 py-4">
+                            <Link
+                              href={`/subscribers?project=${p.id}`}
+                              className="font-medium underline-offset-4 hover:underline"
+                            >
+                              {p.name}
+                            </Link>
+                            <p className="text-[11px] text-muted-foreground mt-1">
+                              {p.slug}
+                            </p>
+                          </TableCell>
+                          <TableCell className="text-muted-foreground text-xs">
+                            https://{p.domain}/subscribe
+                          </TableCell>
+                          {(
+                            [
+                              "confirmed",
+                              "pending",
+                              "unsubscribed",
+                              "suppressed",
+                            ] as const
+                          ).map((k) => (
+                            <TableCell key={k}>
+                              {current ? (stats[k] ?? 0) : "—"}
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+              <p className="px-6 py-4 text-[11px] text-muted-foreground border-t border-border">
+                Counts load for the selected project; pick another project in
+                the sidebar to see its numbers.
+              </p>
+            </div>
+          )}
+          {hasProject && path === "/bounces" && (
+            <div className="panel">
+              <div className="panel-heading">
+                <div className="flex items-center gap-2">
+                  <ShieldAlert size={15} />
+                  <h2 className="section-title">Bounce log</h2>
+                  <Badge variant="secondary">{bounces.length}</Badge>
+                </div>
+                <span className="text-[11px] text-muted-foreground">
+                  Latest 100 events
+                </span>
+              </div>
+              {bounces.length ? (
+                <div className="overflow-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="pl-6">Address</TableHead>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Reason</TableHead>
+                        <TableHead>Date</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {bounces.map((b) => (
+                        <TableRow key={b.id}>
+                          <TableCell className="pl-6 py-4">{b.email}</TableCell>
+                          <TableCell>
+                            <Status value={b.type} />
+                          </TableCell>
+                          <TableCell className="text-muted-foreground text-xs max-w-md truncate">
+                            {b.reason || "—"}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground text-xs whitespace-nowrap">
+                            {date(b.created_at)}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              ) : (
+                <Empty
+                  icon={ShieldAlert}
+                  title="No bounces"
+                  description="Bounces and complaints reported by Resend appear here."
+                />
+              )}
+            </div>
+          )}
           {hasProject && path === "/settings" && (
             <div className="grid lg:grid-cols-2 gap-5">
               <section className="panel p-6">
@@ -612,7 +755,6 @@ export default function Dashboard(props: DashboardProps) {
                   ))}
                 </div>
               </section>
-              <ApiTokens project={project} tokens={apiTokens} />
               <section className="panel p-6 lg:col-span-2">
                 <div className="flex gap-3 items-center">
                   <Code2 size={17} />
