@@ -43,7 +43,7 @@ func admin(t *testing.T, app *vukemtest.App) *vukemtest.Client {
 }
 func TestSecurity_AdminAccess(t *testing.T) {
 	app, _ := setup(t)
-	for _, path := range []string{"/", "/subscribers", "/campaigns", "/campaigns/new", "/projects", "/settings"} {
+	for _, path := range []string{"/", "/subscribers", "/campaigns", "/campaigns/new", "/projects", "/lists", "/bounces", "/api-tokens", "/settings"} {
 		app.Client(t).Get(path).AssertRedirect("/login")
 	}
 	for _, path := range []string{"/api/projects", "/api/campaigns", "/api/campaigns/1/send", "/api/preview", "/api/subscribers/1/unsubscribe"} {
@@ -273,4 +273,21 @@ func TestDurableQueueRechecksUnsubscribe(t *testing.T) {
 	if d.Status != "skipped" {
 		t.Fatalf("got delivery status %q", d.Status)
 	}
+}
+
+func TestBouncesPageIsScopedToTheProject(t *testing.T) {
+	app, p := setup(t)
+	db, _ := app.DB()
+	other := models.Project{Name: "Other", Slug: "other", Domain: "other.example.com", FromEmail: "hi@other.example.com"}
+	if err := orm.Create(t.Context(), db, &other); err != nil {
+		t.Fatal(err)
+	}
+	for i, b := range []models.Bounce{{ProjectID: p.ID, Email: "gone@example.com", Type: "hard", EventID: "e1"}, {ProjectID: other.ID, Email: "x@example.com", Type: "soft", EventID: "e2"}} {
+		if err := orm.Create(t.Context(), db, &b); err != nil {
+			t.Fatal(i, err)
+		}
+	}
+	page := admin(t, app).Get("/bounces?project="+strconv.FormatInt(p.ID, 10)).AssertStatus(200).AssertInertia("Dashboard")
+	page.PropEquals("bounces.0.email", "gone@example.com").PropEquals("bounces.0.type", "hard")
+	admin(t, app).Get("/?project="+strconv.FormatInt(p.ID, 10)).AssertInertia("Dashboard").PropEquals("bounces", []any{})
 }

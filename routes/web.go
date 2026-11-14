@@ -116,8 +116,8 @@ func Web(r *router.Router, app *vukem.App) error {
 		return c.Redirect("/")
 	}).Use(limit).Name("google.callback")
 	r.Post("/logout", func(c *web.Ctx) error { c.Session().Invalidate(); inertia.ClearHistory(c); return c.Redirect("/login") }).Name("logout")
-	for i, path := range []string{"/", "/subscribers", "/campaigns", "/campaigns/new", "/projects", "/settings"} {
-		r.Get(path, controllers.Protected(c.Dashboard)).Name([]string{"dashboard", "subscribers", "campaigns", "campaigns.create", "projects", "settings"}[i])
+	for i, path := range []string{"/", "/subscribers", "/campaigns", "/campaigns/new", "/projects", "/lists", "/bounces", "/api-tokens", "/settings"} {
+		r.Get(path, controllers.Protected(c.Dashboard)).Name([]string{"dashboard", "subscribers", "campaigns", "campaigns.create", "projects", "lists", "bounces", "api-tokens", "settings"}[i])
 	}
 	r.Post("/api/subscribers/{id}/unsubscribe", controllers.Protected(c.AdminUnsubscribe)).Name("subscribers.unsubscribe")
 	r.Post("/api/projects", controllers.Protected(c.CreateProject)).Name("projects.store")

@@ -404,7 +404,13 @@ func (n *NewsletterController) Dashboard(c *web.Ctx) error {
 		return err
 	}
 
-	return inertia.Render(c, "Dashboard", inertia.Props{"projects": projects, "project": p, "subscribers": subscribers, "campaigns": campaigns, "stats": stats, "deliveryStats": deliveryStats, "trackingStats": tracking, "apiTokens": apiTokens, "total": total, "page": page, "filters": web.Map{"q": c.Query("q"), "status": c.Query("status")}, "admin": AdminEmail})
+	bounces := []models.Bounce{}
+	if c.Request().URL.Path == "/bounces" && p.ID != 0 {
+		if bounces, err = orm.QueryOf[models.Bounce](n.DB).Where("project_id", "=", p.ID).OrderBy("id", orm.Desc).Limit(100).Get(ctx); err != nil {
+			return err
+		}
+	}
+	return inertia.Render(c, "Dashboard", inertia.Props{"bounces": bounces, "projects": projects, "project": p, "subscribers": subscribers, "campaigns": campaigns, "stats": stats, "deliveryStats": deliveryStats, "trackingStats": tracking, "apiTokens": apiTokens, "total": total, "page": page, "filters": web.Map{"q": c.Query("q"), "status": c.Query("status")}, "admin": AdminEmail})
 }
 func (n *NewsletterController) campaignInput(c *web.Ctx) (models.Project, map[string]string, string, error) {
 	in, err := input(c)
