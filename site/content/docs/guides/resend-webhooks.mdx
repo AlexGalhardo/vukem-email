@@ -25,8 +25,10 @@ Every campaign and confirmation email is tagged with its project (campaign email
 | --- | --- |
 | `email.delivered` | The delivery becomes `delivered`. |
 | `email.bounced` with `Permanent` type | Delivery `bounced`; the address is added to the project's suppression list and the subscriber becomes `suppressed`. |
-| `email.bounced` with other types | Delivery `bounced`; nothing else (soft bounces may recover). |
+| `email.bounced` with other types (`Transient`, `Undetermined`) | Delivery `bounced` and a soft bounce is logged. After 3 soft bounces for the same address and project within 30 days the address is suppressed with reason `soft_bounce_limit`. |
 | `email.complained` | Delivery `complained`; the address is suppressed. |
+
+Every bounce and complaint is also stored in the `bounces` table (project, address, subscriber, delivery, type `hard`, `soft` or `complaint`, the provider message, and the Svix event id, which keeps redeliveries from counting twice). The limit is `controllers.SoftBounceLimit` and the window `controllers.SoftBounceWindow`.
 
 Delivery states only move forward: `queued`, `accepted`, `delivered`, `bounced`, `complained`. A late or repeated event never overwrites a stronger state (a `delivered` that arrives after a `bounced` changes nothing). Suppression rows are written with an insert that ignores conflicts, so concurrent or retried events for one address converge on a single row and the first reason is kept.
 

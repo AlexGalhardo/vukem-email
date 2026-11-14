@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Added
 
 - **docs:** Add `docs/audit-2026-11-14.md`, the gap analysis against a minimal listmonk.
+- **bounces:** Add a `bounces` table that logs every hard bounce, soft bounce and complaint from Resend; the address is suppressed after 3 soft bounces within 30 days (`controllers.SoftBounceLimit`, `SoftBounceWindow`) (audit M2).
 
 ### Changed
 
