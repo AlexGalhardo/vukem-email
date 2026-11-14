@@ -48,6 +48,10 @@ updates:
     directory: /site
     schedule:
       interval: weekly
+    # typescript-eslint 8.x peers typescript <6.1.0, so the site cannot take TypeScript 7 yet (npm ERESOLVE in CI).
+    ignore:
+      - dependency-name: typescript
+        update-types: ["version-update:semver-major"]
     groups:
       site-deps:
         patterns: ["*"]
