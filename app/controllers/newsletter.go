@@ -513,17 +513,21 @@ func (n *NewsletterController) queueCampaign(c *web.Ctx, id, projectID int64) er
 			if len(subs) == 0 {
 				break
 			}
-			for _, s := range subs {
-				d := models.Delivery{CampaignID: campaign.ID, SubscriberID: s.ID, Status: "queued"}
-				if err := orm.Create(c.Context(), tx, &d); err != nil {
-					return err
-				}
+			// One multi-row INSERT per batch; ids come back with RETURNING. vukem has no bulk dispatch, so jobs are still enqueued one by one.
+			batch := make([]models.Delivery, len(subs))
+			for i, s := range subs {
+				batch[i] = models.Delivery{CampaignID: campaign.ID, SubscriberID: s.ID, Status: "queued"}
+			}
+			if err := orm.CreateMany(c.Context(), tx, batch); err != nil {
+				return err
+			}
+			for _, d := range batch {
 				if err := q.DispatchTx(c.Context(), tx, jobs.SendDelivery{DeliveryID: d.ID}); err != nil {
 					return err
 				}
-				lastID = s.ID
-				recipients++
 			}
+			lastID = subs[len(subs)-1].ID
+			recipients += int64(len(subs))
 		}
 		if recipients == 0 {
 			return errs.New(422, "This project has no confirmed subscribers yet.")
