@@ -394,7 +394,11 @@ func (n *NewsletterController) campaignInput(c *web.Ctx) (models.Project, map[st
 	}
 	html, err := newsletter.Render(c.Context(), in["mode"], in["source"])
 	if err != nil {
-		return p, nil, "", errs.New(422, err.Error())
+		var contentErr *newsletter.ContentError
+		if errors.As(err, &contentErr) {
+			return p, nil, "", errs.New(422, contentErr.Message)
+		}
+		return p, nil, "", err
 	}
 	return p, in, html, nil
 }
